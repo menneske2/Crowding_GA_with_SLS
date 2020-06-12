@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ToggleGroup?>
+
+<?import javafx.scene.image.ImageView?>
+<?import java.lang.Double?>
+
+
+
+<HBox maxHeight="800.0" prefWidth="1000.0" spacing="50" xmlns:fx="http://javafx.com/fxml/1" fx:controller="core.SolverController">
+
+	<fx:define>
+		<Double fx:id="CONF_WIDTH" fx:value="200"/>
+		<Double fx:id="CONF_UNIT_HEIGHT" fx:value="20"/>
+		<Double fx:id="CONFIG_LABEL_LENGTH" fx:value="150"/>
+		<Double fx:id="CONFIG_TEXTBOX_LENGTH" fx:value="50"/>
+
+		<Double fx:id="MAIN_WIDTH" fx:value="800"/>
+		<Double fx:id="CHART_HEIGHT" fx:value="300"/>
+		
+		<ToggleGroup fx:id="fxOptimizerSelection"/>
+	</fx:define>
+
+	<VBox prefHeight="Infinity" prefWidth="$CONF_WIDTH" spacing="15"> <!-- Configuration -->
+		<Label text="General options:"/>
+		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
+			<Label text="Seed:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
+			<TextField fx:id="fxSeed" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
+		</HBox>
+
+		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
+			<Label text="Population size:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
+			<TextField fx:id="fxPopSize" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
+		</HBox>
+
+		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
+			<Label text="Generations:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
+			<TextField fx:id="fxGenerations" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
+		</HBox>
+		
+
+		<!--======================================== UTILITIES ========================================-->
+		<Button fx:id="fxStart" text="Run" onAction="#solveProblem" minWidth="$CONF_WIDTH" maxWidth="$CONF_WIDTH" alignment="center"/>
+		<Button fx:id="fxStop" text="Stop" onAction="#stopProblem" minWidth="$CONF_WIDTH" maxWidth="$CONF_WIDTH" alignment="center"/>
+		<Label fx:id="fxGenerationCounter" text="Generations completed: "/>
+		<Label fx:id="fxScore" text="Score: "/>
+
+	</VBox>
+
+
+
+	<!--======================================== DONE WITH CONFIG ========================================-->
+
+
+	<VBox fx:id="fxChartArea" prefHeight="Infinity" minWidth="$MAIN_WIDTH" maxWidth="$MAIN_WIDTH">
+
+	</VBox>
+</HBox>

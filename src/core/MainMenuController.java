@@ -40,7 +40,22 @@ public class MainMenuController {
 	}
 	
 	private void openProblem(Problem prob){
+		try{
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("Solver.fxml"));
+		Parent root = loader.load();
+		SolverController solver = ((SolverController) loader.getController());
 		
+		solver.setProblem(prob);
+
+		Stage stage = new Stage();
+		stage.setTitle(prob.toString());
+		Scene scene = new Scene(root);
+		stage.setScene(scene);
+		stage.show();
+		} catch(Exception e){
+			System.out.println(e.getMessage());
+			System.exit(3);
+		}
 	}
 
 }
