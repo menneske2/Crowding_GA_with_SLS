@@ -15,8 +15,8 @@ import java.util.List;
 public class Problem {
 	
 	private final String name;
-	private List<List<Float>> xs;
-	private List<Float> ys;
+	public double[][] xs;
+	public double[] ys;
 	
 	public Problem(String name, List<List<Float>> data){
 		this.name = name;
@@ -26,12 +26,16 @@ public class Problem {
 	
 	
 	private void parseDataFile(List<List<Float>> data){
-		this.xs = new ArrayList<>();
-		this.ys = new ArrayList<>();
+		this.xs = new double[data.size()][data.get(0).size()-2];
+		this.ys = new double[data.size()];
 		
-		for(var line : data){
-			ys.add(line.remove(line.size()-1));
-			xs.add(line);
+		for(int i=0; i<data.size(); i++){
+			var line = data.get(i);
+			ys[i] = line.remove(line.size()-1);
+			line.remove(0); // the first number on each line is the index.
+			for(int j=0; j<line.size(); j++)
+				xs[i][j] = line.get(j);
+				
 		}
 	}
 	

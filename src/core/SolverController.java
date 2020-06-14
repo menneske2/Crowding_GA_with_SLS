@@ -6,6 +6,7 @@
 package core;
 
 
+import algorithm.GeneticAlgorithm;
 import algorithm.OptimizerConfig;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -70,9 +71,9 @@ public class SolverController {
 		updateConfig();
 		OptimizerConfig copy = conf.clone();
 		comsChannel = new LinkedBlockingQueue();
-//		Runnable optimizer = new AntOptimizer(prob, copy, this, comsChannel);
-//		Thread thread = new Thread(optimizer);
-//		thread.start();
+		Runnable optimizer = new GeneticAlgorithm(prob, copy, this, comsChannel);
+		Thread thread = new Thread(optimizer);
+		thread.start();
 		
 		fxStop.setDisable(false);
 		fxStart.setDisable(true);
@@ -88,7 +89,7 @@ public class SolverController {
 		if(generation < 8000 || generation%10 == 9){
 			fxGenerationCounter.setText("Generation: " + (generation+1));
 			bestChart.getData().get(0).getData().add(new XYChart.Data(generation, best));
-			bestChart.getData().get(1).getData().add(new XYChart.Data(generation, avg));
+			avgChart.getData().get(0).getData().add(new XYChart.Data(generation, avg));
 			fxScore.setText("Best score: " + best);
 		}
 	}
