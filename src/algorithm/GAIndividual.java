@@ -8,6 +8,7 @@ package algorithm;
 
 import core.Problem;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -66,10 +67,10 @@ public class GAIndividual implements Comparable<GAIndividual>, Cloneable{
 		
 		
 		// Splitting into training- and test-set
-		if(conf.TEST_SET_PROPORTION != 0f){
-			System.out.println("TRAIN/TEST SET SPLITTING IS NOT YET SUPPORTED");
-			System.exit(72);
-		}
+//		if(conf.TEST_SET_PROPORTION != 0f){
+//			System.out.println("TRAIN/TEST SET SPLITTING IS NOT YET SUPPORTED");
+//			System.exit(72);
+//		}
 		int totalSetSize = prob.ys.length;
 		int testSetSize = Math.round(totalSetSize*conf.TEST_SET_PROPORTION);
 		int trainSetSize = totalSetSize - testSetSize;
@@ -106,16 +107,27 @@ public class GAIndividual implements Comparable<GAIndividual>, Cloneable{
 		}
 
 		
-		// Fitting model and gathering statistics.
+		// Fitting model
 		OLSMultipleLinearRegression regressor = new OLSMultipleLinearRegression();
-		regressor.newSampleData(y_train, x_train); // nå har den lært.
+		regressor.newSampleData(y_train, x_train); // Fitting model to training data.
 		
-//		double rmse = regressor.calculateTotalSumOfSquares();
-//		rmse /= prob.ys.length;
-//		rmse = Math.sqrt(rmse);
-		double R = Math.sqrt(regressor.calculateRSquared());
+		// Calculating RMSE and R manually since the regressor doesn't support testing data without fitting to it.
+		double[] params = regressor.estimateRegressionParameters();
+		double yMean = Arrays.stream(y_test).average().getAsDouble();
+		double totalSumOfSquares = 0.0;
+		double residualSumOfSquares = 0.0;
 		
-		this.fitness = R;
+		for(int sample=0; sample<x_test.length; sample++){
+			double expected = params[0];
+			for(int i=1; i<params.length; i++){
+				expected += x_test[sample][i-1] * params[i];
+			}
+			totalSumOfSquares += Math.pow(y_test[sample] - yMean, 2);
+			residualSumOfSquares += Math.pow(expected - y_test[sample], 2);
+		}
+		double rSquared = 1 - (residualSumOfSquares / totalSumOfSquares);
+		double rmse = Math.sqrt(residualSumOfSquares / y_test.length); // Root mean square error (RMSE).
+		this.fitness = rSquared;
 	}
 
 	

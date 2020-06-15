@@ -102,15 +102,15 @@ public class SolverController {
 	
 	private void generateCharts(){
 		fxChartArea.getChildren().removeAll();
-		bestChart = generateChart(new String[]{"Best score", "Average score"});
-		entropyChart = generateChart(new String[]{"Entropy"});
+		bestChart = generateChart("Fitness", new String[]{"Best score", "Average score"});
+		entropyChart = generateChart("Entropy", new String[]{"Entropy"});
 	}
 	
-	private LineChart generateChart(String[] seriesNames){		
+	private LineChart generateChart(String yName, String[] seriesNames){		
 		Axis xAxis = new NumberAxis();
 		Axis yAxis = new NumberAxis();
 		xAxis.setLabel("Generation");
-		yAxis.setLabel("Fitness");
+		yAxis.setLabel(yName);
 		
 		LineChart chart = new LineChart<>(xAxis, yAxis);
 		chart.setAnimated(false);
