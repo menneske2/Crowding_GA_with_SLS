@@ -14,10 +14,17 @@ public class OptimizerConfig implements Cloneable{
 	public static final int NO_SEED = -1;
 	
 	public int SEED = 72;
-	public int GENERATIONS = 1;
-	public int POPULATION_SIZE = 1;
+	public int GENERATIONS = 200;
+	public int POPULATION_SIZE = 100;
 	
-	public float TEST_SET_PROPORTION = 0.5f;
+	public float ELITISM = 2;
+	public float CROSSOVER_CHANCE = 0.7f;
+	public float MUTATION_CHANCE = 0.2f;
+	public float CROWDING_COEFFICIENT = 1f;
+	
+	public float TEST_SET_PROPORTION = 0.0f;
+	
+	
 	
 	@Override
 	public OptimizerConfig clone(){

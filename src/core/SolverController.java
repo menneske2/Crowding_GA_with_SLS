@@ -42,7 +42,7 @@ public class SolverController {
 
 
 	private LineChart<Number, Number> bestChart;
-	private LineChart<Number, Number> avgChart;
+	private LineChart<Number, Number> entropyChart;
 	private Problem prob;
 	private OptimizerConfig conf;
 	private BlockingQueue comsChannel;
@@ -64,7 +64,7 @@ public class SolverController {
 		for(var series : bestChart.getData()){
 			series.getData().clear();
 		}
-		for(var series : avgChart.getData()){
+		for(var series : entropyChart.getData()){
 			series.getData().clear();
 		}
 		
@@ -85,11 +85,12 @@ public class SolverController {
 		fxStop.setDisable(true);
 	}
 	
-	public void progressReport(int generation, int best, float avg){
+	public void progressReport(int generation, double best, double avg, double entropy){
 		if(generation < 8000 || generation%10 == 9){
 			fxGenerationCounter.setText("Generation: " + (generation+1));
 			bestChart.getData().get(0).getData().add(new XYChart.Data(generation, best));
-			avgChart.getData().get(0).getData().add(new XYChart.Data(generation, avg));
+			bestChart.getData().get(1).getData().add(new XYChart.Data(generation, avg));
+			entropyChart.getData().get(0).getData().add(new XYChart.Data(generation, entropy));
 			fxScore.setText("Best score: " + best);
 		}
 	}
@@ -102,7 +103,7 @@ public class SolverController {
 	private void generateCharts(){
 		fxChartArea.getChildren().removeAll();
 		bestChart = generateChart(new String[]{"Best score", "Average score"});
-		avgChart = generateChart(new String[]{"test", "testerson"});
+		entropyChart = generateChart(new String[]{"Entropy"});
 	}
 	
 	private LineChart generateChart(String[] seriesNames){		
