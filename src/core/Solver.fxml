@@ -36,15 +36,40 @@
 			<Label text="Seed:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
 			<TextField fx:id="fxSeed" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
 		</HBox>
+		
+		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
+			<Label text="Generations:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
+			<TextField fx:id="fxGenerations" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
+		</HBox>
 
 		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
 			<Label text="Population size:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
 			<TextField fx:id="fxPopSize" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
 		</HBox>
-
+		
 		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
-			<Label text="Generations:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
-			<TextField fx:id="fxGenerations" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
+			<Label text="Elitist population:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
+			<TextField fx:id="fxElitism" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
+		</HBox>
+		
+		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
+			<Label text="Crossover chance:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
+			<TextField fx:id="fxCrossover" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
+		</HBox>
+		
+		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
+			<Label text="Mutation chance:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
+			<TextField fx:id="fxMutation" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
+		</HBox>
+		
+		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
+			<Label text="Crowding coefficient:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
+			<TextField fx:id="fxCrowdingCoefficient" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
+		</HBox>
+		
+		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
+			<Label text="Test set proportion:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
+			<TextField fx:id="fxTestSetProportion" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
 		</HBox>
 		
 

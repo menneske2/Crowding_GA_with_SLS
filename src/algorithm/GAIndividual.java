@@ -67,10 +67,6 @@ public class GAIndividual implements Comparable<GAIndividual>, Cloneable{
 		
 		
 		// Splitting into training- and test-set
-//		if(conf.TEST_SET_PROPORTION != 0f){
-//			System.out.println("TRAIN/TEST SET SPLITTING IS NOT YET SUPPORTED");
-//			System.exit(72);
-//		}
 		int totalSetSize = prob.ys.length;
 		int testSetSize = Math.round(totalSetSize*conf.TEST_SET_PROPORTION);
 		int trainSetSize = totalSetSize - testSetSize;
@@ -123,13 +119,30 @@ public class GAIndividual implements Comparable<GAIndividual>, Cloneable{
 				expected += x_test[sample][i-1] * params[i];
 			}
 			totalSumOfSquares += Math.pow(y_test[sample] - yMean, 2);
-			residualSumOfSquares += Math.pow(expected - y_test[sample], 2);
+			residualSumOfSquares += Math.pow(y_test[sample] - expected, 2);
 		}
 		double rSquared = 1 - (residualSumOfSquares / totalSumOfSquares);
+		rSquared = Math.max(rSquared, 0.000000001);
+		double R = Math.sqrt(rSquared);
 		double rmse = Math.sqrt(residualSumOfSquares / y_test.length); // Root mean square error (RMSE).
-		this.fitness = rSquared;
+		this.fitness = R;
 	}
 
+	public String getGenomeAsString(){
+		String s = "";
+		for(Boolean b : genome){
+			s += (b.hashCode() & 0b10) >> 1;
+		}
+		return s;
+	}
+	
+	public int numberOfFeatures(){
+		int num = 0;
+		for(Boolean b : genome){
+			num += (b.hashCode() & 0b10) >> 1;
+		}
+		return num;
+	}
 	
 	@Override
 	/**

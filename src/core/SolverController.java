@@ -6,6 +6,7 @@
 package core;
 
 
+import algorithm.GAIndividual;
 import algorithm.GeneticAlgorithm;
 import algorithm.OptimizerConfig;
 import java.util.concurrent.BlockingQueue;
@@ -31,6 +32,11 @@ public class SolverController {
 	@FXML TextField fxSeed;
 	@FXML TextField fxPopSize;
 	@FXML TextField fxGenerations;
+	@FXML TextField fxElitism;
+	@FXML TextField fxCrossover;
+	@FXML TextField fxMutation;
+	@FXML TextField fxCrowdingCoefficient;
+	@FXML TextField fxTestSetProportion;
 
 	
 	@FXML Button fxStart;
@@ -95,14 +101,16 @@ public class SolverController {
 		}
 	}
 	
-	public void registerSolution(Problem p){
+	public void registerSolution(Problem p, GAIndividual best, long timeSpent){
 		fxStart.setDisable(false);
 		fxStop.setDisable(true);
+		System.out.println("Features used: " + best.numberOfFeatures() + "\tSolution: " + best.getGenomeAsString());
+		System.out.println("Time taken: " + (int)Math.floor(timeSpent/(1000*60)) + "m" + (timeSpent/1000)%60 + "s");
 	}
 	
 	private void generateCharts(){
 		fxChartArea.getChildren().removeAll();
-		bestChart = generateChart("Fitness", new String[]{"Best score", "Average score"});
+		bestChart = generateChart("R-measure (negative values set to 0)", new String[]{"Best R-measure", "Average R-measure"});
 		entropyChart = generateChart("Entropy", new String[]{"Entropy"});
 	}
 	
@@ -132,12 +140,22 @@ public class SolverController {
 		fxSeed.setText("" + conf.SEED);
 		fxGenerations.setText("" + conf.GENERATIONS);
 		fxPopSize.setText("" + conf.POPULATION_SIZE);
+		fxElitism.setText("" + conf.ELITIST_POPULATION);
+		fxCrossover.setText("" + conf.CROSSOVER_CHANCE);
+		fxMutation.setText("" + conf.MUTATION_CHANCE);
+		fxCrowdingCoefficient.setText("" + conf.CROWDING_COEFFICIENT);
+		fxTestSetProportion.setText("" + conf.TEST_SET_PROPORTION);
 	}
 	
 	private void updateConfig(){
 		conf.SEED = Integer.parseInt(fxSeed.getText());
 		conf.GENERATIONS = Integer.parseInt(fxGenerations.getText());
 		conf.POPULATION_SIZE = Integer.parseInt(fxPopSize.getText());
+		conf.ELITIST_POPULATION = Integer.parseInt(fxElitism.getText());
+		conf.CROSSOVER_CHANCE = Float.parseFloat(fxCrossover.getText());
+		conf.MUTATION_CHANCE = Float.parseFloat(fxMutation.getText());
+		conf.CROWDING_COEFFICIENT = Float.parseFloat(fxCrowdingCoefficient.getText());
+		conf.TEST_SET_PROPORTION = Float.parseFloat(fxTestSetProportion.getText());
 	}
 
 }

@@ -67,8 +67,9 @@ public class GeneticAlgorithm implements Runnable{
 			// Gathering statistics and sending progress report to main client.
 			final int genCopy = generation-1; // it needs to be an effectively final variable.
 			double avg = 0;
-			for(var p : population)
+			for(var p : population){
 				avg += p.fitness;
+			}
 			avg /= population.size();
 			final double avg2 = avg;
 			GAIndividual best = population.get(0);
@@ -81,10 +82,9 @@ public class GeneticAlgorithm implements Runnable{
 
 
 		long timeTaken = new Date().getTime() - startTime.getTime();
-		System.out.println("Time taken: " + (int)Math.floor(timeTaken/(1000*60)) + "m" + (timeTaken/1000)%60 + "s");
 
 		Platform.runLater(()->{
-			feedbackStation.registerSolution(prob);
+			feedbackStation.registerSolution(prob, population.get(0), timeTaken);
 		});
 	}
 	
@@ -93,7 +93,7 @@ public class GeneticAlgorithm implements Runnable{
 		List<GAIndividual> newPop = new ArrayList<>();
 		int genomeLength = population.get(0).genome.length;
 		
-		for(int i=0; i<conf.ELITISM; i++){
+		for(int i=0; i<conf.ELITIST_POPULATION; i++){
 			newPop.add(population.get(i).clone());
 		}
 		
