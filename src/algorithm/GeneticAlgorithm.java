@@ -75,6 +75,10 @@ public class GeneticAlgorithm implements Runnable{
 			GAIndividual best = population.get(0);
 			double entropy = getEntropy(population);
 			
+			
+			System.out.format("gen %d entropy: %.2f\n", genCopy, entropy);
+			
+			
 			Platform.runLater(()->{
 				feedbackStation.progressReport(genCopy, best.fitness, avg2, entropy);
 			});
@@ -195,13 +199,16 @@ public class GeneticAlgorithm implements Runnable{
 				genomeSum[i] += (b.hashCode() & 0b10) >> 1;
 			}
 		}
-		double[] probabilities = new double[genomeLength];
-		for(int i=0; i<genomeLength; i++){
-			probabilities[i] = ((double) genomeSum[i]) / pop.size();
+		double[] probabilities = new double[genomeLength*2];
+		for(int i=0; i<genomeLength; i+=2){
+			probabilities[i] = ((double) genomeSum[i]) / pop.size(); // probability of 1 in that position
+			probabilities[i+1] = ((double) (pop.size()-genomeSum[i])) / pop.size(); // probability of 0 in that position.
 		}
 		double entropy = 0.0;
 		for(double p : probabilities){
-			entropy -= Math.log(p) / Math.log(2); // log2.
+			if(p == 0.0)
+				continue;
+			entropy -= p * (Math.log(p) / Math.log(2)); // p * log2 of p.
 		}
 		return entropy;
 	}

@@ -14,7 +14,7 @@ public class OptimizerConfig implements Cloneable{
 	public static final int NO_SEED = -1;
 	
 	public int SEED = NO_SEED;
-	public int GENERATIONS = 200;
+	public int GENERATIONS = 300;
 	public int POPULATION_SIZE = 100;
 	
 	public int ELITIST_POPULATION = 2;
