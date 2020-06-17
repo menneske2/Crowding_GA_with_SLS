@@ -73,10 +73,9 @@ public class GeneticAlgorithm implements Runnable{
 			avg /= population.size();
 			final double avg2 = avg;
 			GAIndividual best = population.get(0);
-			double entropy = getEntropy(population);
-			
-			
-			System.out.format("gen %d entropy: %.2f\n", genCopy, entropy);
+			double entropy = GAUtilities.getEntropy(population);
+			System.out.print("generation " + genCopy + ": ");
+			int numClusters = GAUtilities.getNumClusters(newGen, -1, rng);
 			
 			
 			Platform.runLater(()->{
@@ -127,10 +126,10 @@ public class GeneticAlgorithm implements Runnable{
 			}
 			
 			// Bitflip mutation.
-			for(int i=0; i<childGenomes.length; i++){
-				if(rng.nextFloat() < conf.MUTATION_CHANCE){
+			for (boolean[] genome : childGenomes) {
+				if (rng.nextFloat() < conf.MUTATION_CHANCE) {
 					int point = rng.nextInt(genomeLength);
-					childGenomes[i][point] = !childGenomes[i][point];
+					genome[point] = !genome[point];
 				}
 			}
 			
@@ -149,7 +148,7 @@ public class GeneticAlgorithm implements Runnable{
 				GAIndividual child = children[c];
 				for(int p=0; p<2; p++){
 					GAIndividual parent = parents[p];
-					distances[p*2+c] = hammingDistance(child, parent);
+					distances[p*2+c] = GAUtilities.getHammingDistance(child, parent);
 				}
 			}
 			int opposition = 1;
@@ -177,48 +176,12 @@ public class GeneticAlgorithm implements Runnable{
 		return newPop;
 	}
 	
-	private int hammingDistance(GAIndividual gai1, GAIndividual gai2){
-		boolean[] g1 = gai1.genome;
-		boolean[] g2 = gai2.genome;
-		
-		int dist = 0;
-		for(int i=0; i<g1.length; i++){
-			int val1 = (((Boolean)g1[i]).hashCode() & 0b10) >> 1;
-			int val2 = (((Boolean)g2[i]).hashCode() & 0b10) >> 1;
-			dist += Math.abs(val1 - val2);
-		}
-		return dist;
-	}
-	
-	private double getEntropy(List<GAIndividual> pop){
-		int genomeLength = pop.get(0).genome.length;
-		int[] genomeSum = new int[genomeLength];
-		for(var gai : pop){
-			for(int i=0; i<genomeLength; i++){
-				Boolean b = gai.genome[i];
-				genomeSum[i] += (b.hashCode() & 0b10) >> 1;
-			}
-		}
-		double[] probabilities = new double[genomeLength*2];
-		for(int i=0; i<genomeLength; i+=2){
-			probabilities[i] = ((double) genomeSum[i]) / pop.size(); // probability of 1 in that position
-			probabilities[i+1] = ((double) (pop.size()-genomeSum[i])) / pop.size(); // probability of 0 in that position.
-		}
-		double entropy = 0.0;
-		for(double p : probabilities){
-			if(p == 0.0)
-				continue;
-			entropy -= p * (Math.log(p) / Math.log(2)); // p * log2 of p.
-		}
-		return entropy;
-	}
-	
 	private void initPopulation(){
 		population = new ArrayList<>();
 		
 		// Random initialization
 		for(int person=0; person<conf.POPULATION_SIZE; person++){
-			boolean[] chromosome = new boolean[prob.xs[0].length];
+			boolean[] chromosome = new boolean[prob.xsTrain[0].length];
 			for(int i=0; i<chromosome.length; i++){
 				chromosome[i] = rng.nextBoolean();
 			}

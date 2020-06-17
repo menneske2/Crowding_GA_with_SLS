@@ -13,11 +13,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
+import org.apache.commons.math3.ml.clustering.Clusterable;
 /**
  *
  * @author Fredrik-Oslo
  */
-public class GAIndividual implements Comparable<GAIndividual>, Cloneable{
+public class GAIndividual implements Comparable<GAIndividual>, Cloneable, Clusterable{
 	
 	private final Problem prob;
 	private final OptimizerConfig conf;
@@ -47,85 +48,52 @@ public class GAIndividual implements Comparable<GAIndividual>, Cloneable{
 	
 	
 	public void evaluateFitness(){
-		// Removing columns according to the genome bitstring.
+		double[][] xTrain = reduceFeatures(prob.xsTrain);
+		double[][] xValid = reduceFeatures(prob.xsValid);
+		
+		// Fitting model
+		OLSMultipleLinearRegression regressor = new OLSMultipleLinearRegression();
+		regressor.newSampleData(prob.ysTrain, xTrain); // Fitting model to training data.
+		
+		// Calculating RMSE and R manually since the regressor doesn't support testing data without fitting to it.
+		double[] params = regressor.estimateRegressionParameters();
+		double yMean = Arrays.stream(prob.ysValid).average().getAsDouble();
+		double totalSumOfSquares = 0.0;
+		double residualSumOfSquares = 0.0;
+		
+		for(int sample=0; sample<xValid.length; sample++){
+			double expected = params[0];
+			for(int i=1; i<params.length; i++){
+				expected += xValid[sample][i-1] * params[i];
+			}
+			totalSumOfSquares += Math.pow(prob.ysValid[sample] - yMean, 2);
+			residualSumOfSquares += Math.pow(prob.ysValid[sample] - expected, 2);
+		}
+		double rSquared = 1 - (residualSumOfSquares / totalSumOfSquares);
+		rSquared = Math.max(rSquared, 0.000000001);
+		double R = Math.sqrt(rSquared);
+		double rmse = Math.sqrt(residualSumOfSquares / prob.ysValid.length); // Root mean square error (RMSE).
+		this.fitness = R;
+	}
+	
+	private double[][] reduceFeatures(double[][] full){
 		int nCols = 0;
 		for(Boolean b : genome){
 			nCols += (b.hashCode() & 0b10) >> 1;
 		}
 
-		double[][] reducedXs = new double[prob.ys.length][nCols];
+		double[][] reduced = new double[full.length][nCols];
 		int reducedIndex = 0;
-		for(int dataPoint=0; dataPoint<prob.xs.length; dataPoint++){
+		for(int dataPoint=0; dataPoint<full.length; dataPoint++){
 			for(int i=0; i<genome.length; i++){
 				if(genome[i]){
-					reducedXs[dataPoint][reducedIndex] = prob.xs[dataPoint][i];
+					reduced[dataPoint][reducedIndex] = full[dataPoint][i];
 					reducedIndex++;
 				}
 			}
 			reducedIndex = 0;
 		}
-		
-		
-		// Splitting into training- and test-set
-		int totalSetSize = prob.ys.length;
-		int testSetSize = Math.round(totalSetSize*conf.TEST_SET_PROPORTION);
-		int trainSetSize = totalSetSize - testSetSize;
-		
-		List<Integer> indexes = new ArrayList<>();
-		for(int i=0; i<totalSetSize; i++)
-			indexes.add(i);
-		Collections.shuffle(indexes, rng);
-		for(int i=0; i<testSetSize; i++){
-			indexes.remove(0);
-		}
-		
-		double[][] x_train = new double[trainSetSize][nCols];
-		double[] y_train = new double[trainSetSize];
-		double[][] x_test = new double[testSetSize][nCols];
-		double[] y_test = new double[testSetSize];
-		
-		int trainProgress = 0;
-		int testProgress = 0;
-		for(int i=0; i<totalSetSize; i++){
-			if(indexes.contains(i)){
-				x_train[trainProgress] = reducedXs[i];
-				y_train[trainProgress] = prob.ys[i];
-				trainProgress++;
-			} else{
-				x_test[testProgress] = reducedXs[i];
-				y_test[testProgress] = prob.ys[i];
-				testProgress++;
-			}
-		}
-		if(testSetSize == 0){
-			y_test = y_train;
-			x_test = x_train;
-		}
-
-		
-		// Fitting model
-		OLSMultipleLinearRegression regressor = new OLSMultipleLinearRegression();
-		regressor.newSampleData(y_train, x_train); // Fitting model to training data.
-		
-		// Calculating RMSE and R manually since the regressor doesn't support testing data without fitting to it.
-		double[] params = regressor.estimateRegressionParameters();
-		double yMean = Arrays.stream(y_test).average().getAsDouble();
-		double totalSumOfSquares = 0.0;
-		double residualSumOfSquares = 0.0;
-		
-		for(int sample=0; sample<x_test.length; sample++){
-			double expected = params[0];
-			for(int i=1; i<params.length; i++){
-				expected += x_test[sample][i-1] * params[i];
-			}
-			totalSumOfSquares += Math.pow(y_test[sample] - yMean, 2);
-			residualSumOfSquares += Math.pow(y_test[sample] - expected, 2);
-		}
-		double rSquared = 1 - (residualSumOfSquares / totalSumOfSquares);
-		rSquared = Math.max(rSquared, 0.000000001);
-		double R = Math.sqrt(rSquared);
-		double rmse = Math.sqrt(residualSumOfSquares / y_test.length); // Root mean square error (RMSE).
-		this.fitness = R;
+		return reduced;
 	}
 
 	public String getGenomeAsString(){
@@ -152,5 +120,20 @@ public class GAIndividual implements Comparable<GAIndividual>, Cloneable{
 		if(this.fitness == other.fitness)
 			return 0;
 		return this.fitness > other.fitness ? -1 : 1;
+	}
+
+	
+	@Override
+	/**
+	 * Method used by the k-means clustering algorithm.
+	 */
+	public double[] getPoint() {
+		// cast the genome into a double[].
+		double[] casted = new double[genome.length];
+		for(int i=0; i<genome.length; i++){
+			Boolean b = genome[i];
+			casted[i] = (b.hashCode() & 0b10) >> 1;
+		}
+		return casted;
 	}
 }

@@ -45,14 +45,26 @@ public class Main extends Application{
 
 		File folder = new File("Testing Data");
 		for(File f : folder.listFiles()){
-			if(!f.getName().endsWith(".txt"))
-				continue;
-			List<List<Float>> contents = getNumberFile(f);
-			Problem p = new Problem(f.getName(), contents);
-			problems.add(p);
-			
+			if(f.isDirectory()){
+				String prefix = f.getName().toLowerCase() + "_";
+				List<List<Float>> trainData = getNumberFile(new File(f.getPath()+"\\"+prefix+"train.data"));
+				List<List<Float>> trainLabels = getNumberFile(new File(f.getPath()+"\\"+prefix+"train.labels"));
+				List<List<Float>> validationData = getNumberFile(new File(f.getPath()+"\\"+prefix+"valid.data"));
+				List<List<Float>> validationLabels = getNumberFile(new File(f.getPath()+"\\"+prefix+"valid.labels"));
+				appendLabelsToData(trainData, trainLabels);
+				appendLabelsToData(validationData, validationLabels);
+				
+				Problem p = new Problem(f.getName(), trainData, validationData);
+				problems.add(p);
+			}
 		}
 		return problems;
+	}
+	
+	private void appendLabelsToData(List<List<Float>> data, List<List<Float>> labels){
+		for(int i=0; i<data.size(); i++){
+			data.get(i).add(labels.get(i).get(0));
+		}
 	}
 	
 	private List<List<Float>> getNumberFile(File f){

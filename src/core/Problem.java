@@ -15,28 +15,31 @@ import java.util.List;
 public class Problem {
 	
 	private final String name;
-	public double[][] xs;
-	public double[] ys;
+	public double[][] xsTrain, xsValid;
+	public double[] ysTrain, ysValid;
 	
-	public Problem(String name, List<List<Float>> data){
+	
+	public Problem(String name, List<List<Float>> trainSet, List<List<Float>> validationSet){
 		this.name = name;
 		
-		parseDataFile(data);
+		this.ysTrain = new double[trainSet.size()];
+		this.xsTrain = parseDataFile(trainSet, ysTrain);
+		
+		this.ysValid = new double[validationSet.size()];
+		this.xsValid = parseDataFile(validationSet, ysValid);
 	}
 	
 	
-	private void parseDataFile(List<List<Float>> data){
-		this.xs = new double[data.size()][data.get(0).size()-2];
-		this.ys = new double[data.size()];
+	private double[][] parseDataFile(List<List<Float>> data, double[] ys){
+		double[][] xs = new double[data.size()][data.get(0).size()-1];
 		
 		for(int i=0; i<data.size(); i++){
 			var line = data.get(i);
 			ys[i] = line.remove(line.size()-1);
-			line.remove(0); // the first number on each line is the index.
 			for(int j=0; j<line.size(); j++)
 				xs[i][j] = line.get(j);
-				
 		}
+		return xs;
 	}
 	
 	@Override
