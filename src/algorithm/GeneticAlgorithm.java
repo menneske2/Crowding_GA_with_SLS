@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import javafx.application.Platform;
+import org.apache.commons.math3.ml.clustering.Clusterable;
 
 /**
  *
@@ -74,12 +75,13 @@ public class GeneticAlgorithm implements Runnable{
 			final double avg2 = avg;
 			GAIndividual best = population.get(0);
 			double entropy = GAUtilities.getEntropy(population);
-			System.out.print("generation " + genCopy + ": ");
-			int numClusters = GAUtilities.getNumClusters(newGen, -1, rng);
 			
+			List<Clusterable> whyIsThisNecessary = new ArrayList<>();
+			whyIsThisNecessary.addAll(population);
+			int nNiches = GAUtilities.getNumClusters(whyIsThisNecessary, rng);
 			
 			Platform.runLater(()->{
-				feedbackStation.progressReport(genCopy, best.fitness, avg2, entropy);
+				feedbackStation.progressReport(genCopy, best.fitness, avg2, entropy, nNiches);
 			});
 		}
 

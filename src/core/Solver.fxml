@@ -67,11 +67,6 @@
 			<TextField fx:id="fxCrowdingCoefficient" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
 		</HBox>
 		
-		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
-			<Label text="Test set proportion:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
-			<TextField fx:id="fxTestSetProportion" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
-		</HBox>
-		
 
 		<!--======================================== UTILITIES ========================================-->
 		<Button fx:id="fxStart" text="Run" onAction="#solveProblem" minWidth="$CONF_WIDTH" maxWidth="$CONF_WIDTH" alignment="center"/>

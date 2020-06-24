@@ -9,6 +9,8 @@ package core;
 import algorithm.GAIndividual;
 import algorithm.GeneticAlgorithm;
 import algorithm.OptimizerConfig;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import javafx.event.ActionEvent;
@@ -45,10 +47,10 @@ public class SolverController {
 	@FXML Label fxScore;
 	
 	@FXML VBox fxChartArea;
-
-
 	private LineChart<Number, Number> bestChart;
 	private LineChart<Number, Number> entropyChart;
+	private LineChart<Number, Number> clusterChart;
+	
 	private Problem prob;
 	private OptimizerConfig conf;
 	private BlockingQueue comsChannel;
@@ -91,12 +93,13 @@ public class SolverController {
 		fxStop.setDisable(true);
 	}
 	
-	public void progressReport(int generation, double best, double avg, double entropy){
+	public void progressReport(int generation, double best, double avg, double entropy, int nNiches){
 		if(generation < 8000 || generation%10 == 9){
 			fxGenerationCounter.setText("Generation: " + (generation+1));
 			bestChart.getData().get(0).getData().add(new XYChart.Data(generation, best));
 			bestChart.getData().get(1).getData().add(new XYChart.Data(generation, avg));
 			entropyChart.getData().get(0).getData().add(new XYChart.Data(generation, entropy));
+			clusterChart.getData().get(0).getData().add(new XYChart.Data(generation, nNiches));
 			fxScore.setText("Best score: " + best);
 		}
 	}
@@ -110,14 +113,15 @@ public class SolverController {
 	
 	private void generateCharts(){
 		fxChartArea.getChildren().removeAll();
-		bestChart = generateChart("R-measure (negative values set to 0)", new String[]{"Best R-measure", "Average R-measure"});
-		entropyChart = generateChart("Entropy", new String[]{"Entropy"});
+		bestChart = generateChart("Generation", "R-measure (negative values set to 0)", new String[]{"Best R-measure", "Average R-measure"});
+		entropyChart = generateChart("Generation", "Entropy", new String[]{"Entropy"});
+		clusterChart = generateChart("Generation", "Clustering data", new String[]{"Number of niches"});
 	}
 	
-	private LineChart generateChart(String yName, String[] seriesNames){		
+	private LineChart generateChart(String xName, String yName, String[] seriesNames){		
 		Axis xAxis = new NumberAxis();
 		Axis yAxis = new NumberAxis();
-		xAxis.setLabel("Generation");
+		xAxis.setLabel(xName);
 		yAxis.setLabel(yName);
 		
 		LineChart chart = new LineChart<>(xAxis, yAxis);
@@ -144,7 +148,6 @@ public class SolverController {
 		fxCrossover.setText("" + conf.CROSSOVER_CHANCE);
 		fxMutation.setText("" + conf.MUTATION_CHANCE);
 		fxCrowdingCoefficient.setText("" + conf.CROWDING_COEFFICIENT);
-		fxTestSetProportion.setText("" + conf.TEST_SET_PROPORTION);
 	}
 	
 	private void updateConfig(){
@@ -155,7 +158,6 @@ public class SolverController {
 		conf.CROSSOVER_CHANCE = Float.parseFloat(fxCrossover.getText());
 		conf.MUTATION_CHANCE = Float.parseFloat(fxMutation.getText());
 		conf.CROWDING_COEFFICIENT = Float.parseFloat(fxCrowdingCoefficient.getText());
-		conf.TEST_SET_PROPORTION = Float.parseFloat(fxTestSetProportion.getText());
 	}
 
 }
