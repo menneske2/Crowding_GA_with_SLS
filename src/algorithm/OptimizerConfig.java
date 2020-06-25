@@ -15,12 +15,12 @@ public class OptimizerConfig implements Cloneable{
 	
 	public int SEED = 72;
 	public int GENERATIONS = 300;
-	public int POPULATION_SIZE = 50;
+	public int POPULATION_SIZE = 150;
 	
 	public int ELITIST_POPULATION = 2;
 	public float CROSSOVER_CHANCE = 0.7f;
 	public float MUTATION_CHANCE = 0.2f;
-	public float CROWDING_COEFFICIENT = 1f;
+	public float CROWDING_COEFFICIENT = 0.5f;
 	
 	
 	

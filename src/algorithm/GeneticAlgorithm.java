@@ -5,7 +5,6 @@
  */
 package algorithm;
 
-import algorithm.clustering.POPCAlgorithm;
 import core.Problem;
 import core.SolverController;
 import java.util.ArrayList;
@@ -15,7 +14,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import javafx.application.Platform;
-import org.apache.commons.math3.ml.clustering.Clusterable;
 
 /**
  *
@@ -77,10 +75,8 @@ public class GeneticAlgorithm implements Runnable{
 			GAIndividual best = population.get(0);
 			double entropy = GAUtilities.getEntropy(population);
 			
-			long preClusterTime = new Date().getTime();
-			int nNiches = POPCAlgorithm.getNumClusters(population, rng);
-			long clusteringTime = new Date().getTime() - preClusterTime;
-//			System.out.println("Clustering took: " + clusteringTime + "ms");
+			int nNiches = GAUtilities.getNumClusters(population);
+			System.out.println("Number of niches: " + nNiches);
 
 			
 			Platform.runLater(()->{

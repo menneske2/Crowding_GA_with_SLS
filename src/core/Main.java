@@ -5,8 +5,6 @@
  */
 package core;
 
-import algorithm.GAIndividual;
-import algorithm.clustering.POPCAlgorithm;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -60,21 +58,6 @@ public class Main extends Application{
 				
 				Problem p = new Problem(f.getName(), trainData, validationData);
 				problems.add(p);
-			}
-			// This one is extremely temporary. debugging POPC.
-			else if(f.getName().endsWith(".txt")){
-				System.out.println(f.getName());
-				List<List<Float>> data = getNumberFile(f, " ");
-				List<GAIndividual> pop = new ArrayList<>();
-				for(var line : data){
-					boolean[] genome = new boolean[line.size()];
-					for(int i=0; i<line.size(); i++){
-						genome[i] = line.get(i) == 1;
-					}
-					pop.add(new GAIndividual(null, null, null, genome));
-				}
-				int nClusters = POPCAlgorithm.getNumClusters(pop, new Random());
-				System.out.format("clusters in %s: %d\n", f.getName(), nClusters);
 			}
 			else{
 				List<List<Float>> data = getNumberFile(f, ",");
