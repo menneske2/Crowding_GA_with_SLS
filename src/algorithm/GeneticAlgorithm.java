@@ -5,6 +5,7 @@
  */
 package algorithm;
 
+import algorithm.clustering.POPCAlgorithm;
 import core.Problem;
 import core.SolverController;
 import java.util.ArrayList;
@@ -76,9 +77,11 @@ public class GeneticAlgorithm implements Runnable{
 			GAIndividual best = population.get(0);
 			double entropy = GAUtilities.getEntropy(population);
 			
-			List<Clusterable> whyIsThisNecessary = new ArrayList<>();
-			whyIsThisNecessary.addAll(population);
-			int nNiches = GAUtilities.getNumClusters(whyIsThisNecessary, rng);
+			long preClusterTime = new Date().getTime();
+			int nNiches = POPCAlgorithm.getNumClusters(population, rng);
+			long clusteringTime = new Date().getTime() - preClusterTime;
+//			System.out.println("Clustering took: " + clusteringTime + "ms");
+
 			
 			Platform.runLater(()->{
 				feedbackStation.progressReport(genCopy, best.fitness, avg2, entropy, nNiches);

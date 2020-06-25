@@ -47,9 +47,10 @@ public class SolverController {
 	@FXML Label fxScore;
 	
 	@FXML VBox fxChartArea;
-	private LineChart<Number, Number> bestChart;
-	private LineChart<Number, Number> entropyChart;
-	private LineChart<Number, Number> clusterChart;
+//	private LineChart<Number, Number> bestChart;
+//	private LineChart<Number, Number> entropyChart;
+//	private LineChart<Number, Number> clusterChart;
+	private List<LineChart<Number, Number>> charts;
 	
 	private Problem prob;
 	private OptimizerConfig conf;
@@ -59,6 +60,7 @@ public class SolverController {
 		conf = new OptimizerConfig();
 		loadConfig();
 		fxStop.setDisable(true);
+		charts = new ArrayList<>();
 	}
 
 	public void setProblem(Problem p){
@@ -69,11 +71,16 @@ public class SolverController {
 	@FXML
 	public void solveProblem(ActionEvent e){
 		
-		for(var series : bestChart.getData()){
-			series.getData().clear();
-		}
-		for(var series : entropyChart.getData()){
-			series.getData().clear();
+//		for(var series : bestChart.getData()){
+//			series.getData().clear();
+//		}
+//		for(var series : entropyChart.getData()){
+//			series.getData().clear();
+//		}
+		for(var chart : charts){
+			for(var series : chart.getData()){
+				series.getData().clear();
+			}
 		}
 		
 		updateConfig();
@@ -96,11 +103,21 @@ public class SolverController {
 	public void progressReport(int generation, double best, double avg, double entropy, int nNiches){
 		if(generation < 8000 || generation%10 == 9){
 			fxGenerationCounter.setText("Generation: " + (generation+1));
-			bestChart.getData().get(0).getData().add(new XYChart.Data(generation, best));
-			bestChart.getData().get(1).getData().add(new XYChart.Data(generation, avg));
-			entropyChart.getData().get(0).getData().add(new XYChart.Data(generation, entropy));
-			clusterChart.getData().get(0).getData().add(new XYChart.Data(generation, nNiches));
+			// Performance-chart
+			charts.get(0).getData().get(0).getData().add(new XYChart.Data(generation, best));
+			charts.get(0).getData().get(1).getData().add(new XYChart.Data(generation, avg));
+			// Entropy-chart
+			charts.get(1).getData().get(0).getData().add(new XYChart.Data(generation, entropy));
+			// Cluster-chart
+			charts.get(2).getData().get(0).getData().add(new XYChart.Data(generation, nNiches));
 			fxScore.setText("Best score: " + best);
+			
+//			clusterChart.getData().get(0).getData().clear();
+//			List<XYChart.Data<Number, Number>> temp = new ArrayList<>();
+//			for(int i=0; i<JEvo.size(); i++){
+//				temp.add(new XYChart.Data(i, JEvo.get(i)));
+//			}
+//			clusterChart.getData().get(0).getData().addAll(temp);
 		}
 	}
 	
@@ -113,9 +130,10 @@ public class SolverController {
 	
 	private void generateCharts(){
 		fxChartArea.getChildren().removeAll();
-		bestChart = generateChart("Generation", "R-measure (negative values set to 0)", new String[]{"Best R-measure", "Average R-measure"});
-		entropyChart = generateChart("Generation", "Entropy", new String[]{"Entropy"});
-		clusterChart = generateChart("Generation", "Clustering data", new String[]{"Number of niches"});
+		charts.clear();
+		charts.add(generateChart("Generation", "R-measure (negative values set to 0)", new String[]{"Best R-measure", "Average R-measure"}));
+		charts.add(generateChart("Generation", "Entropy", new String[]{"Entropy"}));
+		charts.add(generateChart("Generation", "Clustering data", new String[]{"Number of niches"}));
 	}
 	
 	private LineChart generateChart(String xName, String yName, String[] seriesNames){		
