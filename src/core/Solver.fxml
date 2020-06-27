@@ -31,7 +31,7 @@
 	</fx:define>
 
 	<VBox prefHeight="Infinity" prefWidth="$CONF_WIDTH" spacing="15"> <!-- Configuration -->
-		<Label text="General options:"/>
+		<Label text="EA options:"/>
 		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
 			<Label text="Seed:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
 			<TextField fx:id="fxSeed" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
@@ -65,6 +65,52 @@
 		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
 			<Label text="Crowding coefficient:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
 			<TextField fx:id="fxCrowdingCoefficient" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
+		</HBox>
+		
+		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
+			<Label text="Enable PID-controller:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
+			<CheckBox fx:id="fxPIDEnabled"/>
+		</HBox>
+		
+		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
+			<Label text="PID Control rate:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
+			<TextField fx:id="fxPIDControlRate" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
+		</HBox>
+		
+		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
+			<Label text="Surviving niches:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
+			<TextField fx:id="fxActiveNiches" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
+		</HBox>
+		
+		
+		
+		<!--======================================== SLS ========================================-->
+		<Label text=""/>
+		<Label text="SLS parameters:"/>
+		
+		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
+			<Label text="Enable SLS:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
+			<CheckBox fx:id="fxSLSEnabled"/>
+		</HBox>
+
+		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
+			<Label text="Max flips:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
+			<TextField fx:id="fxSLSMaxFlips" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
+		</HBox>
+		
+		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
+			<Label text="Accept first improvement:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
+			<CheckBox fx:id="fxSLSTakeFirst"/>
+		</HBox>
+		
+		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
+			<Label text="Max flips in greedy search:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
+			<TextField fx:id="fxSLSMaxFlipsGreedy" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
+		</HBox>
+		
+		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
+			<Label text="Noise probability:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
+			<TextField fx:id="fxSLSNoiseP" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
 		</HBox>
 		
 

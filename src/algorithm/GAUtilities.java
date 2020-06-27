@@ -5,11 +5,11 @@
  */
 package algorithm;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.math3.ml.clustering.Cluster;
 import org.apache.commons.math3.ml.clustering.DBSCANClusterer;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
-import org.apache.commons.math3.ml.distance.ManhattanDistance;
 
 /**
  *
@@ -59,12 +59,16 @@ public class GAUtilities {
 		return genomeSum;
 	}
 	
-	public static int getNumClusters(List<GAIndividual> pop){
+	public static List<Niche> getNiches(List<GAIndividual> pop){
 		DistanceMeasure distanceMeasure = new JaccardDistance();
-		double epsilon = 0.18;
+		double epsilon = 0.1;
 		DBSCANClusterer clusterer = new DBSCANClusterer(epsilon, 1, distanceMeasure);
-		List<Cluster> clusters = clusterer.cluster(pop);
-		return clusters.size();
+		List<Cluster<GAIndividual>> clusters = clusterer.cluster(pop);
+		List<Niche> toReturn = new ArrayList<>();
+		for(var cluster : clusters){
+			toReturn.add(new Niche(cluster));
+		}
+		return toReturn;
 	}
 	
 	

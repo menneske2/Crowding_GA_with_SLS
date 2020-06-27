@@ -43,55 +43,11 @@ public class GAIndividual implements Comparable<GAIndividual>, Cloneable, Cluste
 		return null;
 	}
 	
-	
 	public void evaluateFitness(){
-		double[][] xTrain = reduceFeatures(prob.xsTrain);
-		double[][] xValid = reduceFeatures(prob.xsValid);
-		
-		// Fitting model
-		OLSMultipleLinearRegression regressor = new OLSMultipleLinearRegression();
-		regressor.newSampleData(prob.ysTrain, xTrain); // Fitting model to training data.
-		
-		// Calculating RMSE and R manually since the regressor doesn't support testing data without fitting to it.
-		double[] params = regressor.estimateRegressionParameters();
-		double yMean = Arrays.stream(prob.ysValid).average().getAsDouble();
-		double totalSumOfSquares = 0.0;
-		double residualSumOfSquares = 0.0;
-		
-		for(int sample=0; sample<xValid.length; sample++){
-			double expected = params[0];
-			for(int i=1; i<params.length; i++){
-				expected += xValid[sample][i-1] * params[i];
-			}
-			totalSumOfSquares += Math.pow(prob.ysValid[sample] - yMean, 2);
-			residualSumOfSquares += Math.pow(prob.ysValid[sample] - expected, 2);
-		}
-		double rSquared = 1 - (residualSumOfSquares / totalSumOfSquares);
-		rSquared = Math.max(rSquared, 0.000000001);
-		double R = Math.sqrt(rSquared);
-		double rmse = Math.sqrt(residualSumOfSquares / prob.ysValid.length); // Root mean square error (RMSE).
-		this.fitness = R;
+		double RMeasure = prob.evaluateBitstring(genome);
+		this.fitness = RMeasure;
 	}
 	
-	private double[][] reduceFeatures(double[][] full){
-		int nCols = 0;
-		for(Boolean b : genome){
-			nCols += (b.hashCode() & 0b10) >> 1;
-		}
-
-		double[][] reduced = new double[full.length][nCols];
-		int reducedIndex = 0;
-		for(int dataPoint=0; dataPoint<full.length; dataPoint++){
-			for(int i=0; i<genome.length; i++){
-				if(genome[i]){
-					reduced[dataPoint][reducedIndex] = full[dataPoint][i];
-					reducedIndex++;
-				}
-			}
-			reducedIndex = 0;
-		}
-		return reduced;
-	}
 
 	public String getGenomeAsString(){
 		String s = "";
