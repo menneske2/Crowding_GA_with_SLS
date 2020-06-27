@@ -117,6 +117,7 @@
 		<!--======================================== UTILITIES ========================================-->
 		<Button fx:id="fxStart" text="Run" onAction="#solveProblem" minWidth="$CONF_WIDTH" maxWidth="$CONF_WIDTH" alignment="center"/>
 		<Button fx:id="fxStop" text="Stop" onAction="#stopProblem" minWidth="$CONF_WIDTH" maxWidth="$CONF_WIDTH" alignment="center"/>
+		<Button fx:id="fxUpdate" text="Update config" onAction="#updateGA" minWidth="$CONF_WIDTH" maxWidth="$CONF_WIDTH" alignment="center"/>
 		<Label fx:id="fxGenerationCounter" text="Generations completed: "/>
 		<Label fx:id="fxScore" text="Score: "/>
 

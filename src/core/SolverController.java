@@ -88,7 +88,8 @@ public class SolverController {
 		}
 		
 		updateConfig();
-		OptimizerConfig copy = conf.clone();
+//		OptimizerConfig copy = conf.clone();
+		OptimizerConfig copy = conf;
 		comsChannel = new LinkedBlockingQueue();
 		Runnable optimizer = new GeneticAlgorithm(prob, copy, this, comsChannel);
 		Thread thread = new Thread(optimizer);
@@ -99,9 +100,14 @@ public class SolverController {
 	}
 	
 	@FXML
-	public void stopProblem(ActionEvent e){
+	private void stopProblem(ActionEvent e){
 		comsChannel.add("Stopping...");
 		fxStop.setDisable(true);
+	}
+	
+	@FXML
+	private void updateGA(ActionEvent e){
+		this.updateConfig();
 	}
 	
 	public void progressReport(int generation, int FEs, double best, double avg, double entropy, double nNiches, int improvementRatioSLS){
