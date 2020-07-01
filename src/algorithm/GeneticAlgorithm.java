@@ -41,8 +41,6 @@ public class GeneticAlgorithm implements Runnable{
 		if(conf.SEED != OptimizerConfig.NO_SEED)
 			rng.setSeed(conf.SEED);
 		controller = new PIDController();
-		if(conf.PID_ENABLED == false)
-			controller.disable();
 		sls = new SLS(prob, conf, rng);
 	}
 	
@@ -63,13 +61,11 @@ public class GeneticAlgorithm implements Runnable{
 			if(conf.GENERATIONS != -1 && generation>=conf.GENERATIONS){
 				break;
 			}
-
+			if(conf.FITNESS_EVALUATIONS != -1 && prob.fitnessEvaluations >= conf.FITNESS_EVALUATIONS){
+				break;
+			}
 			
-			// Replacement scheme
-			List<GAIndividual> newGen = newEAGeneration();
-			population = newGen;
-			Collections.sort(population);
-			
+			// Printing niche fitnesses.
 			List<Niche> niches = GAUtilities.getNiches(population);
 			System.out.format("Number of niches: %d. Fitnesses: [", niches.size());
 			for(var niche : niches){
@@ -77,13 +73,41 @@ public class GeneticAlgorithm implements Runnable{
 			}
 			System.out.println("]");
 			
+			// Printing niche memberships.
+			String s = "Niche memberships: [";
+			for(var niche : niches){
+				s += niche.getPoints().size() + ", ";
+			}
+			System.out.println(s.substring(0, s.length()-2)+"]");
 			
-			double nNichesSmoothed = controller.updateCrowdingScalingFactor(conf, niches);
 			
+			// Using PID-controller
+			if(conf.PID_ENABLED)
+				controller.updateCrowdingScalingFactor(conf, niches);
+			
+			
+			sls.resetImprovementStats();
 			if(conf.SLS_Enabled){
-				SLSPurge(niches);
+				List<Niche> tooBig = new ArrayList<>();
+				for(var n : niches){
+					if(n.getPoints().size() > conf.MAX_NICHE_SIZE)
+						tooBig.add(n);
+				}
+				if(!tooBig.isEmpty())
+					SLSPurge(tooBig);
 			}
 			
+			// Elitist survival of the best individual in all active peaks.
+			List<GAIndividual> elitist = new ArrayList<>();
+			Collections.sort(niches);
+			for(int i=0; i<Math.min(niches.size(), conf.ACTIVE_NICHES); i++){
+				elitist.add(niches.get(i).getBest().clone());
+			}
+			
+			// EA + replacement scheme.
+			List<GAIndividual> newGen = newEAGeneration(elitist);
+			population = newGen;
+			Collections.sort(population);
 			
 			generation++;
 			
@@ -98,10 +122,10 @@ public class GeneticAlgorithm implements Runnable{
 			final double avg2 = avg;
 			GAIndividual best = population.get(0);
 			double entropy = GAUtilities.getEntropy(population);
-
+			float crowdingFactor = conf.CROWDING_SCALING_FACTOR;
 			
 			Platform.runLater(()->{
-				feedbackStation.progressReport(genCopy, prob.fitnessEvaluations, best.fitness, avg2, entropy, nNichesSmoothed, sls.getNImprovementsOverX());
+				feedbackStation.progressReport(genCopy, prob.fitnessEvaluations, best.fitness, avg2, entropy, niches.size(), sls.getNImprovementsOverX(), crowdingFactor);
 			});
 		}
 
@@ -114,8 +138,6 @@ public class GeneticAlgorithm implements Runnable{
 	}
 	
 	private void SLSPurge(List<Niche> niches){
-		sls.resetImprovementStats();
-		if(niches.size() > conf.ACTIVE_NICHES){
 			long preTime = new Date().getTime();
 			double[] improvements = new double[niches.size()];
 			for(int i=0; i<niches.size(); i++){
@@ -125,31 +147,36 @@ public class GeneticAlgorithm implements Runnable{
 				improvements[i] = sls.optimizeNiche(chosen) - pre;
 			}
 			long timeSpent = new Date().getTime() - preTime;
-			System.out.println("SLS-ing all "+niches.size()+" niches took " + (int)Math.floor(timeSpent/(1000*60)) + "m" + (timeSpent/1000)%60 + "s. Improvements over "+sls.x+": " + sls.getNImprovementsOverX());
+			System.out.println("SLS-ing "+niches.size()+" niches took " + (int)Math.floor(timeSpent/(1000*60)) + "m" + (timeSpent/1000)%60 + "s. Improvements over "+sls.x+": " + sls.getNImprovementsOverX());
 			System.out.print("Improvements: [");
 			for(var d : improvements)
-				System.out.format("%.3f, ", d);
+				System.out.format("%.4f, ", d);
 			System.out.println("]");
 
 			// Committing genocide in all niches. The elite ones get 1 survivor.
 			Collections.sort(niches);
 			for(int i=0; i<niches.size(); i++){
-				int start = i >= conf.ACTIVE_NICHES ? 0 : 1;
+				int start = i >= conf.ACTIVE_NICHES ? 0 : conf.MAX_NICHE_SIZE;
 				for(int j=start; j<niches.get(i).getPoints().size(); j++){
 					var gai = niches.get(i).getPoints().get(j);
 					population.remove(gai);
+					niches.get(i).getPoints().remove(j);
+					j--;
+				}
+				if(niches.get(i).getPoints().isEmpty()){
+					niches.remove(i);
+					i--;
 				}
 			}
-		}
 	}
 	
-	private List<GAIndividual> newEAGeneration(){
-		List<GAIndividual> newPop = new ArrayList<>();
+	private List<GAIndividual> newEAGeneration(List<GAIndividual> elitist){
+		List<GAIndividual> newPop = new ArrayList<>(elitist);
 		int genomeLength = population.get(0).genome.length;
 		
-		for(int i=0; i<conf.ELITIST_POPULATION; i++){
-			newPop.add(population.get(i).clone());
-		}
+//		for(int i=0; i<conf.ELITIST_POPULATION; i++){
+//			newPop.add(population.get(i).clone());
+//		}
 		
 		while(newPop.size() < conf.POPULATION_SIZE){
 			// Parent selection

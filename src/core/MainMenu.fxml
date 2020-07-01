@@ -16,7 +16,7 @@
 			<ListView fx:id="problems" prefWidth="398" minHeight="495">
 			</ListView>
 		</ScrollPane>
-		<Button text="Knappen over alle knapper" onAction="#initChosenProblem" alignment="center" prefHeight="50" prefWidth="Infinity"/>
+		<Button text="Solve problem" onAction="#initChosenProblem" alignment="center" prefHeight="50" prefWidth="Infinity"/>
 	</VBox>
 	
 </VBox>

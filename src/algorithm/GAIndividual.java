@@ -7,9 +7,7 @@ package algorithm;
 
 
 import core.Problem;
-import java.util.Arrays;
 import java.util.Random;
-import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 import org.apache.commons.math3.ml.clustering.Clusterable;
 /**
  *

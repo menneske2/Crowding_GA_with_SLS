@@ -36,7 +36,7 @@ public class SolverController {
 	@FXML TextField fxSeed;
 	@FXML TextField fxPopSize;
 	@FXML TextField fxGenerations;
-	@FXML TextField fxElitism;
+	@FXML TextField fxFEs;
 	@FXML TextField fxCrossover;
 	@FXML TextField fxMutation;
 	@FXML TextField fxCrowdingCoefficient;
@@ -46,6 +46,7 @@ public class SolverController {
 	
 	// SLS options
 	@FXML CheckBox fxSLSEnabled;
+	@FXML TextField fxMaxNicheSize;
 	@FXML TextField fxSLSMaxFlips;
 	@FXML CheckBox fxSLSTakeFirst;
 	@FXML TextField fxSLSMaxFlipsGreedy;
@@ -56,6 +57,7 @@ public class SolverController {
 	@FXML Button fxStop;
 	@FXML Label fxGenerationCounter;
 	@FXML Label fxScore;
+	@FXML Label fxCurCrowdingFactor;
 	
 	@FXML VBox fxChartArea;
 
@@ -88,10 +90,8 @@ public class SolverController {
 		}
 		
 		updateConfig();
-//		OptimizerConfig copy = conf.clone();
-		OptimizerConfig copy = conf;
 		comsChannel = new LinkedBlockingQueue();
-		Runnable optimizer = new GeneticAlgorithm(prob, copy, this, comsChannel);
+		Runnable optimizer = new GeneticAlgorithm(prob, conf, this, comsChannel);
 		Thread thread = new Thread(optimizer);
 		thread.start();
 		
@@ -110,7 +110,7 @@ public class SolverController {
 		this.updateConfig();
 	}
 	
-	public void progressReport(int generation, int FEs, double best, double avg, double entropy, double nNiches, int improvementRatioSLS){
+	public void progressReport(int generation, int FEs, double best, double avg, double entropy, double nNiches, int improvementRatioSLS, double crowdingFactor){
 		if(generation < 8000 || generation%10 == 9){
 			fxGenerationCounter.setText("Generation: " + (generation+1));
 			// Performance-chart
@@ -123,6 +123,7 @@ public class SolverController {
 			charts.get(2).getData().get(1).getData().add(new XYChart.Data(generation, improvementRatioSLS));
 			
 			fxScore.setText("Best score: " + best);
+			fxCurCrowdingFactor.setText("Crowding factor: " + conf.CROWDING_SCALING_FACTOR);
 			
 //			clusterChart.getData().get(0).getData().clear();
 //			List<XYChart.Data<Number, Number>> temp = new ArrayList<>();
@@ -145,7 +146,7 @@ public class SolverController {
 		charts.clear();
 		charts.add(generateChart("Fitness evaluations", "R-measure (negative values set to 0)", new String[]{"Best R-measure", "Average R-measure"}));
 		charts.add(generateChart("Generation", "Entropy", new String[]{"Entropy"}));
-		charts.add(generateChart("Generation", "Clustering data", new String[]{"Number of niches (smoothed)", "Improvements made in SLS after searching more than X options"}));
+		charts.add(generateChart("Generation", "Clustering data", new String[]{"Number of niches", "Improvements made in SLS after searching more than X options"}));
 	}
 	
 	private LineChart generateChart(String xName, String yName, String[] seriesNames){		
@@ -174,8 +175,8 @@ public class SolverController {
 		// EA options
 		fxSeed.setText("" + conf.SEED);
 		fxGenerations.setText("" + conf.GENERATIONS);
+		fxFEs.setText("" + conf.FITNESS_EVALUATIONS);
 		fxPopSize.setText("" + conf.POPULATION_SIZE);
-		fxElitism.setText("" + conf.ELITIST_POPULATION);
 		fxCrossover.setText("" + conf.CROSSOVER_CHANCE);
 		fxMutation.setText("" + conf.MUTATION_CHANCE);
 		fxCrowdingCoefficient.setText("" + conf.CROWDING_SCALING_FACTOR);
@@ -185,6 +186,7 @@ public class SolverController {
 		
 		// SLS options
 		fxSLSEnabled.selectedProperty().set(conf.SLS_Enabled);
+		fxMaxNicheSize.setText("" + conf.MAX_NICHE_SIZE);
 		fxSLSMaxFlips.setText("" + conf.SLS_MAX_FLIPS);
 		fxSLSTakeFirst.selectedProperty().set(conf.SLS_TAKE_FIRST_IMPROVEMENT);
 		fxSLSMaxFlipsGreedy.setText("" + conf.SLS_MAX_FLIPS_IN_GREEDY);
@@ -195,8 +197,8 @@ public class SolverController {
 		// EA options
 		conf.SEED = Integer.parseInt(fxSeed.getText());
 		conf.GENERATIONS = Integer.parseInt(fxGenerations.getText());
+		conf.FITNESS_EVALUATIONS = Integer.parseInt(fxFEs.getText());
 		conf.POPULATION_SIZE = Integer.parseInt(fxPopSize.getText());
-		conf.ELITIST_POPULATION = Integer.parseInt(fxElitism.getText());
 		conf.CROSSOVER_CHANCE = Float.parseFloat(fxCrossover.getText());
 		conf.MUTATION_CHANCE = Float.parseFloat(fxMutation.getText());
 		conf.CROWDING_SCALING_FACTOR = Float.parseFloat(fxCrowdingCoefficient.getText());
@@ -206,6 +208,7 @@ public class SolverController {
 		
 		// SLS options
 		conf.SLS_Enabled = fxSLSEnabled.selectedProperty().get();
+		conf.MAX_NICHE_SIZE = Integer.parseInt(fxMaxNicheSize.getText());
 		conf.SLS_MAX_FLIPS = Integer.parseInt(fxSLSMaxFlips.getText());
 		conf.SLS_TAKE_FIRST_IMPROVEMENT = fxSLSTakeFirst.selectedProperty().get();
 		conf.SLS_MAX_FLIPS_IN_GREEDY = Integer.parseInt(fxSLSMaxFlipsGreedy.getText());

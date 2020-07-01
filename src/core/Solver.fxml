@@ -38,18 +38,18 @@
 		</HBox>
 		
 		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
-			<Label text="Generations:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
+			<Label text="Max generations:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
 			<TextField fx:id="fxGenerations" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
+		</HBox>
+		
+		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
+			<Label text="Max fitness evaluations:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
+			<TextField fx:id="fxFEs" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
 		</HBox>
 
 		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
 			<Label text="Population size:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
 			<TextField fx:id="fxPopSize" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
-		</HBox>
-		
-		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
-			<Label text="Elitist population:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
-			<TextField fx:id="fxElitism" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
 		</HBox>
 		
 		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
@@ -78,7 +78,7 @@
 		</HBox>
 		
 		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
-			<Label text="Surviving niches:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
+			<Label text="Wanted niches:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
 			<TextField fx:id="fxActiveNiches" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
 		</HBox>
 		
@@ -91,6 +91,11 @@
 		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
 			<Label text="Enable SLS:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
 			<CheckBox fx:id="fxSLSEnabled"/>
+		</HBox>
+		
+		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
+			<Label text="Max members in niche:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
+			<TextField fx:id="fxMaxNicheSize" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
 		</HBox>
 
 		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
@@ -116,10 +121,11 @@
 
 		<!--======================================== UTILITIES ========================================-->
 		<Button fx:id="fxStart" text="Run" onAction="#solveProblem" minWidth="$CONF_WIDTH" maxWidth="$CONF_WIDTH" alignment="center"/>
+		<Button fx:id="fxUpdate" text="Update GA" onAction="#updateGA" minWidth="$CONF_WIDTH" maxWidth="$CONF_WIDTH" alignment="center"/>
 		<Button fx:id="fxStop" text="Stop" onAction="#stopProblem" minWidth="$CONF_WIDTH" maxWidth="$CONF_WIDTH" alignment="center"/>
-		<Button fx:id="fxUpdate" text="Update config" onAction="#updateGA" minWidth="$CONF_WIDTH" maxWidth="$CONF_WIDTH" alignment="center"/>
 		<Label fx:id="fxGenerationCounter" text="Generations completed: "/>
 		<Label fx:id="fxScore" text="Score: "/>
+		<Label fx:id="fxCurCrowdingFactor" text="Crowding factor: "/>
 
 	</VBox>
 

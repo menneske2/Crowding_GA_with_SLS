@@ -61,8 +61,8 @@ public class GAUtilities {
 	
 	public static List<Niche> getNiches(List<GAIndividual> pop){
 		DistanceMeasure distanceMeasure = new JaccardDistance();
-		double epsilon = 0.1;
-		DBSCANClusterer clusterer = new DBSCANClusterer(epsilon, 1, distanceMeasure);
+		double epsilon = 0.15;
+		DBSCANClusterer clusterer = new DBSCANClusterer(epsilon, 0, distanceMeasure);
 		List<Cluster<GAIndividual>> clusters = clusterer.cluster(pop);
 		List<Niche> toReturn = new ArrayList<>();
 		for(var cluster : clusters){
