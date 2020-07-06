@@ -34,12 +34,14 @@ public class SolverController {
 	
 	// EA options
 	@FXML TextField fxSeed;
-	@FXML TextField fxPopSize;
 	@FXML TextField fxGenerations;
 	@FXML TextField fxFEs;
+	@FXML TextField fxPopSize;
+	@FXML TextField fxTournamentSize;
 	@FXML TextField fxCrossover;
 	@FXML TextField fxMutation;
 	@FXML TextField fxCrowdingCoefficient;
+	@FXML TextField fxNichingEpsilon;
 	@FXML CheckBox fxPIDEnabled;
 	@FXML TextField fxPIDControlRate;
 	@FXML TextField fxActiveNiches;
@@ -57,7 +59,6 @@ public class SolverController {
 	@FXML Button fxStop;
 	@FXML Label fxGenerationCounter;
 	@FXML Label fxScore;
-	@FXML Label fxCurCrowdingFactor;
 	
 	@FXML VBox fxChartArea;
 
@@ -110,20 +111,23 @@ public class SolverController {
 		this.updateConfig();
 	}
 	
-	public void progressReport(int generation, int FEs, double best, double avg, double entropy, double nNiches, int improvementRatioSLS, double crowdingFactor){
+	public void progressReport(int generation, int FEs, double best, double avg, int featuresInBest, double entropy, double nNiches, 
+			double mutaChance, double crossChance, double crowdingFactor){
 		if(generation < 8000 || generation%10 == 9){
 			fxGenerationCounter.setText("Generation: " + (generation+1));
-			// Performance-chart
+			// Performance chart
 			charts.get(0).getData().get(0).getData().add(new XYChart.Data(FEs, best));
 			charts.get(0).getData().get(1).getData().add(new XYChart.Data(FEs, avg));
-			// Entropy-chart
+			// Diversity chart
 			charts.get(1).getData().get(0).getData().add(new XYChart.Data(generation, entropy));
-			// Cluster-chart
-			charts.get(2).getData().get(0).getData().add(new XYChart.Data(generation, nNiches));
-			charts.get(2).getData().get(1).getData().add(new XYChart.Data(generation, improvementRatioSLS));
+			charts.get(1).getData().get(1).getData().add(new XYChart.Data(generation, nNiches));
+			charts.get(1).getData().get(2).getData().add(new XYChart.Data(generation, featuresInBest));
+			// Operation probability chart.
+			charts.get(2).getData().get(0).getData().add(new XYChart.Data(generation, mutaChance));
+			charts.get(2).getData().get(1).getData().add(new XYChart.Data(generation, crossChance));
+			charts.get(2).getData().get(2).getData().add(new XYChart.Data(generation, crowdingFactor));
 			
 			fxScore.setText("Best score: " + best);
-			fxCurCrowdingFactor.setText("Crowding factor: " + conf.CROWDING_SCALING_FACTOR);
 			
 //			clusterChart.getData().get(0).getData().clear();
 //			List<XYChart.Data<Number, Number>> temp = new ArrayList<>();
@@ -145,8 +149,8 @@ public class SolverController {
 		fxChartArea.getChildren().removeAll();
 		charts.clear();
 		charts.add(generateChart("Fitness evaluations", "R-measure (negative values set to 0)", new String[]{"Best R-measure", "Average R-measure"}));
-		charts.add(generateChart("Generation", "Entropy", new String[]{"Entropy"}));
-		charts.add(generateChart("Generation", "Clustering data", new String[]{"Number of niches", "Improvements made in SLS after searching more than X options"}));
+		charts.add(generateChart("Generation", "Diversity", new String[]{"Entropy", "Number of niches", "Features in best"}));
+		charts.add(generateChart("Generation", "Operation probabilities", new String[]{"Crossover", "Mutation", "Crowding scaling factor"}));
 	}
 	
 	private LineChart generateChart(String xName, String yName, String[] seriesNames){		
@@ -177,9 +181,11 @@ public class SolverController {
 		fxGenerations.setText("" + conf.GENERATIONS);
 		fxFEs.setText("" + conf.FITNESS_EVALUATIONS);
 		fxPopSize.setText("" + conf.POPULATION_SIZE);
+		fxTournamentSize.setText("" + conf.TOURNAMENT_SIZE);
 		fxCrossover.setText("" + conf.CROSSOVER_CHANCE);
 		fxMutation.setText("" + conf.MUTATION_CHANCE);
 		fxCrowdingCoefficient.setText("" + conf.CROWDING_SCALING_FACTOR);
+		fxNichingEpsilon.setText("" + conf.NICHING_EPSILON);
 		fxPIDEnabled.selectedProperty().set(conf.PID_ENABLED);
 		fxPIDControlRate.setText("" + conf.PID_CONTROL_RATE);
 		fxActiveNiches.setText("" + conf.ACTIVE_NICHES);
@@ -199,7 +205,9 @@ public class SolverController {
 		conf.GENERATIONS = Integer.parseInt(fxGenerations.getText());
 		conf.FITNESS_EVALUATIONS = Integer.parseInt(fxFEs.getText());
 		conf.POPULATION_SIZE = Integer.parseInt(fxPopSize.getText());
+		conf.TOURNAMENT_SIZE = Integer.parseInt(fxTournamentSize.getText());
 		conf.CROSSOVER_CHANCE = Float.parseFloat(fxCrossover.getText());
+		conf.NICHING_EPSILON = Float.parseFloat(fxNichingEpsilon.getText());
 		conf.MUTATION_CHANCE = Float.parseFloat(fxMutation.getText());
 		conf.CROWDING_SCALING_FACTOR = Float.parseFloat(fxCrowdingCoefficient.getText());
 		conf.PID_ENABLED = fxPIDEnabled.selectedProperty().get();

@@ -42,7 +42,7 @@ public class GAIndividual implements Comparable<GAIndividual>, Cloneable, Cluste
 	}
 	
 	public void evaluateFitness(){
-		double RMeasure = prob.evaluateBitstring(genome);
+		double RMeasure = prob.evaluateBitstring(genome, true);
 		this.fitness = RMeasure;
 	}
 	
@@ -76,7 +76,7 @@ public class GAIndividual implements Comparable<GAIndividual>, Cloneable, Cluste
 	
 	@Override
 	/**
-	 * Method used by the k-means clustering algorithm.
+	 * Method used by the clustering algorithm.
 	 */
 	public double[] getPoint() {
 		// cast the genome into a double[].

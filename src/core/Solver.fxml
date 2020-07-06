@@ -53,6 +53,11 @@
 		</HBox>
 		
 		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
+			<Label text="Tournament size:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
+			<TextField fx:id="fxTournamentSize" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
+		</HBox>
+		
+		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
 			<Label text="Crossover chance:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
 			<TextField fx:id="fxCrossover" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
 		</HBox>
@@ -65,6 +70,11 @@
 		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
 			<Label text="Crowding coefficient:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
 			<TextField fx:id="fxCrowdingCoefficient" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
+		</HBox>
+		
+		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
+			<Label text="Niching epsilon:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
+			<TextField fx:id="fxNichingEpsilon" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
 		</HBox>
 		
 		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
@@ -81,6 +91,8 @@
 			<Label text="Wanted niches:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
 			<TextField fx:id="fxActiveNiches" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
 		</HBox>
+		
+		
 		
 		
 		
@@ -125,7 +137,6 @@
 		<Button fx:id="fxStop" text="Stop" onAction="#stopProblem" minWidth="$CONF_WIDTH" maxWidth="$CONF_WIDTH" alignment="center"/>
 		<Label fx:id="fxGenerationCounter" text="Generations completed: "/>
 		<Label fx:id="fxScore" text="Score: "/>
-		<Label fx:id="fxCurCrowdingFactor" text="Crowding factor: "/>
 
 	</VBox>
 

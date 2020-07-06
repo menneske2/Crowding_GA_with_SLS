@@ -8,13 +8,14 @@ package algorithm;
 import core.Problem;
 import core.SolverController;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import javafx.application.Platform;
-import org.apache.commons.math3.ml.clustering.Cluster;
 
 /**
  *
@@ -66,7 +67,7 @@ public class GeneticAlgorithm implements Runnable{
 			}
 			
 			// Printing niche fitnesses.
-			List<Niche> niches = GAUtilities.getNiches(population);
+			List<Niche> niches = GAUtilities.getNiches(population, conf.NICHING_EPSILON);
 			System.out.format("Number of niches: %d. Fitnesses: [", niches.size());
 			for(var niche : niches){
 				System.out.format("%.3f, ", niche.getBest().fitness);
@@ -86,7 +87,6 @@ public class GeneticAlgorithm implements Runnable{
 				controller.updateCrowdingScalingFactor(conf, niches);
 			
 			
-			sls.resetImprovementStats();
 			if(conf.SLS_Enabled){
 				List<Niche> tooBig = new ArrayList<>();
 				for(var n : niches){
@@ -97,7 +97,7 @@ public class GeneticAlgorithm implements Runnable{
 					SLSPurge(tooBig);
 			}
 			
-			// Elitist survival of the best individual in all active peaks.
+			// Elitist survival of the best individual in all active niches.
 			List<GAIndividual> elitist = new ArrayList<>();
 			Collections.sort(niches);
 			for(int i=0; i<Math.min(niches.size(), conf.ACTIVE_NICHES); i++){
@@ -114,18 +114,20 @@ public class GeneticAlgorithm implements Runnable{
 			
 			// Gathering statistics and sending progress report to main client.
 			final int genCopy = generation-1; // it needs to be an effectively final variable.
-			double avg = 0;
+			double bestR = prob.evaluateBitstring(population.get(0).genome, false);
+			double avgR = 0;
 			for(var p : population){
-				avg += p.fitness;
+				avgR += prob.evaluateBitstring(p.genome, false);
 			}
-			avg /= population.size();
-			final double avg2 = avg;
-			GAIndividual best = population.get(0);
+			avgR /= population.size();
+			final double avg = avgR;
+			
 			double entropy = GAUtilities.getEntropy(population);
 			float crowdingFactor = conf.CROWDING_SCALING_FACTOR;
 			
 			Platform.runLater(()->{
-				feedbackStation.progressReport(genCopy, prob.fitnessEvaluations, best.fitness, avg2, entropy, niches.size(), sls.getNImprovementsOverX(), crowdingFactor);
+				feedbackStation.progressReport(genCopy, prob.fitnessEvaluations, bestR, avg, population.get(0).numberOfFeatures(), entropy, niches.size(), 
+						conf.MUTATION_CHANCE, conf.CROSSOVER_CHANCE, crowdingFactor);
 			});
 		}
 
@@ -147,7 +149,7 @@ public class GeneticAlgorithm implements Runnable{
 				improvements[i] = sls.optimizeNiche(chosen) - pre;
 			}
 			long timeSpent = new Date().getTime() - preTime;
-			System.out.println("SLS-ing "+niches.size()+" niches took " + (int)Math.floor(timeSpent/(1000*60)) + "m" + (timeSpent/1000)%60 + "s. Improvements over "+sls.x+": " + sls.getNImprovementsOverX());
+			System.out.println("SLS-ing "+niches.size()+" niches took " + (int)Math.floor(timeSpent/(1000*60)) + "m" + (timeSpent/1000)%60 + "s.");
 			System.out.print("Improvements: [");
 			for(var d : improvements)
 				System.out.format("%.4f, ", d);
@@ -156,7 +158,8 @@ public class GeneticAlgorithm implements Runnable{
 			// Committing genocide in all niches. The elite ones get 1 survivor.
 			Collections.sort(niches);
 			for(int i=0; i<niches.size(); i++){
-				int start = i >= conf.ACTIVE_NICHES ? 0 : conf.MAX_NICHE_SIZE;
+				int start = conf.MAX_NICHE_SIZE;
+				Collections.sort(niches.get(i).getPoints());
 				for(int j=start; j<niches.get(i).getPoints().size(); j++){
 					var gai = niches.get(i).getPoints().get(j);
 					population.remove(gai);
@@ -174,16 +177,33 @@ public class GeneticAlgorithm implements Runnable{
 		List<GAIndividual> newPop = new ArrayList<>(elitist);
 		int genomeLength = population.get(0).genome.length;
 		
-//		for(int i=0; i<conf.ELITIST_POPULATION; i++){
-//			newPop.add(population.get(i).clone());
-//		}
-		
 		while(newPop.size() < conf.POPULATION_SIZE){
-			// Parent selection
+
+			
 			GAIndividual[] parents = new GAIndividual[2];
-			for(int i=0; i<parents.length; i++) {
-				parents[i] = population.get(rng.nextInt(population.size()));
+			
+			// Deterministic tournament selection of parents.
+			for(int i=0; i<parents.length; i++){
+				GAIndividual[] bracket = new GAIndividual[conf.TOURNAMENT_SIZE];
+				for(int j=0; j<bracket.length; j++){
+					bracket[j] = population.get(rng.nextInt(population.size()));
+				}
+				Arrays.sort(bracket);
+				parents[i] = bracket[0];
 			}
+			
+			// Most similar/dissimilar parent selection. Appears to be trash.
+//			parents[0] = population.get(rng.nextInt(population.size()));
+//			GAIndividual[] others = new GAIndividual[conf.TOURNAMENT_SIZE];
+//			for(int i=0; i<others.length; i++){
+//				others[i] = population.get(rng.nextInt(population.size()));
+//			}
+//			Comparator comp = new DistanceComparator(parents[0]);
+//			if(false) // hvis true, most dissimilar.
+//				comp = comp.reversed();
+//			Arrays.sort(others, comp);
+//			parents[1] = others[0];
+			
 			
 			boolean[][] childGenomes = new boolean[2][genomeLength];
 			
@@ -203,11 +223,12 @@ public class GeneticAlgorithm implements Runnable{
 				childGenomes[1] = parents[1].genome.clone();
 			}
 			
-			// Bitflip mutation.
-			for (boolean[] genome : childGenomes) {
-				if (rng.nextFloat() < conf.MUTATION_CHANCE) {
+			
+			for(int i=0; i<2; i++){
+				// Bitflip mutation.
+				if(rng.nextFloat() < conf.MUTATION_CHANCE) {
 					int point = rng.nextInt(genomeLength);
-					genome[point] = !genome[point];
+					childGenomes[i][point] = !childGenomes[i][point];
 				}
 			}
 			

@@ -31,9 +31,15 @@ public class Problem {
 		this.xsValid = parseDataFile(validationSet, ysValid);
 	}
 	
-	public double evaluateBitstring(boolean[] bits){
+	public double evaluateBitstring(boolean[] bits, boolean punish){
 		double[][] xTrain = reduceFeatures(xsTrain, bits);
 		double[][] xValid = reduceFeatures(xsValid, bits);
+		
+		if(xTrain == null){
+			System.out.println("[Problem] No features in bitstring. Returning a fitness score of 0.");
+			this.fitnessEvaluations++;
+			return 0.0;
+		}
 		
 		// Fitting model
 		OLSMultipleLinearRegression regressor = new OLSMultipleLinearRegression();
@@ -56,10 +62,18 @@ public class Problem {
 		double rSquared = 1 - (residualSumOfSquares / totalSumOfSquares);
 		rSquared = Math.max(rSquared, 0.000000001);
 		double R = Math.sqrt(rSquared);
-		double rmse = Math.sqrt(residualSumOfSquares / ysValid.length); // Root mean square error (RMSE).
+//		double rmse = Math.sqrt(residualSumOfSquares / ysValid.length); // Root mean square error (RMSE).
+		double fitness = R;
+
+		// Punishing for using many features (necessary for non-Madelon datasets)
+		if(punish){
+			double nCols = xValid[0].length;
+			fitness -= 1.0 * (nCols/bits.length);
+			this.fitnessEvaluations++; // The only case where punishment doesnt happen is when we're gathering statistics.
+//			System.out.format("Features: %.0f\tR: %.3f\tFitness: %.3f\n", nCols, R, fitness);
+		}
 		
-		this.fitnessEvaluations++;
-		return R;
+		return fitness;
 	}
 	
 	private double[][] reduceFeatures(double[][] full, boolean[] bits){
@@ -68,6 +82,10 @@ public class Problem {
 			nCols += (b.hashCode() & 0b10) >> 1;
 		}
 
+		if(nCols == 0){
+			return null;
+		}
+		
 		double[][] reduced = new double[full.length][nCols];
 		int reducedIndex = 0;
 		for(int dataPoint=0; dataPoint<full.length; dataPoint++){

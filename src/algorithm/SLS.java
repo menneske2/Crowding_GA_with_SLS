@@ -21,9 +21,6 @@ public class SLS {
 	private OptimizerConfig conf;
 	private Random rng;
 	
-	public int x = 20;
-	private int improvementsOverX = 0;
-	private int totalImprovements = 0;
 	
 	public SLS(Problem prob, OptimizerConfig conf, Random rng){
 		this.prob = prob;
@@ -32,13 +29,6 @@ public class SLS {
 		if(conf.SLS_MAX_FLIPS_IN_GREEDY == -1){
 			conf.SLS_MAX_FLIPS_IN_GREEDY = Integer.MAX_VALUE;
 		}
-	}
-	public void resetImprovementStats(){
-		improvementsOverX = 0;
-		totalImprovements = 0;
-	}
-	public int getNImprovementsOverX(){
-		return improvementsOverX;
 	}
 	
 	/**
@@ -52,17 +42,35 @@ public class SLS {
 		return gai.fitness;
 	}
 	
+	/**
+	 * Reaches local optimum 100% of the time, but very slow.
+	 * Unused as of 3/7
+	 * @param gai 
+	 */
+	public boolean[] exhaustivelyOptimize(boolean[] bits){
+		double bestFitness = prob.evaluateBitstring(bits, true);
+		while(true){
+			double newFitness = greedyStep(bits, bestFitness, true);
+			if(newFitness > bestFitness){
+				bestFitness = newFitness;
+			} else{
+				break;
+			}
+		}
+		return bits;
+	}
+	
 	private boolean[] optimize(boolean[] bits){
 		bits = Arrays.copyOf(bits, bits.length);
 		boolean[] bestBits = Arrays.copyOf(bits, bits.length);
-		double bestFitness = prob.evaluateBitstring(bits);
+		double bestFitness = prob.evaluateBitstring(bits, true);
 		
 		double newFitness = 0.0;
 		for(int loop=0; loop<conf.SLS_MAX_FLIPS; loop++){
 			if(rng.nextFloat() < conf.SLS_P_NOISY){
 				newFitness = noisyStep(bits);
 			} else{
-				newFitness = greedyStep(bits, newFitness);
+				newFitness = greedyStep(bits, newFitness, false);
 				if(newFitness == -1){
 					break; // The local optima has been found.
 				}
@@ -75,7 +83,7 @@ public class SLS {
 		return bestBits;
 	}
 	
-	private double greedyStep(boolean[] bits, double prevFitness){
+	private double greedyStep(boolean[] bits, double prevFitness, boolean exhaustive){
 		int indicesTried = 0;
 		List<Integer> unexploredIndices = new ArrayList<>();
 		for(int i=0; i<bits.length; i++){
@@ -85,7 +93,10 @@ public class SLS {
 		double bestFitness = prevFitness;
 		
 		while(true){
-			if(unexploredIndices.isEmpty() || indicesTried >= conf.SLS_MAX_FLIPS_IN_GREEDY){ // This is the local optima.
+			if(unexploredIndices.isEmpty()){
+				return -1;
+			}
+			if(!exhaustive && indicesTried >= conf.SLS_MAX_FLIPS_IN_GREEDY){ // Assume this is the local optima.
 				return -1;
 			}
 			// Randomly picking next bit to try flipping. Can be improved by picking statistically discriminatory bits first.
@@ -93,7 +104,7 @@ public class SLS {
 			unexploredIndices.remove(index);
 			
 			bits[index] = !bits[index];
-			double fitness = prob.evaluateBitstring(bits);
+			double fitness = prob.evaluateBitstring(bits, true);
 			bits[index] = !bits[index];
 			indicesTried++;
 			if(fitness > bestFitness){
@@ -103,10 +114,6 @@ public class SLS {
 					break;
 			}
 		}
-		if(indicesTried > x){
-			this.improvementsOverX++;
-		}
-		totalImprovements++;
 		bits[bestIndex] = !bits[bestIndex];
 		return bestFitness;
 	}
@@ -114,6 +121,6 @@ public class SLS {
 	private double noisyStep(boolean[] bits){
 		int index = rng.nextInt(bits.length);
 		bits[index] = !bits[index];
-		return prob.evaluateBitstring(bits);
+		return prob.evaluateBitstring(bits, true);
 	}
 }

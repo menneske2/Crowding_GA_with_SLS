@@ -59,9 +59,8 @@ public class GAUtilities {
 		return genomeSum;
 	}
 	
-	public static List<Niche> getNiches(List<GAIndividual> pop){
+	public static List<Niche> getNiches(List<GAIndividual> pop, double epsilon){
 		DistanceMeasure distanceMeasure = new JaccardDistance();
-		double epsilon = 0.15;
 		DBSCANClusterer clusterer = new DBSCANClusterer(epsilon, 0, distanceMeasure);
 		List<Cluster<GAIndividual>> clusters = clusterer.cluster(pop);
 		List<Niche> toReturn = new ArrayList<>();
