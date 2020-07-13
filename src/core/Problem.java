@@ -18,10 +18,11 @@ public class Problem {
 	private final String name;
 	public double[][] xsTrain, xsValid;
 	public double[] ysTrain, ysValid;
+	private final List<String> indexNames;
 	public int fitnessEvaluations = 0;
 	
 	
-	public Problem(String name, List<List<Float>> trainSet, List<List<Float>> validationSet){
+	public Problem(String name, List<List<Float>> trainSet, List<List<Float>> validationSet, List<String> indexNames){
 		this.name = name;
 		
 		this.ysTrain = new double[trainSet.size()];
@@ -29,6 +30,16 @@ public class Problem {
 		
 		this.ysValid = new double[validationSet.size()];
 		this.xsValid = parseDataFile(validationSet, ysValid);
+		
+		this.indexNames = indexNames;
+	}
+	
+	public String getIndexName(int index){
+		if(indexNames != null){
+			return indexNames.get(index);
+		} else{
+			return "null";
+		}
 	}
 	
 	public double evaluateBitstring(boolean[] bits, boolean punish){

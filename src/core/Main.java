@@ -48,15 +48,26 @@ public class Main extends Application{
 		File folder = new File("Testing Data");
 		for(File f : folder.listFiles()){
 			if(f.isDirectory()){
-				String prefix = f.getName().toLowerCase() + "_";
-				List<List<Float>> trainData = getNumberFile(new File(f.getPath()+"\\"+prefix+"train.data"), " ");
-				List<List<Float>> trainLabels = getNumberFile(new File(f.getPath()+"\\"+prefix+"train.labels"), " ");
-				List<List<Float>> validationData = getNumberFile(new File(f.getPath()+"\\"+prefix+"valid.data"), " ");
-				List<List<Float>> validationLabels = getNumberFile(new File(f.getPath()+"\\"+prefix+"valid.labels"), " ");
+				String prefix = f.getName().toLowerCase();
+				List<List<Float>> trainData = getNumberFile(new File(f.getPath()+"\\"+prefix+"_train.data"), " ");
+				List<List<Float>> trainLabels = getNumberFile(new File(f.getPath()+"\\"+prefix+"_train.labels"), " ");
+				List<List<Float>> validationData = getNumberFile(new File(f.getPath()+"\\"+prefix+"_valid.data"), " ");
+				List<List<Float>> validationLabels = getNumberFile(new File(f.getPath()+"\\"+prefix+"_valid.labels"), " ");
 				appendLabelsToData(trainData, trainLabels);
 				appendLabelsToData(validationData, validationLabels);
 				
-				Problem p = new Problem(f.getName(), trainData, validationData);
+				List<String> names = getStringFile(new File(f.getPath() + "\\" + prefix + ".names"));
+				
+				if(names != null){
+					List<Integer> removedFeatures = new ArrayList<>(){{
+						add(8);
+					}};
+					purgeColumns(names, removedFeatures);
+					purgeColumns(trainData, removedFeatures);
+					purgeColumns(validationData, removedFeatures);
+				}
+				
+				Problem p = new Problem(f.getName(), trainData, validationData, names);
 				problems.add(p);
 			}
 			else{
@@ -64,17 +75,33 @@ public class Main extends Application{
 				List<List<Float>> validationSet = new ArrayList<>();
 				List<List<Float>> trainingSet = splitDataset(data, validationSet);
 				
-				Problem p = new Problem(f.getName(), trainingSet, validationSet);
+				Problem p = new Problem(f.getName(), trainingSet, validationSet, null);
 				problems.add(p);
 			}
 		}
 		return problems;
 	}
 	
+	private List purgeColumns(List in, List<Integer> indices){
+		if(in.get(0).getClass() == new ArrayList().getClass()){
+			for(int i=0; i<in.size(); i++){
+				in.set(i, purgeColumns((List)in.get(i), indices));
+			}
+			return in;
+		}
+		
+		Collections.sort(indices);
+		for(int indicesIndex=indices.size()-1; indicesIndex >= 0; indicesIndex--){ // Traversing in opposite direction to avoid wrong deletion.
+			int index = indices.get(indicesIndex);
+			in.remove(index);
+		}
+		return in;
+	}
 
+	
 	private List<List<Float>> splitDataset(List<List<Float>> data, List<List<Float>> validation){
 		float splitRatio = 0.3f;
-		Random rng = new Random(42);
+		Random rng = new Random(72);
 		
 		List<List<Float>> train = new ArrayList<>(data);
 		Collections.shuffle(train, rng);
@@ -89,6 +116,23 @@ public class Main extends Application{
 		for(int i=0; i<data.size(); i++){
 			data.get(i).add(labels.get(i).get(0));
 		}
+	}
+	
+	private List<String> getStringFile(File f){
+		List<String> contents = new ArrayList<>();
+		try{
+			BufferedReader reader = new BufferedReader(new FileReader(f));
+			while(true){
+				String line = reader.readLine();
+				if(line == null)
+					break;
+				contents.add(line);
+			}
+		} catch(Exception e){
+			System.out.println(e.getMessage());
+			return null;
+		}
+		return contents;
 	}
 	
 	private List<List<Float>> getNumberFile(File f, String delimiter){

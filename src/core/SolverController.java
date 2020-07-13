@@ -141,8 +141,14 @@ public class SolverController {
 	public void registerSolution(Problem p, GAIndividual best, long timeSpent){
 		fxStart.setDisable(false);
 		fxStop.setDisable(true);
-		System.out.println("Features used: " + best.numberOfFeatures() + "/" + best.genome.length + "\tFinal solution: " + best.getGenomeAsString());
 		System.out.println("Time taken: " + (int)Math.floor(timeSpent/(1000*60)) + "m" + (timeSpent/1000)%60 + "s");
+		System.out.println("Features used: " + best.numberOfFeatures() + "/" + best.genome.length + "\tFinal solution: " + best.getGenomeAsString());
+		System.out.println("Names of features used:");
+		for(int i=0; i<best.genome.length; i++){
+			if(best.genome[i]){
+				System.out.println("F" + i + ": " + p.getIndexName(i));
+			}
+		}
 	}
 	
 	private void generateCharts(){
