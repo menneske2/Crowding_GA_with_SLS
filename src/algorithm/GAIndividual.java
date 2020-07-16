@@ -42,8 +42,8 @@ public class GAIndividual implements Comparable<GAIndividual>, Cloneable, Cluste
 	}
 	
 	public void evaluateFitness(){
-		double RMeasure = prob.evaluateBitstring(genome, true);
-		this.fitness = RMeasure;
+		double fitness = prob.evaluateBitstring(genome, true);
+		this.fitness = fitness;
 	}
 	
 

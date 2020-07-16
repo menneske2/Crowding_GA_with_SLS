@@ -19,8 +19,8 @@ import java.util.concurrent.Executors;
 public class DataHarvester {
 	
 	private final int NUM_THREADS = 4;
-	private final int PROB_INDEX = 2;
-	private final int RUNS_PER_DATAPOINT = 2;
+	private final int PROB_INDEX = 1;
+	private final int RUNS_PER_DATAPOINT = 1;
 	
 	private final List<Problem> probList;
 	private final ExecutorService threadPool;
@@ -28,7 +28,7 @@ public class DataHarvester {
 	public DataHarvester(List<Problem> probList){
 		this.probList = probList;
 		threadPool = Executors.newFixedThreadPool(NUM_THREADS);
-		Problem prob = probList.get(PROB_INDEX);
+//		Problem prob = probList.get(PROB_INDEX);
 //		harvestData(prob);
 		threadPool.shutdown();
 	}

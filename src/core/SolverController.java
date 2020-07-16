@@ -116,9 +116,9 @@ public class SolverController {
 		if(generation < 8000 || generation%10 == 9){
 			fxGenerationCounter.setText("Generation: " + (generation+1));
 			// Performance chart
-			charts.get(0).getData().get(0).getData().add(new XYChart.Data(FEs, bestFit));
-			charts.get(0).getData().get(1).getData().add(new XYChart.Data(FEs, best));
-			charts.get(0).getData().get(2).getData().add(new XYChart.Data(FEs, avg));
+			charts.get(0).getData().get(0).getData().add(new XYChart.Data(FEs, best));
+			charts.get(0).getData().get(1).getData().add(new XYChart.Data(FEs, avg));
+			charts.get(0).getData().get(2).getData().add(new XYChart.Data(FEs, bestFit));
 			// Diversity chart
 			charts.get(1).getData().get(0).getData().add(new XYChart.Data(generation, entropy));
 			charts.get(1).getData().get(1).getData().add(new XYChart.Data(generation, nNiches));
@@ -155,7 +155,7 @@ public class SolverController {
 	private void generateCharts(){
 		fxChartArea.getChildren().removeAll();
 		charts.clear();
-		charts.add(generateChart("Fitness evaluations", "R-measure (negative values set to 0)", new String[]{"Best fitness", "Best R-measure", "Average R-measure"}));
+		charts.add(generateChart("Fitness evaluations", "Accuracy (%)", new String[]{"Best success%", "Average success%", "Best fitness"}));
 		charts.add(generateChart("Generation", "Diversity", new String[]{"Entropy", "Number of niches", "Features in best"}));
 		charts.add(generateChart("Generation", "Operation probabilities", new String[]{"Crossover chance", "Mutation chance", "Crowding scaling factor"}));
 	}

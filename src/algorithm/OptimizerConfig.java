@@ -13,15 +13,15 @@ public class OptimizerConfig implements Cloneable{
 	
 	public static final int NO_SEED = -1;
 	
-	public int SEED = 14;
+	public int SEED = NO_SEED;
 	public int GENERATIONS = -1;
 	public int FITNESS_EVALUATIONS = 20000;
 	public int POPULATION_SIZE = 50;
-	public int TOURNAMENT_SIZE = 3;
+	public int TOURNAMENT_SIZE = 2;
 	public float CROSSOVER_CHANCE = 0.7f;
 	public float MUTATION_CHANCE = 0.2f;
 	public float CROWDING_SCALING_FACTOR = 0.5f;
-	public float NICHING_EPSILON = 0.1f;
+	public float NICHING_EPSILON = 0.05f;
 	public boolean PID_ENABLED = true;
 	public float PID_CONTROL_RATE = 0.02f;
 	public int ACTIVE_NICHES = 15;

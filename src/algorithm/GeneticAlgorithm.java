@@ -287,7 +287,7 @@ public class GeneticAlgorithm implements Runnable{
 		
 		// Random initialization
 		for(int person=0; person<conf.POPULATION_SIZE; person++){
-			boolean[] chromosome = new boolean[prob.xsTrain[0].length];
+			boolean[] chromosome = new boolean[prob.numFeatures];
 			for(int i=0; i<chromosome.length; i++){
 				chromosome[i] = rng.nextBoolean();
 			}

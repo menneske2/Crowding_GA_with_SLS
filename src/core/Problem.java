@@ -5,9 +5,16 @@
  */
 package core;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
+import jsat.classifiers.CategoricalData;
+import jsat.classifiers.ClassificationDataSet;
+import jsat.classifiers.Classifier;
+import jsat.classifiers.DataPoint;
+import jsat.classifiers.DataPointPair;
+import jsat.classifiers.bayesian.NaiveBayes;
+import jsat.linear.DenseVector;
+import jsat.linear.Vec;
 
 /**
  *
@@ -15,114 +22,112 @@ import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
  */
 public class Problem {
 	
-	private final String name;
-	public double[][] xsTrain, xsValid;
-	public double[] ysTrain, ysValid;
-	private final List<String> indexNames;
+	public String name;
+	private final ClassificationDataSet datasetTrain, datasetValid;
+	public final int numFeatures;
 	public int fitnessEvaluations = 0;
 	
 	
-	public Problem(String name, List<List<Float>> trainSet, List<List<Float>> validationSet, List<String> indexNames){
-		this.name = name;
-		
-		this.ysTrain = new double[trainSet.size()];
-		this.xsTrain = parseDataFile(trainSet, ysTrain);
-		
-		this.ysValid = new double[validationSet.size()];
-		this.xsValid = parseDataFile(validationSet, ysValid);
-		
-		this.indexNames = indexNames;
+	
+	public Problem(List<ClassificationDataSet> datasets){
+		this.numFeatures = datasets.get(0).getNumFeatures();
+		this.datasetTrain = datasets.get(0);
+		this.datasetValid = datasets.get(1);
 	}
 	
 	public String getIndexName(int index){
-		if(indexNames != null){
-			return indexNames.get(index);
+		int numCats = datasetTrain.getNumCategoricalVars();
+		if(index > numCats){
+			return datasetTrain.getNumericName(index - numCats);
 		} else{
-			return "null";
+			return datasetTrain.getCategoryName(index);
 		}
 	}
 	
 	public double evaluateBitstring(boolean[] bits, boolean punish){
-		double[][] xTrain = reduceFeatures(xsTrain, bits);
-		double[][] xValid = reduceFeatures(xsValid, bits);
+		this.fitnessEvaluations++;
+		ClassificationDataSet reducedTrain = reduceFeatures(datasetTrain, bits);
+		ClassificationDataSet reducedValid = reduceFeatures(datasetValid, bits);
 		
-		if(xTrain == null){
-//			System.out.println("[Problem] No features in bitstring. Returning a fitness score of 0.");
-			this.fitnessEvaluations++;
+		if(reducedTrain.getNumFeatures() == 0){
 			return 0.0;
 		}
 		
-		// Fitting model
-		OLSMultipleLinearRegression regressor = new OLSMultipleLinearRegression();
-		regressor.newSampleData(ysTrain, xTrain); // Fitting model to training data.
+		Classifier classifier = new NaiveBayes();
+		classifier.trainC(reducedTrain);
 		
-		// Calculating RMSE and R manually since the regressor doesn't support testing data without fitting to it.
-		double[] params = regressor.estimateRegressionParameters();
-		double yMean = Arrays.stream(ysValid).average().getAsDouble();
-		double totalSumOfSquares = 0.0;
-		double residualSumOfSquares = 0.0;
-		
-		for(int sample=0; sample<xValid.length; sample++){
-			double expected = params[0];
-			for(int i=1; i<params.length; i++){
-				expected += xValid[sample][i-1] * params[i];
-			}
-			totalSumOfSquares += Math.pow(ysValid[sample] - yMean, 2);
-			residualSumOfSquares += Math.pow(ysValid[sample] - expected, 2);
+		int correct = 0;
+		for(int i=0; i<reducedValid.getSampleSize(); i++){
+			DataPoint dp = reducedValid.getDataPoint(i);
+			int predict = classifier.classify(dp).mostLikely();
+			int truth = reducedValid.getDataPointCategory(i);
+			if(predict == truth)
+				correct++;
 		}
-		double rSquared = 1 - (residualSumOfSquares / totalSumOfSquares);
-		rSquared = Math.max(rSquared, 0.000000001);
-		double R = Math.sqrt(rSquared);
-//		double rmse = Math.sqrt(residualSumOfSquares / ysValid.length); // Root mean square error (RMSE).
-		double fitness = R;
-
-		// Punishing for using many features (necessary for non-Madelon datasets)
+		
+		double fitness = (double) correct / datasetValid.getSampleSize();
 		if(punish){
-			double nCols = xValid[0].length;
-			fitness -= 1.0 * (nCols/bits.length);
-			this.fitnessEvaluations++; // The only case where punishment doesnt happen is when we're gathering statistics.
-//			System.out.format("Features: %.0f\tR: %.3f\tFitness: %.3f\n", nCols, R, fitness);
+			double ratioUsed = (double) reducedTrain.getNumFeatures() / datasetTrain.getNumFeatures();
+			fitness -= 1.0 * ratioUsed;
 		}
 		
 		return fitness;
 	}
 	
-	private double[][] reduceFeatures(double[][] full, boolean[] bits){
+	private ClassificationDataSet reduceFeatures(ClassificationDataSet full, boolean[] bits){
+		// Counting features.
 		int nCols = 0;
 		for(Boolean b : bits){
 			nCols += (b.hashCode() & 0b10) >> 1;
 		}
-
-		if(nCols == 0){
-			return null;
-		}
 		
-		double[][] reduced = new double[full.length][nCols];
-		int reducedIndex = 0;
-		for(int dataPoint=0; dataPoint<full.length; dataPoint++){
-			for(int i=0; i<bits.length; i++){
+		List<DataPointPair<Integer>> reducedPoints = new ArrayList<>();
+
+		// The first n features correspond to the categorical values in the dataset, the rest are for numerical values.
+		int numCategorical = full.getNumCategoricalVars();
+		
+		List<CategoricalData> catData = new ArrayList<>();
+		CategoricalData[] fullCatData = full.getCategories();
+		for(int i=0; i<numCategorical; i++){
+			if(bits[i]){
+				catData.add(fullCatData[i]);
+			}
+		}
+		CategoricalData[] reducedCategories = catData.toArray(new CategoricalData[]{});
+		
+		for(int point=0; point<full.getSampleSize(); point++){
+			double[] newNums = new double[nCols];
+			int[] newCats = new int[reducedCategories.length];
+			
+			int iNum = 0;
+			int iCat = 0;
+			
+			DataPointPair<Integer> fullPoint = full.getDataPointPair(point);
+			DataPoint fullData = fullPoint.getDataPoint();
+			for(int i=0; i<numCategorical; i++){
 				if(bits[i]){
-					reduced[dataPoint][reducedIndex] = full[dataPoint][i];
-					reducedIndex++;
+					newCats[iCat] = fullData.getCategoricalValue(i);
+					iCat++;
 				}
 			}
-			reducedIndex = 0;
+			Vec nums = fullData.getNumericalValues();
+			for(int i=numCategorical; i<bits.length; i++){
+				if(bits[i]){
+					newNums[iNum] = nums.get(i-numCategorical);
+					iNum++;
+				}
+			}
+			
+			DataPoint newP = new DataPoint(new DenseVector(newNums), newCats, reducedCategories);
+			DataPointPair<Integer> reducedPoint = new DataPointPair<>(newP, fullPoint.getPair());
+			reducedPoints.add(reducedPoint);
 		}
-		return reduced;
-	}
-	
-	
-	private double[][] parseDataFile(List<List<Float>> data, double[] ys){
-		double[][] xs = new double[data.size()][data.get(0).size()-1];
 		
-		for(int i=0; i<data.size(); i++){
-			var line = data.get(i);
-			ys[i] = line.remove(line.size()-1);
-			for(int j=0; j<line.size(); j++)
-				xs[i][j] = line.get(j);
-		}
-		return xs;
+		ClassificationDataSet reducedSet = new ClassificationDataSet(reducedPoints, full.getPredicting());
+		
+		return reducedSet;
 	}
+	
 	
 	@Override
 	public String toString(){
