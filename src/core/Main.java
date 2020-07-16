@@ -19,6 +19,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import jsat.ARFFLoader;
+import jsat.DataSet;
+import statistics.DataHarvester;
 
 /**
  *
@@ -36,6 +39,8 @@ public class Main extends Application{
 
 		List<Problem> probList = readProblems();
 		mmc.addProblems(probList);
+		
+		DataHarvester harvest = new DataHarvester(probList);
 
         stage.setTitle("Crowding GA with SLS");
         stage.setScene(new Scene(root));
@@ -60,7 +65,7 @@ public class Main extends Application{
 				
 				if(names != null){
 					List<Integer> removedFeatures = new ArrayList<>(){{
-						add(8);
+//						add(8);
 					}};
 					purgeColumns(names, removedFeatures);
 					purgeColumns(trainData, removedFeatures);
@@ -69,6 +74,20 @@ public class Main extends Application{
 				
 				Problem p = new Problem(f.getName(), trainData, validationData, names);
 				problems.add(p);
+			}
+			else if(f.getName().equals("communities.arff")){
+//				System.out.println("ayy");
+//				DataSet dataset = ARFFLoader.loadArffFile(f);
+//				List<DataSet> splits = dataset.randomSplit(new Random(72), new double[]{0.7, 0.3});
+//				System.out.println(splits.get(0).getDataPoints().size());
+//				System.out.println(splits.get(1).getDataPoints().size());
+			}
+			else if(f.getName().equals("eucalyptus.arff")){
+				System.out.println("ayy");
+				DataSet dataset = ARFFLoader.loadArffFile(f);
+				List<DataSet> splits = dataset.randomSplit(new Random(72), new double[]{0.7, 0.3});
+				System.out.println(splits.get(0).getDataPoints().size());
+				System.out.println(splits.get(1).getDataPoints().size());
 			}
 			else{
 				List<List<Float>> data = getNumberFile(f, ",");

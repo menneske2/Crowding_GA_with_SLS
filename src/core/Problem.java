@@ -47,7 +47,7 @@ public class Problem {
 		double[][] xValid = reduceFeatures(xsValid, bits);
 		
 		if(xTrain == null){
-			System.out.println("[Problem] No features in bitstring. Returning a fitness score of 0.");
+//			System.out.println("[Problem] No features in bitstring. Returning a fitness score of 0.");
 			this.fitnessEvaluations++;
 			return 0.0;
 		}

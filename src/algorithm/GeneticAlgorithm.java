@@ -66,20 +66,22 @@ public class GeneticAlgorithm implements Runnable{
 				break;
 			}
 			
-			// Printing niche fitnesses.
+			
 			List<Niche> niches = GAUtilities.getNiches(population, conf.NICHING_EPSILON);
-			System.out.format("Number of niches: %d. Fitnesses: [", niches.size());
-			for(var niche : niches){
-				System.out.format("%.3f, ", niche.getBest().fitness);
-			}
-			System.out.println("]");
+			
+			// Printing niche fitnesses.
+//			System.out.format("Number of niches: %d. Fitnesses: [", niches.size());
+//			for(var niche : niches){
+//				System.out.format("%.3f, ", niche.getBest().fitness);
+//			}
+//			System.out.println("]");
 			
 			// Printing niche memberships.
-			String s = "Niche memberships: [";
-			for(var niche : niches){
-				s += niche.getPoints().size() + ", ";
-			}
-			System.out.println(s.substring(0, s.length()-2)+"]");
+//			String s = "Niche memberships: [";
+//			for(var niche : niches){
+//				s += niche.getPoints().size() + ", ";
+//			}
+//			System.out.println(s.substring(0, s.length()-2)+"]");
 			
 			
 			// Using PID-controller
@@ -115,6 +117,7 @@ public class GeneticAlgorithm implements Runnable{
 			// Gathering statistics and sending progress report to main client.
 			final int genCopy = generation-1; // it needs to be an effectively final variable.
 			double bestR = prob.evaluateBitstring(population.get(0).genome, false);
+			double bestFit = prob.evaluateBitstring(population.get(0).genome, true);
 			double avgR = 0;
 			for(var p : population){
 				avgR += prob.evaluateBitstring(p.genome, false);
@@ -126,9 +129,13 @@ public class GeneticAlgorithm implements Runnable{
 			float crowdingFactor = conf.CROWDING_SCALING_FACTOR;
 			
 			Platform.runLater(()->{
-				feedbackStation.progressReport(genCopy, prob.fitnessEvaluations, bestR, avg, population.get(0).numberOfFeatures(), entropy, niches.size(), 
+				feedbackStation.progressReport(genCopy, prob.fitnessEvaluations, bestFit, bestR, avg, population.get(0).numberOfFeatures(), entropy, niches.size(), 
 						conf.MUTATION_CHANCE, conf.CROSSOVER_CHANCE, crowdingFactor);
 			});
+			
+			if(entropy == 0.0){
+				break;
+			}
 		}
 
 
@@ -149,11 +156,11 @@ public class GeneticAlgorithm implements Runnable{
 				improvements[i] = sls.optimizeNiche(chosen) - pre;
 			}
 			long timeSpent = new Date().getTime() - preTime;
-			System.out.println("SLS-ing "+niches.size()+" niches took " + (int)Math.floor(timeSpent/(1000*60)) + "m" + (timeSpent/1000)%60 + "s.");
-			System.out.print("Improvements: [");
-			for(var d : improvements)
-				System.out.format("%.4f, ", d);
-			System.out.println("]");
+//			System.out.println("SLS-ing "+niches.size()+" niches took " + (int)Math.floor(timeSpent/(1000*60)) + "m" + (timeSpent/1000)%60 + "s.");
+//			System.out.print("Improvements: [");
+//			for(var d : improvements)
+//				System.out.format("%.4f, ", d);
+//			System.out.println("]");
 
 			// Committing genocide in all niches. The elite ones get 1 survivor.
 			Collections.sort(niches);
