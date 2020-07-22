@@ -7,10 +7,8 @@ package core;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -69,7 +67,9 @@ public class Main extends Application{
 		}
 		if(dataset.countMissingValues() != 0){
 			System.out.println("Found " + dataset.countMissingValues() + " missing values in " + f.getName()+". Removing all rows with missing values.");
+			int preLen = dataset.getSampleSize();
 			dataset = dataset.getMissingDropped();
+			System.out.println("Went from " + preLen + " samples to " + dataset.getSampleSize() + ".");
 		}
 		int predictIndex = dataset.getCategories().length-1;
 		List<DataSet> splits = dataset.randomSplit(new Random(72), new double[]{0.7, 0.3});

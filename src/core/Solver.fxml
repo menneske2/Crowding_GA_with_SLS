@@ -53,6 +53,11 @@
 		</HBox>
 		
 		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
+			<Label text="Elitist survivors:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
+			<TextField fx:id="fxElitism" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
+		</HBox>
+		
+		<HBox minHeight="$CONF_UNIT_HEIGHT" maxHeight="$CONF_UNIT_HEIGHT">
 			<Label text="Tournament size:" prefWidth="$CONFIG_LABEL_LENGTH" prefHeight="Infinity" alignment="center_left"/>
 			<TextField fx:id="fxTournamentSize" minWidth="$CONFIG_TEXTBOX_LENGTH" maxWidth="$CONFIG_TEXTBOX_LENGTH"/>
 		</HBox>

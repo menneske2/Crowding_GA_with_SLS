@@ -20,14 +20,14 @@ import jsat.linear.Vec;
  *
  * @author Fredrik-Oslo
  */
-public class Problem {
+public class Problem implements Cloneable{
 	
 	public String name;
-	private final ClassificationDataSet datasetTrain, datasetValid;
+	public final ClassificationDataSet datasetTrain, datasetValid;
 	public final int numFeatures;
 	public int fitnessEvaluations = 0;
 	
-	
+	public double fitnessPunishRatio = 0.5;
 	
 	public Problem(List<ClassificationDataSet> datasets){
 		this.numFeatures = datasets.get(0).getNumFeatures();
@@ -35,9 +35,20 @@ public class Problem {
 		this.datasetValid = datasets.get(1);
 	}
 	
+	@Override
+	public Problem clone(){
+		try{
+		return (Problem) super.clone();
+		} catch(Exception e){
+			e.printStackTrace();
+			System.exit(98);
+			return null;
+		}
+	}
+	
 	public String getIndexName(int index){
 		int numCats = datasetTrain.getNumCategoricalVars();
-		if(index > numCats){
+		if(index >= numCats){
 			return datasetTrain.getNumericName(index - numCats);
 		} else{
 			return datasetTrain.getCategoryName(index);
@@ -68,7 +79,7 @@ public class Problem {
 		double fitness = (double) correct / datasetValid.getSampleSize();
 		if(punish){
 			double ratioUsed = (double) reducedTrain.getNumFeatures() / datasetTrain.getNumFeatures();
-			fitness -= 1.0 * ratioUsed;
+			fitness -= fitnessPunishRatio * ratioUsed;
 		}
 		
 		return fitness;

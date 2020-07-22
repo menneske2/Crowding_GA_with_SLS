@@ -6,7 +6,6 @@
 package core;
 
 import java.util.List;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -32,7 +31,7 @@ public class MainMenuController {
 		Problem chosen = (Problem) problems.getSelectionModel().getSelectedItem();
 		if(chosen == null)
 			chosen = (Problem) problems.getItems().get(0);
-		openProblem(chosen);
+		openProblem(chosen.clone());
 	}
 
 	public void addProblems(List<Problem> probs){

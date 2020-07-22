@@ -37,6 +37,7 @@ public class SolverController {
 	@FXML TextField fxGenerations;
 	@FXML TextField fxFEs;
 	@FXML TextField fxPopSize;
+	@FXML TextField fxElitism;
 	@FXML TextField fxTournamentSize;
 	@FXML TextField fxCrossover;
 	@FXML TextField fxMutation;
@@ -121,12 +122,13 @@ public class SolverController {
 			charts.get(0).getData().get(2).getData().add(new XYChart.Data(FEs, bestFit));
 			// Diversity chart
 			charts.get(1).getData().get(0).getData().add(new XYChart.Data(generation, entropy));
-			charts.get(1).getData().get(1).getData().add(new XYChart.Data(generation, nNiches));
-			charts.get(1).getData().get(2).getData().add(new XYChart.Data(generation, featuresInBest));
+			charts.get(1).getData().get(1).getData().add(new XYChart.Data(generation, featuresInBest));
+			// Niching chart
+			charts.get(2).getData().get(0).getData().add(new XYChart.Data(generation, nNiches));
 			// Operation probability chart.
-			charts.get(2).getData().get(0).getData().add(new XYChart.Data(generation, mutaChance));
-			charts.get(2).getData().get(1).getData().add(new XYChart.Data(generation, crossChance));
-			charts.get(2).getData().get(2).getData().add(new XYChart.Data(generation, crowdingFactor));
+			charts.get(3).getData().get(0).getData().add(new XYChart.Data(generation, mutaChance));
+			charts.get(3).getData().get(1).getData().add(new XYChart.Data(generation, crossChance));
+			charts.get(3).getData().get(2).getData().add(new XYChart.Data(generation, crowdingFactor));
 			
 			fxScore.setText("Best score: " + best);
 			
@@ -144,6 +146,8 @@ public class SolverController {
 		fxStop.setDisable(true);
 		System.out.println("Time taken: " + (int)Math.floor(timeSpent/(1000*60)) + "m" + (timeSpent/1000)%60 + "s");
 		System.out.println("Features used: " + best.numberOfFeatures() + "/" + best.genome.length + "\tFinal solution: " + best.getGenomeAsString());
+		if(p.datasetTrain.getNumCategoricalVars() != 0)
+			System.out.println("Predicting feature: " + p.datasetTrain.getCategoryName(p.datasetTrain.getNumCategoricalVars()-1));
 		System.out.println("Names of features used:");
 		for(int i=0; i<best.genome.length; i++){
 			if(best.genome[i]){
@@ -156,7 +160,8 @@ public class SolverController {
 		fxChartArea.getChildren().removeAll();
 		charts.clear();
 		charts.add(generateChart("Fitness evaluations", "Accuracy (%)", new String[]{"Best success%", "Average success%", "Best fitness"}));
-		charts.add(generateChart("Generation", "Diversity", new String[]{"Entropy", "Number of niches", "Features in best"}));
+		charts.add(generateChart("Generation", "Diversity", new String[]{"Entropy", "Features in best"}));
+		charts.add(generateChart("Generation", "Niching data", new String[]{"Number of niches"}));
 		charts.add(generateChart("Generation", "Operation probabilities", new String[]{"Crossover chance", "Mutation chance", "Crowding scaling factor"}));
 	}
 	
@@ -188,6 +193,7 @@ public class SolverController {
 		fxGenerations.setText("" + conf.GENERATIONS);
 		fxFEs.setText("" + conf.FITNESS_EVALUATIONS);
 		fxPopSize.setText("" + conf.POPULATION_SIZE);
+		fxElitism.setText("" + conf.ELITIST_NICHES);
 		fxTournamentSize.setText("" + conf.TOURNAMENT_SIZE);
 		fxCrossover.setText("" + conf.CROSSOVER_CHANCE);
 		fxMutation.setText("" + conf.MUTATION_CHANCE);
@@ -212,6 +218,7 @@ public class SolverController {
 		conf.GENERATIONS = Integer.parseInt(fxGenerations.getText());
 		conf.FITNESS_EVALUATIONS = Integer.parseInt(fxFEs.getText());
 		conf.POPULATION_SIZE = Integer.parseInt(fxPopSize.getText());
+		conf.ELITIST_NICHES = Integer.parseInt(fxElitism.getText());
 		conf.TOURNAMENT_SIZE = Integer.parseInt(fxTournamentSize.getText());
 		conf.CROSSOVER_CHANCE = Float.parseFloat(fxCrossover.getText());
 		conf.NICHING_EPSILON = Float.parseFloat(fxNichingEpsilon.getText());

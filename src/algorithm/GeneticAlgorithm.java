@@ -102,7 +102,7 @@ public class GeneticAlgorithm implements Runnable{
 			// Elitist survival of the best individual in all active niches.
 			List<GAIndividual> elitist = new ArrayList<>();
 			Collections.sort(niches);
-			for(int i=0; i<Math.min(niches.size(), conf.ACTIVE_NICHES); i++){
+			for(int i=0; i<Math.min(niches.size(), conf.ELITIST_NICHES); i++){
 				elitist.add(niches.get(i).getBest().clone());
 			}
 			
@@ -235,6 +235,11 @@ public class GeneticAlgorithm implements Runnable{
 				// Bitflip mutation.
 				if(rng.nextFloat() < conf.MUTATION_CHANCE) {
 					int point = rng.nextInt(genomeLength);
+					for(int j=0; j<10; j++){
+						if(childGenomes[i][point])
+							break;
+						point = rng.nextInt(genomeLength);
+					}
 					childGenomes[i][point] = !childGenomes[i][point];
 				}
 			}

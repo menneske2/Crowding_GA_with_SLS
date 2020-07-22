@@ -43,7 +43,7 @@ public class DataHarvester {
 	
 	private void runTest(Problem prob, OptimizerConfig conf){
 		for(int i=0; i<RUNS_PER_DATAPOINT; i++){
-			Runnable tester = new AlgTester(this, prob, conf.clone());
+			Runnable tester = new AlgTester(this, prob.clone(), conf.clone());
 			threadPool.submit(tester);
 		}
 	}
