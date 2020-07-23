@@ -7,9 +7,14 @@ package core;
 
 
 import algorithm.GAIndividual;
+import algorithm.GAUtilities;
 import algorithm.GeneticAlgorithm;
+import algorithm.JaccardDistance;
+import algorithm.Niche;
 import algorithm.OptimizerConfig;
+import algorithm.TwoDimensionalMappingDistance;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -23,8 +28,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import statistics.BenchmarkVisualizer;
 
 /**
  *
@@ -141,19 +148,33 @@ public class SolverController {
 		}
 	}
 	
-	public void registerSolution(Problem p, GAIndividual best, long timeSpent){
+	public void registerSolution(Problem p, List<GAIndividual> pop, long timeSpent){
 		fxStart.setDisable(false);
 		fxStop.setDisable(true);
+		Collections.sort(pop);
+		GAIndividual best = pop.get(0);
 		System.out.println("Time taken: " + (int)Math.floor(timeSpent/(1000*60)) + "m" + (timeSpent/1000)%60 + "s");
 		System.out.println("Features used: " + best.numberOfFeatures() + "/" + best.genome.length + "\tFinal solution: " + best.getGenomeAsString());
-		if(p.datasetTrain.getNumCategoricalVars() != 0)
-			System.out.println("Predicting feature: " + p.datasetTrain.getCategoryName(p.datasetTrain.getNumCategoricalVars()-1));
-		System.out.println("Names of features used:");
-		for(int i=0; i<best.genome.length; i++){
-			if(best.genome[i]){
-				System.out.println("F" + i + ": " + p.getIndexName(i));
+		if(p.realDataset){
+			if(p.datasetTrain.getNumCategoricalVars() != 0)
+				System.out.println("Predicting feature: " + p.datasetTrain.getCategoryName(p.datasetTrain.getNumCategoricalVars()-1));
+			System.out.println("Names of features used:");
+			for(int i=0; i<best.genome.length; i++){
+				if(best.genome[i]){
+					System.out.println("F" + i + ": " + p.getIndexName(i));
+				}
 			}
 		}
+		generateVisualization(pop);
+	}
+	
+	private void generateVisualization(List<GAIndividual> pop){
+		List<boolean[]> bitstrings = new ArrayList<>();
+		for(var gai : pop)
+			bitstrings.add(gai.genome);
+		
+		Image im = BenchmarkVisualizer.getSolutionsOnHeatmap(bitstrings);
+		BenchmarkVisualizer.popupImage(im);
 	}
 	
 	private void generateCharts(){

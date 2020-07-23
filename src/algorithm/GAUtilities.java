@@ -47,6 +47,14 @@ public class GAUtilities {
 		return entropy;
 	}
 	
+	public static int countFeatures(boolean[] bits){
+		int nFeatures = 0;
+		for(Boolean b : bits){
+			nFeatures += (b.hashCode() & 0b10) >> 1;
+		}
+		return nFeatures;
+	}
+	
 	public static int[] sumGenomes(List<GAIndividual> pop){
 		int genomeLength = pop.get(0).genome.length;
 		int[] genomeSum = new int[genomeLength];
@@ -59,8 +67,7 @@ public class GAUtilities {
 		return genomeSum;
 	}
 	
-	public static List<Niche> getNiches(List<GAIndividual> pop, double epsilon){
-		DistanceMeasure distanceMeasure = new JaccardDistance();
+	public static List<Niche> getNiches(List<GAIndividual> pop, double epsilon, DistanceMeasure distanceMeasure){
 		DBSCANClusterer clusterer = new DBSCANClusterer(epsilon, 0, distanceMeasure);
 		List<Cluster<GAIndividual>> clusters = clusterer.cluster(pop);
 		List<Niche> toReturn = new ArrayList<>();

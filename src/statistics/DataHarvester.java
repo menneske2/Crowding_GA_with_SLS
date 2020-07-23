@@ -37,6 +37,7 @@ public class DataHarvester {
 		OptimizerConfig conf = new OptimizerConfig();
 		conf.SEED = OptimizerConfig.NO_SEED;
 		conf.FITNESS_EVALUATIONS = 1000;
+		prob.fitnessPunishRatio = 0.5;
 		
 		runTest(prob, conf);
 	}

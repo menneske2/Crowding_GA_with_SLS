@@ -10,6 +10,7 @@ import algorithm.GeneticAlgorithm;
 import algorithm.OptimizerConfig;
 import core.Problem;
 import core.SolverController;
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -40,8 +41,8 @@ public class AlgTester extends SolverController implements Runnable{
 	}
 	
 	@Override
-	public void registerSolution(Problem p, GAIndividual best, long timeSpent){
-		harvester.reportResults(best);
+	public void registerSolution(Problem p, List<GAIndividual> pop, long timeSpent){
+		harvester.reportResults(pop.get(0));
 	}
 	
 }

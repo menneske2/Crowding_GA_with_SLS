@@ -10,12 +10,12 @@ import core.SolverController;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import javafx.application.Platform;
+import statistics.BenchmarkVisualizer;
 
 /**
  *
@@ -67,7 +67,11 @@ public class GeneticAlgorithm implements Runnable{
 			}
 			
 			
-			List<Niche> niches = GAUtilities.getNiches(population, conf.NICHING_EPSILON);
+			List<Niche> niches = null;
+			if(prob.realDataset)
+				niches = GAUtilities.getNiches(population, conf.NICHING_EPSILON, new JaccardDistance());
+			else
+				niches = GAUtilities.getNiches(population, conf.NICHING_EPSILON, new TwoDimensionalMappingDistance());
 			
 			// Printing niche fitnesses.
 //			System.out.format("Number of niches: %d. Fitnesses: [", niches.size());
@@ -127,9 +131,10 @@ public class GeneticAlgorithm implements Runnable{
 			
 			double entropy = GAUtilities.getEntropy(population);
 			float crowdingFactor = conf.CROWDING_SCALING_FACTOR;
+			int nNiches = niches.size();
 			
 			Platform.runLater(()->{
-				feedbackStation.progressReport(genCopy, prob.fitnessEvaluations, bestFit, bestR, avg, population.get(0).numberOfFeatures(), entropy, niches.size(), 
+				feedbackStation.progressReport(genCopy, prob.fitnessEvaluations, bestFit, bestR, avg, population.get(0).numberOfFeatures(), entropy, nNiches, 
 						conf.MUTATION_CHANCE, conf.CROSSOVER_CHANCE, crowdingFactor);
 			});
 			
@@ -137,12 +142,13 @@ public class GeneticAlgorithm implements Runnable{
 				break;
 			}
 		}
+		
 
 
 		long timeTaken = new Date().getTime() - startTime.getTime();
 
 		Platform.runLater(()->{
-			feedbackStation.registerSolution(prob, population.get(0), timeTaken);
+			feedbackStation.registerSolution(prob, population, timeTaken);
 		});
 	}
 	
@@ -234,13 +240,11 @@ public class GeneticAlgorithm implements Runnable{
 			for(int i=0; i<2; i++){
 				// Bitflip mutation.
 				if(rng.nextFloat() < conf.MUTATION_CHANCE) {
-					int point = rng.nextInt(genomeLength);
 					for(int j=0; j<10; j++){
-						if(childGenomes[i][point])
-							break;
-						point = rng.nextInt(genomeLength);
+						int point = rng.nextInt(genomeLength);
+						childGenomes[i][point] = false;
 					}
-					childGenomes[i][point] = !childGenomes[i][point];
+					
 				}
 			}
 			

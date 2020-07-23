@@ -17,6 +17,8 @@ import javafx.stage.Stage;
 import jsat.ARFFLoader;
 import jsat.DataSet;
 import jsat.classifiers.ClassificationDataSet;
+import statistics.BenchmarkLoader;
+import statistics.BenchmarkVisualizer;
 import statistics.DataHarvester;
 
 /**
@@ -34,10 +36,14 @@ public class Main extends Application{
 		mmc = loader.getController();
 
 		List<Problem> probList = new ArrayList<>();
+		
+		new BenchmarkLoader().loadBenchmarkProblems(probList);
+		
 		File probFolder = new File("Testing Data");
 		readProblems(probFolder, probList, "");
 		mmc.addProblems(probList);
 		
+		BenchmarkVisualizer visualizer = new BenchmarkVisualizer();
 		DataHarvester harvest = new DataHarvester(probList);
 
         stage.setTitle("Crowding GA with SLS");
@@ -83,7 +89,7 @@ public class Main extends Application{
 			splits2.get(0).setNumericName(namesNumeric.get(i), i);
 			splits2.get(1).setNumericName(namesNumeric.get(i), i);
 		}
-		Problem p = new Problem(splits2);
+		Problem p = new Problem(splits2, -1, null);
 		return p;
 	}
 	
