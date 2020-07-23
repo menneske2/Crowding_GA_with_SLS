@@ -16,6 +16,9 @@ import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
 import javafx.stage.Stage;
 
 /**
@@ -32,14 +35,187 @@ public class BenchmarkVisualizer {
 //		displayImage(im);
 	}
 	
+	public static Image getFullyFeaturedHeatmap(Problem prob){
+		double[][] fitnessArray = generateNormalizedFitnessArray(prob, 1); // problem, degree of self-multiplication.
+		WritableImage im = createHeatMap(fitnessArray, Color.BLACK, Color.WHITE); // fitness, low color, high color.
+		drawHeightCurves(im, fitnessArray, 0.005, Color.DARKGRAY); // im, fitness, height difference between lines, color.
+		markLocalOptima(im, fitnessArray, 10, 1, Color.BLUE); // im, fitness, detection radius, draw radius, color.
+		markGlobalOptima(im, fitnessArray, 2, Color.DARKORANGE); // im, fitness, drawRadius, color.
+		
+		return im;
+	}
+	
 	public static Image getSolutionsOnHeatmap(Image heatMap, List<boolean[]> solutions){
 		WritableImage copy = copyImage(heatMap);
 		
 		for(var bitstring : solutions){
-			placeOnMap(copy, bitstring);
+			placeBitsOnMap(copy, bitstring, 3, Color.RED); // im, bits, drawRadius, color
 		}
 		return copy;
 	}
+	
+	
+	private static void markGlobalOptima(WritableImage im, double[][] fArray, int drawRadius, Color c){
+		double highest = 0;
+		for(int x=0; x<fArray.length; x++){
+			for(int y=0; y<fArray[0].length; y++){
+				highest = Math.max(highest, fArray[x][y]);
+			}
+		}
+		PixelWriter pw = im.getPixelWriter();
+		for(int x=0; x<fArray.length; x++){
+			for(int y=0; y<fArray[0].length; y++){
+				if(fArray[x][y] == highest){
+					for(int x2=x-drawRadius; x2<=x+drawRadius; x2++){
+						for(int y2=y-drawRadius; y2<=y+drawRadius; y2++){
+							if(x2<0 || x2>=im.getWidth() || y2<0 || y2>=im.getHeight())
+								continue;
+							pw.setColor(x2, y2, c);
+						}
+					}
+				}
+			}
+		}
+		
+	}
+	
+	private static void markLocalOptima(WritableImage im, double[][] fArray, int detectRadius, int drawRadius, Color c){
+		PixelWriter pw = im.getPixelWriter();
+		
+		for(int x=0; x<im.getWidth(); x++){
+			for(int y=0; y<im.getHeight(); y++){
+				double val = fArray[x][y];
+				boolean isOptima = true;
+				// Left/right
+				for(int x2=x-detectRadius; x2<x+detectRadius; x2++){
+					if(x2<0 || x2>im.getWidth()-1)
+						continue;
+					if(fArray[x2][y] > val){
+						isOptima = false;
+						break;
+					}
+				}
+				// Up/down
+				for(int y2=y-detectRadius; y2<y+detectRadius; y2++){
+					if(y2<0 || y2>im.getHeight()-1)
+						continue;
+					if(fArray[x][y2] > val){
+						isOptima = false;
+						break;
+					}
+				}
+				// Diagonal 1
+				for(int i=0; i<detectRadius*2; i++){
+					int x2=x-detectRadius + i;
+					int y2=y-detectRadius + i;
+					if(x2<0 || x2>im.getWidth()-1 || y2<0 || y2>im.getHeight()-1)
+							continue;
+					if(fArray[x2][y2] > val){
+						isOptima = false;
+						break;
+					}
+				}
+				// Diagonal 2
+				for(int i=0; i<detectRadius*2; i++){
+					int x2=x-detectRadius + i;
+					int y2=y+detectRadius - i;
+					if(x2<0 || x2>im.getWidth()-1 || y2<0 || y2>im.getHeight()-1)
+							continue;
+					if(fArray[x2][y2] > val){
+						isOptima = false;
+						break;
+					}
+				}
+				
+				if(!isOptima) continue;
+				for(int x2=x-drawRadius; x2<=x+drawRadius; x2++){
+					for(int y2=y-drawRadius; y2<=y+drawRadius; y2++){
+						if(x2<0 || x2>im.getWidth()-1 || y2<0 || y2>im.getHeight()-1)
+							continue;
+						pw.setColor(x2, y2, c);
+					}
+				}
+			}
+		}
+	}
+	
+	
+	private static void placeBitsOnMap(WritableImage im, boolean[] bits, int radius, Color c){
+		BigInteger[] partitions = BenchmarkLoader.partitionBitstring(bits, 2);
+		double[] normalized = BenchmarkLoader.normalize(partitions, bits.length/2, 0, (int)im.getWidth()-1);
+		int locX = (int)Math.round(normalized[0]);
+		int locY = (int)Math.round(normalized[1]);
+		
+		PixelWriter pw = im.getPixelWriter();
+		for(int x=0; x<im.getWidth(); x++){
+			for(int y=0; y<im.getHeight(); y++){
+//				if(Math.abs(locX-x) + Math.abs(locY-y) <= radius){ // diamond shape.
+//					pw.setColor(x, y, c);
+//				}
+				if(Math.sqrt(Math.pow(locX-x,2) + Math.pow(locY-y,2)) <= radius){
+					pw.setColor(x, y, c);
+				}
+			}
+		}
+	}
+	
+	private static void drawHeightCurves(WritableImage im, double[][] fitnessArray, double step, Color c){
+		PixelWriter pw = im.getPixelWriter();
+		for(int x=0; x<im.getWidth(); x++){
+			for(int y=0; y<im.getHeight(); y++){
+				double f = fitnessArray[x][y];
+				if(f%step < 0.001){
+					pw.setColor(x, y, c);
+				}
+			}
+		}
+	}
+	
+	private static WritableImage createHeatMap(double[][] fitArray, Color lowEnd, Color highEnd){
+		int axisLength = fitArray.length;
+		WritableImage wi = new WritableImage(axisLength, axisLength);
+		PixelWriter pw = wi.getPixelWriter();
+		
+		for(int x=0; x<axisLength; x++){
+			for(int y=0; y<axisLength; y++){
+				Color c = lowEnd.interpolate(highEnd, fitArray[x][y]);
+				pw.setColor(x, y, c);
+			}
+		}
+		
+		return wi;
+	}
+	
+	private static double[][] generateNormalizedFitnessArray(Problem prob, int degree){
+		BenchmarkLoader loader = new BenchmarkLoader();
+		prob = loader.loadByName(prob.name, 18);
+		
+		int axisLength = (int) Math.pow(2, prob.numFeatures/2);
+		
+		double lowest = Double.POSITIVE_INFINITY;
+		double highest = Double.NEGATIVE_INFINITY;
+		double[][] fitnesses = new double[axisLength][axisLength];
+		for(int x=0; x<axisLength; x++){
+			for(int y=0; y<axisLength; y++){
+				boolean[] bits = coordsToBoolArray(x, y, prob.numFeatures);
+				double fitness = prob.evaluateBitstring(bits, false);
+				fitnesses[x][y] = fitness;
+				highest = Math.max(highest, fitness);
+				lowest = Math.min(lowest, fitness);
+			}
+		}
+		double[][] normalized = new double[axisLength][axisLength];
+		for(int x=0; x<axisLength; x++){
+			for(int y=0; y<axisLength; y++){
+				double fitness = fitnesses[x][y];
+				double normVal = normalize(fitness, lowest, highest);
+				normVal = Math.pow(normVal, degree);
+				normalized[x][y] = normVal;
+			}
+		}
+		return normalized;
+	}
+	
 	
 	private static WritableImage copyImage(Image orig){
 		WritableImage copy = new WritableImage((int)orig.getWidth(), (int)orig.getHeight());
@@ -62,88 +238,6 @@ public class BenchmarkVisualizer {
 		stage.setScene(scene);
 		stage.setTitle("Heatmap");
 		stage.show();
-	}
-	
-	public static Image getFullyFeaturedHeatmap(Problem prob){
-		WritableImage im = createHeatMap(prob);
-		imposeLines(im);
-		
-		return im;
-	}
-	
-	private static void placeOnMap(WritableImage im, boolean[] bits){
-		BigInteger[] partitions = BenchmarkLoader.partitionBitstring(bits, 2);
-		double[] normalized = BenchmarkLoader.normalize(partitions, bits.length/2, 0, (int)im.getWidth());
-		int locX = (int)Math.round(normalized[0]);
-		int locY = (int)Math.round(normalized[1]);
-		
-		int radius = 2;
-		PixelWriter pw = im.getPixelWriter();
-		for(int x=0; x<im.getWidth(); x++){
-			for(int y=0; y<im.getHeight(); y++){
-				if(Math.abs(locX-x) + Math.abs(locY-y) <= radius){
-					pw.setColor(x, y, Color.RED);
-				}
-			}
-		}
-	}
-	
-	private static WritableImage imposeLines(WritableImage im){
-		PixelReader pr = im.getPixelReader();
-		PixelWriter pw = im.getPixelWriter();
-		for(int x=0; x<im.getWidth()-1; x++){
-			for(int y=0; y<im.getHeight()-1; y++){
-				double val = pr.getColor(x, y).getBrightness();
-				double neighbourVal = pr.getColor(x+1, y+1).getBrightness();
-				int down1 = 0, down2 = 0;
-				double step = 0.01;
-				while(val>step){
-					val -= step;
-					down1++;
-				}
-				while(neighbourVal>step){
-					neighbourVal -= step;
-					down2++;
-				}
-				if(down1 != down2){
-					pw.setColor(x, y, Color.GOLD);
-				}
-			}
-		}
-		return im;
-	}
-	
-	private static WritableImage createHeatMap(Problem prob){
-		BenchmarkLoader loader = new BenchmarkLoader();
-		prob = loader.loadByName(prob.name, 18);
-		
-		int axisLength = (int) Math.pow(2, prob.numFeatures/2);
-		WritableImage wi = new WritableImage(axisLength, axisLength);
-		PixelWriter pw = wi.getPixelWriter();
-		
-		double lowest = Double.POSITIVE_INFINITY;
-		double highest = Double.NEGATIVE_INFINITY;
-		double[][] fitnesses = new double[axisLength][axisLength];
-		for(int x=0; x<axisLength; x++){
-			for(int y=0; y<axisLength; y++){
-				boolean[] bits = coordsToBoolArray(x, y, prob.numFeatures);
-				double fitness = prob.evaluateBitstring(bits, false);
-				fitnesses[x][y] = fitness;
-				highest = Math.max(highest, fitness);
-				lowest = Math.min(lowest, fitness);
-			}
-		}
-		
-		for(int x=0; x<axisLength; x++){
-			for(int y=0; y<axisLength; y++){
-				double fitness = fitnesses[x][y];
-				double normalized = normalize(fitness, lowest, highest);
-				Color c = Color.color(normalized, normalized, normalized);
-				pw.setColor(x, y, c);
-			}
-		}
-		
-		return wi;
 	}
 	
 	// Normalizes to values in the range [0, 1]

@@ -114,6 +114,11 @@ public class SolverController {
 
 	@FXML
 	public void solveProblem(ActionEvent e){
+		for(int i=album.size()-1; i>0; i--){
+			album.remove(i);
+		}
+		fxImgScrollbar.setMax(album.size());
+		this.setAlbumIndex(0);
 		
 		for(var chart : charts){
 			for(var series : chart.getData()){

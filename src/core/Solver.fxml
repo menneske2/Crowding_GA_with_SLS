@@ -153,6 +153,10 @@
 	<VBox fx:id="fxChartArea" prefHeight="Infinity" minWidth="$MAIN_WIDTH" maxWidth="$MAIN_WIDTH">
 	</VBox>
 	
+	
+	<!--======================================== MISC AREA ========================================-->
+	
+	
 	<VBox fx:id="fxMiscArea" spacing="10" prefHeight="Infinity" minWidth="$SECONDARY_COLUMN_WIDTH" maxWidth="$SECONDARY_COLUMN_WIDTH" alignment="center">
 		<VBox spacing="0" minWidth="$SECONDARY_COLUMN_WIDTH" maxWidth="$SECONDARY_COLUMN_WIDTH" alignment="center">
 			<ImageView fx:id="fxImage"/>
@@ -163,5 +167,11 @@
 			<Button text="Next" onAction="#albumNext"/>
 		</HBox>
 		<Label fx:id="fxImageGeneration"/>
+		<Label text="Legend:"/>
+		<Label text="Red: candidate solution"/>
+		<Label text="Orange: global optima"/>
+		<Label text="Blue: local optima"/>
+		<Label text="Wide height-lines indicate a flat hill."/>
+		<Label text="Brighter background colour means higher fitness."/>
 	</VBox>
 </HBox>

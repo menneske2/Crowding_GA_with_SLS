@@ -239,7 +239,7 @@ public class GeneticAlgorithm implements Runnable{
 			
 			
 			for(int i=0; i<2; i++){
-				// Bitflip mutation.
+				// "Turn off 10 random features"-mutation.
 				if(rng.nextFloat() < conf.MUTATION_CHANCE) {
 					for(int j=0; j<10; j++){
 						int point = rng.nextInt(genomeLength);
