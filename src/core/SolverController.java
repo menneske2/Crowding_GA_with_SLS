@@ -7,17 +7,15 @@ package core;
 
 
 import algorithm.GAIndividual;
-import algorithm.GAUtilities;
 import algorithm.GeneticAlgorithm;
-import algorithm.JaccardDistance;
-import algorithm.Niche;
 import algorithm.OptimizerConfig;
-import algorithm.TwoDimensionalMappingDistance;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.chart.Axis;
@@ -27,8 +25,10 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import statistics.BenchmarkVisualizer;
@@ -69,6 +69,13 @@ public class SolverController {
 	@FXML Label fxScore;
 	
 	@FXML VBox fxChartArea;
+	
+	@FXML ImageView fxImage;
+	@FXML ScrollBar fxImgScrollbar;
+	@FXML Label fxImageGeneration;
+	Image heatMap = null;
+	List<Image> album;
+	int albumIndex = 0;
 
 	
 	private List<LineChart<Number, Number>> charts;
@@ -82,11 +89,27 @@ public class SolverController {
 		loadConfig();
 		fxStop.setDisable(true);
 		charts = new ArrayList<>();
+		
+		album = new ArrayList<>();
+		fxImgScrollbar.setMin(0);
+		fxImgScrollbar.setMax(0);
+		fxImgScrollbar.setBlockIncrement(1);
+		fxImgScrollbar.valueProperty().addListener(new ChangeListener<Number>(){
+			@Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                onScrollbar(newValue);
+            }
+		});
 	}
 
 	public void setProblem(Problem p){
 		prob = p;
 		generateCharts();
+		if(!p.realDataset){
+			heatMap = BenchmarkVisualizer.getFullyFeaturedHeatmap(prob);
+			album.add(heatMap);
+			fxImage.setImage(heatMap);
+		}
 	}
 
 	@FXML
@@ -119,10 +142,14 @@ public class SolverController {
 		this.updateConfig();
 	}
 	
-	public void progressReport(int generation, int FEs, double bestFit, double best, double avg, int featuresInBest, double entropy, double nNiches, 
+	public void progressReport(int generation, int FEs, List<GAIndividual> pop, double best, double avg, double entropy, double nNiches, 
 			double mutaChance, double crossChance, double crowdingFactor){
 		if(generation < 8000 || generation%10 == 9){
+			Collections.sort(pop);
+			double bestFit = pop.get(0).fitness;
+			int featuresInBest = pop.get(0).numberOfFeatures();
 			fxGenerationCounter.setText("Generation: " + (generation+1));
+			fxScore.setText("Best score: " + best);
 			// Performance chart
 			charts.get(0).getData().get(0).getData().add(new XYChart.Data(FEs, best));
 			charts.get(0).getData().get(1).getData().add(new XYChart.Data(FEs, avg));
@@ -137,14 +164,9 @@ public class SolverController {
 			charts.get(3).getData().get(1).getData().add(new XYChart.Data(generation, crossChance));
 			charts.get(3).getData().get(2).getData().add(new XYChart.Data(generation, crowdingFactor));
 			
-			fxScore.setText("Best score: " + best);
 			
-//			clusterChart.getData().get(0).getData().clear();
-//			List<XYChart.Data<Number, Number>> temp = new ArrayList<>();
-//			for(int i=0; i<JEvo.size(); i++){
-//				temp.add(new XYChart.Data(i, JEvo.get(i)));
-//			}
-//			clusterChart.getData().get(0).getData().addAll(temp);
+			// Mucking about with images.
+			generateVisualization(pop);
 		}
 	}
 	
@@ -165,16 +187,53 @@ public class SolverController {
 				}
 			}
 		}
-		generateVisualization(pop);
 	}
 	
 	private void generateVisualization(List<GAIndividual> pop){
 		List<boolean[]> bitstrings = new ArrayList<>();
 		for(var gai : pop)
 			bitstrings.add(gai.genome);
-		
-		Image im = BenchmarkVisualizer.getSolutionsOnHeatmap(bitstrings);
-		BenchmarkVisualizer.popupImage(im);
+		Image im = BenchmarkVisualizer.getSolutionsOnHeatmap(heatMap, bitstrings);
+		album.add(im);
+		fxImgScrollbar.setMax(album.size()-1);
+		fxImgScrollbar.setValue(album.size()-1);
+		setAlbumIndex(album.size()-1);
+	}
+	
+	private void setAlbumIndex(int i){
+		albumIndex = i;
+		fxImgScrollbar.setValue(i);
+		fxImage.setImage(album.get(i));
+		switch (i) {
+			case 0:
+				fxImageGeneration.setText("Function heatmap");
+				break;
+			case 1:
+				fxImageGeneration.setText("Generation 0 (initialization)");
+				break;
+			default:
+				fxImageGeneration.setText("Generation " + (i-1));
+				break;
+		}
+	}
+	
+	@FXML
+	private void albumPrev(ActionEvent e){
+		if(albumIndex-1 < 0)
+			setAlbumIndex(album.size()-1);
+		else
+			setAlbumIndex(albumIndex-1);
+	}
+	
+	@FXML
+	private void albumNext(ActionEvent e){
+		setAlbumIndex((albumIndex+1)%album.size());
+	}
+	
+	@FXML
+	private void onScrollbar(Number num){
+		int index = num.intValue();
+		setAlbumIndex(index);
 	}
 	
 	private void generateCharts(){

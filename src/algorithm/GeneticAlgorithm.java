@@ -53,6 +53,15 @@ public class GeneticAlgorithm implements Runnable{
 		initPopulation();
 		
 		int generation = 0;
+		
+		// Sending initialization statistics.
+		List<Niche> nichInit;
+		if(prob.realDataset)
+			nichInit = GAUtilities.getNiches(population, conf.NICHING_EPSILON, new JaccardDistance());
+		else
+			nichInit = GAUtilities.getNiches(population, conf.NICHING_EPSILON, new TwoDimensionalMappingDistance());
+		sendProgressReport(generation, nichInit);
+		
 		while(true){
 			// Termination criterias
 			if(!comsChannel.isEmpty()){ // stop-button implementation.
@@ -72,20 +81,6 @@ public class GeneticAlgorithm implements Runnable{
 				niches = GAUtilities.getNiches(population, conf.NICHING_EPSILON, new JaccardDistance());
 			else
 				niches = GAUtilities.getNiches(population, conf.NICHING_EPSILON, new TwoDimensionalMappingDistance());
-			
-			// Printing niche fitnesses.
-//			System.out.format("Number of niches: %d. Fitnesses: [", niches.size());
-//			for(var niche : niches){
-//				System.out.format("%.3f, ", niche.getBest().fitness);
-//			}
-//			System.out.println("]");
-			
-			// Printing niche memberships.
-//			String s = "Niche memberships: [";
-//			for(var niche : niches){
-//				s += niche.getPoints().size() + ", ";
-//			}
-//			System.out.println(s.substring(0, s.length()-2)+"]");
 			
 			
 			// Using PID-controller
@@ -117,39 +112,45 @@ public class GeneticAlgorithm implements Runnable{
 			
 			generation++;
 			
-			
 			// Gathering statistics and sending progress report to main client.
-			final int genCopy = generation-1; // it needs to be an effectively final variable.
-			double bestR = prob.evaluateBitstring(population.get(0).genome, false);
-			double bestFit = prob.evaluateBitstring(population.get(0).genome, true);
-			double avgR = 0;
-			for(var p : population){
-				avgR += prob.evaluateBitstring(p.genome, false);
-			}
-			avgR /= population.size();
-			final double avg = avgR;
-			
-			double entropy = GAUtilities.getEntropy(population);
-			float crowdingFactor = conf.CROWDING_SCALING_FACTOR;
-			int nNiches = niches.size();
-			
-			Platform.runLater(()->{
-				feedbackStation.progressReport(genCopy, prob.fitnessEvaluations, bestFit, bestR, avg, population.get(0).numberOfFeatures(), entropy, nNiches, 
-						conf.MUTATION_CHANCE, conf.CROSSOVER_CHANCE, crowdingFactor);
-			});
-			
+			double entropy = sendProgressReport(generation, niches);
 			if(entropy == 0.0){
 				break;
 			}
+			
+			
 		}
 		
-
 
 		long timeTaken = new Date().getTime() - startTime.getTime();
 
 		Platform.runLater(()->{
 			feedbackStation.registerSolution(prob, population, timeTaken);
 		});
+	}
+	
+	private double sendProgressReport(int generation, List<Niche> niches){
+		final int genCopy = generation; // it needs to be an effectively final variable.
+		double bestR = prob.evaluateBitstring(population.get(0).genome, false);
+		double bestFit = prob.evaluateBitstring(population.get(0).genome, true);
+		double avgR = 0;
+		for(var p : population){
+			avgR += prob.evaluateBitstring(p.genome, false);
+		}
+		avgR /= population.size();
+		final double avg = avgR;
+
+		double entropy = GAUtilities.getEntropy(population);
+		float crowdingFactor = conf.CROWDING_SCALING_FACTOR;
+		int nNiches = niches.size();
+
+		List<GAIndividual> popCopy = new ArrayList<>(population);
+
+		Platform.runLater(()->{
+			feedbackStation.progressReport(genCopy, prob.fitnessEvaluations, popCopy , bestR, avg, entropy, nNiches, 
+					conf.MUTATION_CHANCE, conf.CROSSOVER_CHANCE, crowdingFactor);
+		});
+		return entropy;
 	}
 	
 	private void SLSPurge(List<Niche> niches){

@@ -16,11 +16,20 @@ import java.util.List;
 public class BenchmarkLoader {
 	
 	public void loadBenchmarkProblems(List<Problem> probList){
-		probList.add(loadF1("Benchmark function F1", 64));
+		probList.add(loadF1(64));
 	}
 	
-	public Problem loadF1(String name, int bitLength){
-		Problem f1 = new Problem(null, bitLength, bits -> {
+	public Problem loadByName(String name, int bitLength){
+		switch(name){
+			case "F1":
+				return loadF1(bitLength);
+		}
+		System.out.println("[BenchmarkLoader] Problem " + name + " not found.");
+		return null;
+	}
+	
+	public Problem loadF1(int bitLength){
+		Problem prob = new Problem(null, bitLength, bits -> {
 			BigInteger[] axesBig = partitionBitstring(bits, 2);
 			double[] axes = normalize(axesBig, bitLength/2, -100, 100);
 			
@@ -43,8 +52,8 @@ public class BenchmarkLoader {
 			total += 200*axes.length;
 			return -total; // minus because its a minimization problem. todo: add the lowest value here so that it goes from 0 to best.
 		});
-		f1.name = name;
-		return f1;
+		prob.name = "F1";
+		return prob;
 	}
 	
 	public static double[] normalize(BigInteger[] in, int maxBits, int floor, int ceiling){

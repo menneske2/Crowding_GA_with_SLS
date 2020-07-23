@@ -32,32 +32,25 @@ public class BenchmarkVisualizer {
 //		displayImage(im);
 	}
 	
-	public static Image getSolutionsOnHeatmap(List<boolean[]> solutions){
-		System.out.println("number of niches: " + solutions.size());
-		int equals = 0;
-		for(int i=0; i<solutions.size(); i++){
-			boolean[] OG = solutions.get(i);
-			for(int j=i+1; j<solutions.size(); j++){
-				boolean[] other = solutions.get(j);
-				boolean equal = true;
-				for(int k=0; k<OG.length; k++){
-					if(OG[k] != other[k]){
-						equal = false;
-						break;
-					}
-				}
-				if(equal)
-					equals++;
+	public static Image getSolutionsOnHeatmap(Image heatMap, List<boolean[]> solutions){
+		WritableImage copy = copyImage(heatMap);
+		
+		for(var bitstring : solutions){
+			placeOnMap(copy, bitstring);
+		}
+		return copy;
+	}
+	
+	private static WritableImage copyImage(Image orig){
+		WritableImage copy = new WritableImage((int)orig.getWidth(), (int)orig.getHeight());
+		PixelReader pr = orig.getPixelReader();
+		PixelWriter pw = copy.getPixelWriter();
+		for(int x=0; x<orig.getWidth(); x++){
+			for(int y=0; y<orig.getHeight(); y++){
+				pw.setColor(x, y, pr.getColor(x, y));
 			}
 		}
-		System.out.println("Equals: " + equals);
-		BenchmarkLoader loader = new BenchmarkLoader();
-		WritableImage im = createHeatMap(loader.loadF1("F1", 18)); // 18 bits corresponds to 2^9 = 512 pixels per axis.
-		imposeLines(im);
-		for(var bitstring : solutions){
-			placeOnMap(im, bitstring);
-		}
-		return im;
+		return copy;
 	}
 	
 	public static void popupImage(Image im){
@@ -69,6 +62,13 @@ public class BenchmarkVisualizer {
 		stage.setScene(scene);
 		stage.setTitle("Heatmap");
 		stage.show();
+	}
+	
+	public static Image getFullyFeaturedHeatmap(Problem prob){
+		WritableImage im = createHeatMap(prob);
+		imposeLines(im);
+		
+		return im;
 	}
 	
 	private static void placeOnMap(WritableImage im, boolean[] bits){
@@ -114,6 +114,9 @@ public class BenchmarkVisualizer {
 	}
 	
 	private static WritableImage createHeatMap(Problem prob){
+		BenchmarkLoader loader = new BenchmarkLoader();
+		prob = loader.loadByName(prob.name, 18);
+		
 		int axisLength = (int) Math.pow(2, prob.numFeatures/2);
 		WritableImage wi = new WritableImage(axisLength, axisLength);
 		PixelWriter pw = wi.getPixelWriter();

@@ -43,7 +43,6 @@ public class Main extends Application{
 		readProblems(probFolder, probList, "");
 		mmc.addProblems(probList);
 		
-		BenchmarkVisualizer visualizer = new BenchmarkVisualizer();
 		DataHarvester harvest = new DataHarvester(probList);
 
         stage.setTitle("Crowding GA with SLS");

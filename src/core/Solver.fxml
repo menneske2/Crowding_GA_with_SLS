@@ -10,13 +10,14 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.control.ScrollBar?>
 
 <?import javafx.scene.image.ImageView?>
 <?import java.lang.Double?>
 
 
 
-<HBox maxHeight="800.0" prefWidth="1000.0" spacing="50" xmlns:fx="http://javafx.com/fxml/1" fx:controller="core.SolverController">
+<HBox maxHeight="800.0" prefWidth="1412.0" spacing="50" xmlns:fx="http://javafx.com/fxml/1" fx:controller="core.SolverController">
 
 	<fx:define>
 		<Double fx:id="CONF_WIDTH" fx:value="200"/>
@@ -24,10 +25,9 @@
 		<Double fx:id="CONFIG_LABEL_LENGTH" fx:value="150"/>
 		<Double fx:id="CONFIG_TEXTBOX_LENGTH" fx:value="50"/>
 
-		<Double fx:id="MAIN_WIDTH" fx:value="800"/>
+		<Double fx:id="MAIN_WIDTH" fx:value="700"/>
 		<Double fx:id="CHART_HEIGHT" fx:value="300"/>
-		
-		<ToggleGroup fx:id="fxOptimizerSelection"/>
+		<Double fx:id="SECONDARY_COLUMN_WIDTH" fx:value="512"/>
 	</fx:define>
 
 	<VBox prefHeight="Infinity" prefWidth="$CONF_WIDTH" spacing="15"> <!-- Configuration -->
@@ -137,7 +137,7 @@
 		
 
 		<!--======================================== UTILITIES ========================================-->
-		<Button fx:id="fxStart" text="Run" onAction="#solveProblem" minWidth="$CONF_WIDTH" maxWidth="$CONF_WIDTH" alignment="center"/>
+		<Button fx:id="fxStart" text="Run" onAction="#solveProblem" defaultButton="true" minWidth="$CONF_WIDTH" maxWidth="$CONF_WIDTH" alignment="center"/>
 		<Button fx:id="fxUpdate" text="Update GA" onAction="#updateGA" minWidth="$CONF_WIDTH" maxWidth="$CONF_WIDTH" alignment="center"/>
 		<Button fx:id="fxStop" text="Stop" onAction="#stopProblem" minWidth="$CONF_WIDTH" maxWidth="$CONF_WIDTH" alignment="center"/>
 		<Label fx:id="fxGenerationCounter" text="Generations completed: "/>
@@ -147,10 +147,21 @@
 
 
 
-	<!--======================================== DONE WITH CONFIG ========================================-->
+	<!--======================================== CHART AREA ========================================-->
 
 
 	<VBox fx:id="fxChartArea" prefHeight="Infinity" minWidth="$MAIN_WIDTH" maxWidth="$MAIN_WIDTH">
-
+	</VBox>
+	
+	<VBox fx:id="fxMiscArea" spacing="10" prefHeight="Infinity" minWidth="$SECONDARY_COLUMN_WIDTH" maxWidth="$SECONDARY_COLUMN_WIDTH" alignment="center">
+		<VBox spacing="0" minWidth="$SECONDARY_COLUMN_WIDTH" maxWidth="$SECONDARY_COLUMN_WIDTH" alignment="center">
+			<ImageView fx:id="fxImage"/>
+			<ScrollBar fx:id="fxImgScrollbar" orientation="horizontal" minHeight="20" visibleAmount="1"/>
+		</VBox>
+		<HBox minWidth="$SECONDARY_COLUMN_WIDTH" maxWidth="$SECONDARY_COLUMN_WIDTH" alignment="center" spacing="15">
+			<Button text="Previous" onAction="#albumPrev"/>
+			<Button text="Next" onAction="#albumNext"/>
+		</HBox>
+		<Label fx:id="fxImageGeneration"/>
 	</VBox>
 </HBox>

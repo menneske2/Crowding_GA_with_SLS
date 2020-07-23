@@ -34,15 +34,15 @@ public class AlgTester extends SolverController implements Runnable{
 		optimizer.run();
 	}
 	
-	@Override
-	public void progressReport(int generation, int FEs, double bestFit, double best, double avg, int featuresInBest, double entropy, double nNiches, 
-			double mutaChance, double crossChance, double crowdingFactor){
-		
-	}
-	
-	@Override
-	public void registerSolution(Problem p, List<GAIndividual> pop, long timeSpent){
-		harvester.reportResults(pop.get(0));
-	}
+//	@Override
+//	public void progressReport(int generation, int FEs, double bestFit, double best, double avg, int featuresInBest, double entropy, double nNiches, 
+//			double mutaChance, double crossChance, double crowdingFactor){
+//		
+//	}
+//	
+//	@Override
+//	public void registerSolution(Problem p, List<GAIndividual> pop, long timeSpent){
+//		harvester.reportResults(pop.get(0));
+//	}
 	
 }
