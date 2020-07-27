@@ -59,7 +59,7 @@ public class GeneticAlgorithm implements Runnable{
 		if(prob.realDataset)
 			nichInit = GAUtilities.getNiches(population, conf.NICHING_EPSILON, new JaccardDistance());
 		else
-			nichInit = GAUtilities.getNiches(population, conf.NICHING_EPSILON, new TwoDimensionalMappingDistance());
+			nichInit = GAUtilities.getNiches(population, conf.NICHING_EPSILON, new NDimensionalMappingDistance(prob.dimensionality));
 		sendProgressReport(generation, nichInit);
 		
 		while(true){
@@ -80,7 +80,7 @@ public class GeneticAlgorithm implements Runnable{
 			if(prob.realDataset)
 				niches = GAUtilities.getNiches(population, conf.NICHING_EPSILON, new JaccardDistance());
 			else
-				niches = GAUtilities.getNiches(population, conf.NICHING_EPSILON, new TwoDimensionalMappingDistance());
+				niches = GAUtilities.getNiches(population, conf.NICHING_EPSILON, new NDimensionalMappingDistance(prob.dimensionality));
 			
 			
 			// Using PID-controller

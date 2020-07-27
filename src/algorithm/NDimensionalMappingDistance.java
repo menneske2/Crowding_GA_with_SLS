@@ -8,14 +8,19 @@ package algorithm;
 import java.math.BigInteger;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
-import org.apache.commons.math3.ml.distance.EuclideanDistance;
 import statistics.BenchmarkLoader;
 
 /**
  *
  * @author Fredrik-Oslo
  */
-public class TwoDimensionalMappingDistance implements DistanceMeasure{
+public class NDimensionalMappingDistance implements DistanceMeasure{
+	
+	private final int dims;
+	
+	public NDimensionalMappingDistance(int dimensionality){
+		dims = dimensionality;
+	}
 
 	@Override
 	public double compute(double[] ind1, double[] ind2) throws DimensionMismatchException {
@@ -24,13 +29,21 @@ public class TwoDimensionalMappingDistance implements DistanceMeasure{
 			bitstrings[0][i] = ind1[i] == 1;
 			bitstrings[1][i] = ind2[i] == 1;
 		}
-		double[][] positions = new double[2][2];
+		double[][] positions = new double[2][dims];
 		for(int i=0; i<bitstrings.length; i++){
-			BigInteger[] partitioned = BenchmarkLoader.partitionBitstring(bitstrings[i], 2);
-			positions[i] = BenchmarkLoader.normalize(partitioned, ind1.length/2, 0, 1);
+			BigInteger[] partitioned = BenchmarkLoader.partitionBitstring(bitstrings[i], dims);
+			positions[i] = BenchmarkLoader.normalize(partitioned, ind1.length/dims, 0, 1);
 		}
-		EuclideanDistance dist = new EuclideanDistance();
-		return dist.compute(positions[0], positions[1]);
+		
+		// Calculating euclidean distance.
+		double dist = 0;
+		for(int i=0; i<dims; i++){
+			dist += Math.pow(positions[0][i] - positions[1][i], 2);
+		}
+		dist = Math.sqrt(dist);
+		return dist;
+//		EuclideanDistance dist = new EuclideanDistance();
+//		return dist.compute(positions[0], positions[1]);
 	}
 	
 }

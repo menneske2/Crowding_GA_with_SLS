@@ -20,7 +20,7 @@ public class OptimizerConfig implements Cloneable{
 	public int TOURNAMENT_SIZE = 2;
 	public float CROSSOVER_CHANCE = 0.7f;
 	public float MUTATION_CHANCE = 0.2f;
-	public int ELITIST_NICHES = 10;
+	public int ELITIST_NICHES = 5;
 	public float CROWDING_SCALING_FACTOR = 0.0f;
 	public float NICHING_EPSILON = 0.05f;
 	public boolean PID_ENABLED = true;

@@ -18,7 +18,6 @@ import jsat.ARFFLoader;
 import jsat.DataSet;
 import jsat.classifiers.ClassificationDataSet;
 import statistics.BenchmarkLoader;
-import statistics.BenchmarkVisualizer;
 import statistics.DataHarvester;
 
 /**

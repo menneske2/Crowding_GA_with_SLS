@@ -27,10 +27,15 @@ public class Problem implements Cloneable{
 	public String name;
 	public final boolean realDataset;
 	public ClassificationDataSet datasetTrain, datasetValid;
-	public BenchmarkFunction bmFunc;
 	public int numFeatures;
-	public int fitnessEvaluations = 0;
 	
+	// Test-function specific fields.
+	public BenchmarkFunction bmFunc;
+	public int numGlobalOptima, numLocalOptima; // Local optima includes global optima.
+	public int dimensionality; 
+	
+	
+	public int fitnessEvaluations = 0;
 	public double fitnessPunishRatio = 0.5;
 	
 	// numFeatures is only used in benchmark functions.
