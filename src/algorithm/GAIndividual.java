@@ -6,7 +6,7 @@
 package algorithm;
 
 
-import core.Problem;
+import problems.Problem;
 import java.util.Random;
 import org.apache.commons.math3.ml.clustering.Clusterable;
 /**

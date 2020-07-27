@@ -6,6 +6,7 @@
 package core;
 
 
+import problems.DatasetClassificationProblem;
 import algorithm.GAIndividual;
 import algorithm.GeneticAlgorithm;
 import algorithm.OptimizerConfig;
@@ -31,7 +32,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import statistics.BenchmarkVisualizer;
+import problems.BenchmarkProblem;
+import problems.Problem;
 
 /**
  *
@@ -105,8 +107,8 @@ public class SolverController {
 	public void setProblem(Problem p){
 		prob = p;
 		generateCharts();
-		if(!p.realDataset){
-			heatMap = BenchmarkVisualizer.getFullyFeaturedHeatmap(prob);
+		if(prob.getClass() == BenchmarkProblem.class){
+			heatMap = BenchmarkVisualizer.getFullyFeaturedHeatmap((BenchmarkProblem)prob);
 			album.add(heatMap);
 			fxImage.setImage(heatMap);
 		}
@@ -171,7 +173,8 @@ public class SolverController {
 			
 			
 			// Mucking about with images.
-			generateVisualization(pop);
+			if(prob.getClass() == BenchmarkProblem.class)
+				generateVisualization(pop);
 		}
 	}
 	
@@ -182,13 +185,14 @@ public class SolverController {
 		GAIndividual best = pop.get(0);
 		System.out.println("Time taken: " + (int)Math.floor(timeSpent/(1000*60)) + "m" + (timeSpent/1000)%60 + "s");
 		System.out.println("Features used: " + best.numberOfFeatures() + "/" + best.genome.length + "\tFinal solution: " + best.getGenomeAsString());
-		if(p.realDataset){
-			if(p.datasetTrain.getNumCategoricalVars() != 0)
-				System.out.println("Predicting feature: " + p.datasetTrain.getCategoryName(p.datasetTrain.getNumCategoricalVars()-1));
+		if(p.getClass() == DatasetClassificationProblem.class){
+			DatasetClassificationProblem pp = (DatasetClassificationProblem) p;
+			if(pp.datasetTrain.getNumCategoricalVars() != 0)
+				System.out.println("Predicting feature: " + pp.datasetTrain.getCategoryName(pp.datasetTrain.getNumCategoricalVars()-1));
 			System.out.println("Names of features used:");
 			for(int i=0; i<best.genome.length; i++){
 				if(best.genome[i]){
-					System.out.println("F" + i + ": " + p.getIndexName(i));
+					System.out.println("F" + i + ": " + pp.getIndexName(i));
 				}
 			}
 		}
@@ -206,6 +210,9 @@ public class SolverController {
 	}
 	
 	private void setAlbumIndex(int i){
+		if(prob.getClass() != BenchmarkProblem.class)
+			return;
+				
 		albumIndex = i;
 		fxImgScrollbar.setValue(i);
 		fxImage.setImage(album.get(i));

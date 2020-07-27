@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package statistics;
+package problems;
 
 /**
  * Implementations of f9-f24 as described in this paper: https://www.sciencedirect.com/science/article/pii/S221065021500053X

@@ -5,6 +5,7 @@
  */
 package algorithm;
 
+import problems.JaccardDistance;
 import java.util.Comparator;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 

@@ -3,9 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package core;
+package problems;
 
-import statistics.BenchmarkFunction;
 import algorithm.GAUtilities;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,47 +21,17 @@ import jsat.linear.Vec;
  *
  * @author Fredrik-Oslo
  */
-public class Problem implements Cloneable{
+public class DatasetClassificationProblem extends Problem{
 	
-	public String name;
-	public final boolean realDataset;
 	public ClassificationDataSet datasetTrain, datasetValid;
-	public int numFeatures;
 	
-	// Test-function specific fields.
-	public BenchmarkFunction bmFunc;
-	public int numGlobalOptima, numLocalOptima; // Local optima includes global optima.
-	public int dimensionality; 
-	
-	
-	public int fitnessEvaluations = 0;
-	public double fitnessPunishRatio = 0.5;
-	
+
 	// numFeatures is only used in benchmark functions.
-	public Problem(List<ClassificationDataSet> datasets, int numFeatures, BenchmarkFunction bmFunc){
-		if(bmFunc == null){
-			realDataset = true;
-			this.numFeatures = datasets.get(0).getNumFeatures();
-			this.datasetTrain = datasets.get(0);
-			this.datasetValid = datasets.get(1);
-		}
-		else{
-			realDataset = false;
-			this.bmFunc = bmFunc;
-			this.numFeatures = numFeatures;
-		}
-		
-	}
-	
-	@Override
-	public Problem clone(){
-		try{
-		return (Problem) super.clone();
-		} catch(Exception e){
-			e.printStackTrace();
-			System.exit(98);
-			return null;
-		}
+	public DatasetClassificationProblem(List<ClassificationDataSet> datasets){
+		this.numFeatures = datasets.get(0).getNumFeatures();
+		this.datasetTrain = datasets.get(0);
+		this.datasetValid = datasets.get(1);
+		this.distanceMeasure = new JaccardDistance();
 	}
 	
 	public String getIndexName(int index){
@@ -77,22 +46,7 @@ public class Problem implements Cloneable{
 	public double evaluateBitstring(boolean[] bits, boolean punish){
 		this.fitnessEvaluations++;
 		
-		double fitness = this.realDataset ? evaluateBitstringRealData(bits) : evaluateBitstringBenchmark(bits);
 		
-		if(punish){
-			double ratioUsed = (double) GAUtilities.countFeatures(bits) / bits.length;
-			fitness -= fitnessPunishRatio * ratioUsed;
-		}
-		
-		return fitness;
-	}
-	
-	private double evaluateBitstringBenchmark(boolean[] bits){
-		double fitness = this.bmFunc.evaluateFitness(bits);
-		return fitness;
-	}
-	
-	private double evaluateBitstringRealData(boolean[] bits){
 		ClassificationDataSet reducedTrain = reduceFeatures(datasetTrain, bits);
 		ClassificationDataSet reducedValid = reduceFeatures(datasetValid, bits);
 		
@@ -113,6 +67,13 @@ public class Problem implements Cloneable{
 		}
 		
 		double fitness = (double) correct / datasetValid.getSampleSize();
+		
+		
+		if(punish){
+			double ratioUsed = (double) GAUtilities.countFeatures(bits) / bits.length;
+			fitness -= fitnessPunishRatio * ratioUsed;
+		}
+		
 		return fitness;
 	}
 	
@@ -166,13 +127,7 @@ public class Problem implements Cloneable{
 		}
 		
 		ClassificationDataSet reducedSet = new ClassificationDataSet(reducedPoints, full.getPredicting());
-		
 		return reducedSet;
 	}
 	
-	
-	@Override
-	public String toString(){
-		return this.name;
-	}
 }

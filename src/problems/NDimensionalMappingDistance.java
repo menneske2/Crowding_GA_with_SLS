@@ -3,12 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package algorithm;
+package problems;
 
 import java.math.BigInteger;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
-import statistics.BenchmarkLoader;
+import problems.BenchmarkLoader;
 
 /**
  *

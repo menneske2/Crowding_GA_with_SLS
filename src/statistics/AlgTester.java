@@ -5,13 +5,11 @@
  */
 package statistics;
 
-import algorithm.GAIndividual;
 import algorithm.GeneticAlgorithm;
 import algorithm.OptimizerConfig;
-import core.Problem;
 import core.SolverController;
-import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
+import problems.Problem;
 
 /**
  *

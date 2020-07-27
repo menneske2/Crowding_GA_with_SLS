@@ -3,9 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package statistics;
+package problems;
 
-import core.Problem;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -32,7 +31,7 @@ public class BenchmarkLoader {
 		probList.add(loadAckley(bitLength));
 	}
 	
-	public Problem loadByName(String name, int bitLength){
+	public BenchmarkProblem loadByName(String name, int bitLength){
 		name = name.substring(0, 3);
 		switch(name){
 			case "F1 ":
@@ -58,10 +57,10 @@ public class BenchmarkLoader {
 		return null;
 	}
 	
-	private Problem loadF1(int bitLength){
-		Problem prob = new Problem(null, bitLength, bits -> {
-			BigInteger[] axesBig = partitionBitstring(bits, DIMENSIONALITY);
-			double[] axes = normalize(axesBig, bitLength/DIMENSIONALITY, -100, 100);
+	private BenchmarkProblem loadF1(int bitLength){
+		BenchmarkProblem prob = new BenchmarkProblem(bitLength, DIMENSIONALITY, (bits, dims) -> {
+			BigInteger[] axesBig = partitionBitstring(bits, dims);
+			double[] axes = normalize(axesBig, bitLength/dims, -100, 100);
 			
 			double total = 0;
 			for(int i=0; i<axes.length; i++){
@@ -83,16 +82,15 @@ public class BenchmarkLoader {
 			return -total; // minus because its a minimization problem. todo: add the lowest value here so that it goes from 0 to best.
 		});
 		prob.name = "F1 - Two-peak trap";
-		prob.dimensionality = DIMENSIONALITY;
 		prob.numGlobalOptima = 1;
 		prob.numLocalOptima = (int)Math.pow(2, DIMENSIONALITY);
 		return prob;
 	}
 	
-	private Problem loadF2(int bitLength){
-		Problem prob = new Problem(null, bitLength, bits -> {
-			BigInteger[] axesBig = partitionBitstring(bits, DIMENSIONALITY);
-			double[] axes = normalize(axesBig, bitLength/DIMENSIONALITY, -100, 100);
+	private BenchmarkProblem loadF2(int bitLength){
+		BenchmarkProblem prob = new BenchmarkProblem(bitLength, DIMENSIONALITY, (bits, dims) -> {
+			BigInteger[] axesBig = partitionBitstring(bits, dims);
+			double[] axes = normalize(axesBig, bitLength/dims, -100, 100);
 			
 			double total = 0;
 			for(int i=0; i<axes.length; i++){
@@ -125,16 +123,15 @@ public class BenchmarkLoader {
 			return -total; // minus because its a minimization problem. todo: add the lowest value here so that it goes from 0 to best.
 		});
 		prob.name = "F2 - Five-uneven-peak trap";
-		prob.dimensionality = DIMENSIONALITY;
 		prob.numGlobalOptima = (int)Math.pow(2, DIMENSIONALITY);
 		prob.numLocalOptima = (int)Math.pow(5, DIMENSIONALITY);
 		return prob;
 	}
 	
-	private Problem loadF3(int bitLength){
-		Problem prob = new Problem(null, bitLength, bits -> {
-			BigInteger[] axesBig = partitionBitstring(bits, DIMENSIONALITY);
-			double[] axes = normalize(axesBig, bitLength/DIMENSIONALITY, -100, 100);
+	private BenchmarkProblem loadF3(int bitLength){
+		BenchmarkProblem prob = new BenchmarkProblem(bitLength, DIMENSIONALITY, (bits, dims) -> {
+			BigInteger[] axesBig = partitionBitstring(bits, dims);
+			double[] axes = normalize(axesBig, bitLength/dims, -100, 100);
 			
 			double total = 0;
 			for(int i=0; i<axes.length; i++){
@@ -157,16 +154,15 @@ public class BenchmarkLoader {
 			return -total; // minus because its a minimization problem. todo: add the lowest value here so that it goes from 0 to best.
 		});
 		prob.name = "F3 - Equal minima";
-		prob.dimensionality = DIMENSIONALITY;
 		prob.numGlobalOptima = (int)Math.pow(5, DIMENSIONALITY);
 		prob.numLocalOptima = 0;
 		return prob;
 	}
 	
-	private Problem loadF4(int bitLength){
-		Problem prob = new Problem(null, bitLength, bits -> {
-			BigInteger[] axesBig = partitionBitstring(bits, DIMENSIONALITY);
-			double[] axes = normalize(axesBig, bitLength/DIMENSIONALITY, -100, 100);
+	private BenchmarkProblem loadF4(int bitLength){
+		BenchmarkProblem prob = new BenchmarkProblem(bitLength, DIMENSIONALITY, (bits, dims) -> {
+			BigInteger[] axesBig = partitionBitstring(bits, dims);
+			double[] axes = normalize(axesBig, bitLength/dims, -100, 100);
 			
 			double total = 0;
 			for(int i=0; i<axes.length; i++){
@@ -190,16 +186,15 @@ public class BenchmarkLoader {
 			return -total; // minus because its a minimization problem. todo: add the lowest value here so that it goes from 0 to best.
 		});
 		prob.name = "F4 - Decreasing minima";
-		prob.dimensionality = DIMENSIONALITY;
 		prob.numGlobalOptima = 1;
 		prob.numLocalOptima = (int)Math.pow(5, DIMENSIONALITY);
 		return prob;
 	}
 	
-	private Problem loadF5(int bitLength){
-		Problem prob = new Problem(null, bitLength, bits -> {
-			BigInteger[] axesBig = partitionBitstring(bits, DIMENSIONALITY);
-			double[] axes = normalize(axesBig, bitLength/DIMENSIONALITY, -100, 100);
+	private BenchmarkProblem loadF5(int bitLength){
+		BenchmarkProblem prob = new BenchmarkProblem(bitLength, DIMENSIONALITY, (bits, dims) -> {
+			BigInteger[] axesBig = partitionBitstring(bits, dims);
+			double[] axes = normalize(axesBig, bitLength/dims, -100, 100);
 			
 			double total = 0;
 			for(int i=0; i<axes.length; i++){
@@ -221,16 +216,15 @@ public class BenchmarkLoader {
 			return -total; // minus because its a minimization problem. todo: add the lowest value here so that it goes from 0 to best.
 		});
 		prob.name = "F5 - Uneven minima";
-		prob.dimensionality = DIMENSIONALITY;
 		prob.numGlobalOptima = (int)Math.pow(5, DIMENSIONALITY);
 		prob.numLocalOptima = 0;
 		return prob;
 	}
 	
-	private Problem loadF6(int bitLength){
-		Problem prob = new Problem(null, bitLength, bits -> {
-			BigInteger[] axesBig = partitionBitstring(bits, DIMENSIONALITY);
-			double[] axes = normalize(axesBig, bitLength/DIMENSIONALITY, -100, 100);
+	private BenchmarkProblem loadF6(int bitLength){
+		BenchmarkProblem prob = new BenchmarkProblem(bitLength, DIMENSIONALITY, (bits, dims) -> {
+			BigInteger[] axesBig = partitionBitstring(bits, dims);
+			double[] axes = normalize(axesBig, bitLength/dims, -100, 100);
 			
 			double[] axeResults = new double[axes.length]; 
 			for(int i=0; i<axes.length; i++){
@@ -249,17 +243,16 @@ public class BenchmarkLoader {
 			return -total; // minus because its a minimization problem. todo: add the lowest value here so that it goes from 0 to best.
 		});
 		prob.name = "F6 - Himmelblau's function";
-		prob.dimensionality = DIMENSIONALITY;
 		prob.numGlobalOptima = (int)Math.pow(4, DIMENSIONALITY/2);
 		prob.numLocalOptima = 0;
 		return prob;
 	}
 	
-	private Problem loadF7(int bitLength){
-		Problem prob = new Problem(null, bitLength, bits -> {
-			BigInteger[] axesBig = partitionBitstring(bits, DIMENSIONALITY);
-			double[] axes = normalize(axesBig, bitLength/DIMENSIONALITY, -3, 2);
-			axes[1] = normalize(axesBig, bitLength/DIMENSIONALITY, -2, 2)[1];
+	private BenchmarkProblem loadF7(int bitLength){
+		BenchmarkProblem prob = new BenchmarkProblem(bitLength, DIMENSIONALITY, (bits, dims) -> {
+			BigInteger[] axesBig = partitionBitstring(bits, dims);
+			double[] axes = normalize(axesBig, bitLength/dims, -3, 2);
+			axes[1] = normalize(axesBig, bitLength/dims, -2, 2)[1];
 			
 			double[] axeResults = new double[axes.length]; 
 			for(int i=0; i<axes.length; i++){
@@ -282,16 +275,15 @@ public class BenchmarkLoader {
 			return total;
 		});
 		prob.name = "F7 - Six-hump camelback";
-		prob.dimensionality = DIMENSIONALITY;
 		prob.numGlobalOptima = (int)Math.pow(2, DIMENSIONALITY/2);
 		prob.numLocalOptima = 0;
 		return prob;
 	}
 	
-	private Problem loadF8(int bitLength){
-		Problem prob = new Problem(null, bitLength, bits -> {
-			BigInteger[] axesBig = partitionBitstring(bits, DIMENSIONALITY);
-			double[] axes = normalize(axesBig, bitLength/DIMENSIONALITY, -100, 100);
+	private BenchmarkProblem loadF8(int bitLength){
+		BenchmarkProblem prob = new BenchmarkProblem(bitLength, DIMENSIONALITY, (bits, dims) -> {
+			BigInteger[] axesBig = partitionBitstring(bits, dims);
+			double[] axes = normalize(axesBig, bitLength/dims, -100, 100);
 			
 			double total = 0;
 			for(int i=0; i<axes.length; i++){
@@ -311,22 +303,20 @@ public class BenchmarkLoader {
 			return -total; // minus because its a minimization problem. todo: add the lowest value here so that it goes from 0 to best.
 		});
 		prob.name = "F8 - Modified Vincent function";
-		prob.dimensionality = DIMENSIONALITY;
 		prob.numGlobalOptima = (int)Math.pow(6, DIMENSIONALITY);
 		prob.numLocalOptima = 0;
 		return prob;
 	}
 	
-	private Problem loadAckley(int bitLength){
-		Problem prob = new Problem(null, bitLength, bits -> {
-			BigInteger[] axesBig = partitionBitstring(bits, DIMENSIONALITY);
-			double[] axes = normalize(axesBig, bitLength/DIMENSIONALITY, -100, 100);
+	private BenchmarkProblem loadAckley(int bitLength){
+		BenchmarkProblem prob = new BenchmarkProblem(bitLength, DIMENSIONALITY, (bits, dims) -> {
+			BigInteger[] axesBig = partitionBitstring(bits, dims);
+			double[] axes = normalize(axesBig, bitLength/dims, -100, 100);
 			
 			double total = PrimitiveFunctions.f15(axes);
 			return -total; // minus because its a minimization problem. todo: add the lowest value here so that it goes from 0 to best.
 		});
 		prob.name = "F16 - Ackley's function";
-		prob.dimensionality = DIMENSIONALITY;
 		prob.numGlobalOptima = 1;
 		prob.numLocalOptima = -1;
 		return prob;

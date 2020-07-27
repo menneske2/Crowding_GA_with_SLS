@@ -3,9 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package statistics;
+package core;
 
-import core.Problem;
+import problems.BenchmarkProblem;
+import problems.BenchmarkLoader;
 import java.math.BigInteger;
 import java.util.List;
 import javafx.scene.Group;
@@ -30,7 +31,7 @@ public class BenchmarkVisualizer {
 	private static final int SHAPE_CIRCLE = 4;
 	
 	
-	public static Image getFullyFeaturedHeatmap(Problem prob){
+	public static Image getFullyFeaturedHeatmap(BenchmarkProblem prob){
 		double[][] fitnessArray = generateNormalizedFitnessArray(prob, 18); // problem, bitstring length
 		WritableImage im = createHeatMap(fitnessArray, Color.BLACK, Color.WHITE); // fitness, low color, high color.
 		drawHeightCurves(im, fitnessArray, 0.005, Color.DARKGRAY); // im, fitness, height difference between lines, color.
@@ -188,7 +189,7 @@ public class BenchmarkVisualizer {
 		return wi;
 	}
 	
-	private static double[][] generateNormalizedFitnessArray(Problem prob, int resolution){
+	private static double[][] generateNormalizedFitnessArray(BenchmarkProblem prob, int resolution){
 		BenchmarkLoader loader = new BenchmarkLoader();
 		prob = loader.loadByName(prob.name, resolution);
 		

@@ -5,7 +5,6 @@
  */
 package algorithm;
 
-import core.Problem;
 import core.SolverController;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,7 +14,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import javafx.application.Platform;
-import statistics.BenchmarkVisualizer;
+import problems.Problem;
 
 /**
  *
@@ -55,12 +54,7 @@ public class GeneticAlgorithm implements Runnable{
 		int generation = 0;
 		
 		// Sending initialization statistics.
-		List<Niche> nichInit;
-		if(prob.realDataset)
-			nichInit = GAUtilities.getNiches(population, conf.NICHING_EPSILON, new JaccardDistance());
-		else
-			nichInit = GAUtilities.getNiches(population, conf.NICHING_EPSILON, new NDimensionalMappingDistance(prob.dimensionality));
-		sendProgressReport(generation, nichInit);
+		sendProgressReport(generation, GAUtilities.getNiches(population, conf.NICHING_EPSILON, prob.distanceMeasure));
 		
 		while(true){
 			// Termination criterias
@@ -76,11 +70,8 @@ public class GeneticAlgorithm implements Runnable{
 			}
 			
 			
-			List<Niche> niches = null;
-			if(prob.realDataset)
-				niches = GAUtilities.getNiches(population, conf.NICHING_EPSILON, new JaccardDistance());
-			else
-				niches = GAUtilities.getNiches(population, conf.NICHING_EPSILON, new NDimensionalMappingDistance(prob.dimensionality));
+			List<Niche> niches = GAUtilities.getNiches(population, conf.NICHING_EPSILON, prob.distanceMeasure);
+			
 			
 			
 			// Using PID-controller
@@ -128,6 +119,8 @@ public class GeneticAlgorithm implements Runnable{
 			feedbackStation.registerSolution(prob, population, timeTaken);
 		});
 	}
+	
+	
 	
 	private double sendProgressReport(int generation, List<Niche> niches){
 		final int genCopy = generation; // it needs to be an effectively final variable.

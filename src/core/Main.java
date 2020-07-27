@@ -5,6 +5,7 @@
  */
 package core;
 
+import problems.Problem;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +18,8 @@ import javafx.stage.Stage;
 import jsat.ARFFLoader;
 import jsat.DataSet;
 import jsat.classifiers.ClassificationDataSet;
-import statistics.BenchmarkLoader;
+import problems.BenchmarkLoader;
+import problems.DatasetClassificationProblem;
 import statistics.DataHarvester;
 
 /**
@@ -63,7 +65,7 @@ public class Main extends Application{
 		}
 	}
 	
-	private Problem loadProblem(File f){
+	private DatasetClassificationProblem loadProblem(File f){
 		DataSet dataset = ARFFLoader.loadArffFile(f);
 		List<String> namesNumeric = new ArrayList<>();
 		for(int i=0; i<dataset.getNumNumericalVars(); i++){ // feature names get removed at a couple of stages in this process, so backing them up temporarily.
@@ -87,7 +89,7 @@ public class Main extends Application{
 			splits2.get(0).setNumericName(namesNumeric.get(i), i);
 			splits2.get(1).setNumericName(namesNumeric.get(i), i);
 		}
-		Problem p = new Problem(splits2, -1, null);
+		DatasetClassificationProblem p = new DatasetClassificationProblem(splits2);
 		return p;
 	}
 	
