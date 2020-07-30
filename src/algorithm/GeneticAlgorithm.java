@@ -89,6 +89,13 @@ public class GeneticAlgorithm implements Runnable{
 					SLSPurge(tooBig);
 			}
 			
+			if(!conf.SLS_Enabled){
+				for(var niche : niches){
+					sls.optimizeNiche(niche);
+					purgeExcessInNiche(niche);
+				}
+			}
+			
 			// Elitist survival of the best individual in all active niches.
 			List<GAIndividual> elitist = new ArrayList<>();
 			Collections.sort(niches);
@@ -156,11 +163,6 @@ public class GeneticAlgorithm implements Runnable{
 				improvements[i] = sls.optimizeNiche(chosen) - pre;
 			}
 			long timeSpent = new Date().getTime() - preTime;
-//			System.out.println("SLS-ing "+niches.size()+" niches took " + (int)Math.floor(timeSpent/(1000*60)) + "m" + (timeSpent/1000)%60 + "s.");
-//			System.out.print("Improvements: [");
-//			for(var d : improvements)
-//				System.out.format("%.4f, ", d);
-//			System.out.println("]");
 
 			// Committing genocide in all niches. The elite ones get 1 survivor.
 			Collections.sort(niches);
@@ -178,6 +180,14 @@ public class GeneticAlgorithm implements Runnable{
 					i--;
 				}
 			}
+	}
+	
+	private void purgeExcessInNiche(Niche niche){
+		List<GAIndividual> gais = niche.getPoints();
+		Collections.sort(gais);
+		for(int i=conf.MAX_NICHE_SIZE; i<gais.size(); i++){
+			population.remove(gais.get(i));
+		}
 	}
 	
 	private List<GAIndividual> newEAGeneration(List<GAIndividual> elitist){

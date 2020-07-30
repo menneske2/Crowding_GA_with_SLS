@@ -5,8 +5,13 @@
  */
 package problems;
 
+import java.lang.reflect.Method;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 /**
  *
@@ -14,50 +19,61 @@ import java.util.List;
  */
 public class BenchmarkLoader {
 	
-	private static List<Problem> probList;
+	private static final int BITLENGTH = 512;
 	private static final int DIMENSIONALITY = 2;
+	private static final int SEED = -1;
 	
-	public void loadBenchmarkProblems(List<Problem> probList){
-		this.probList = probList;
-		int bitLength = 512;
-		probList.add(loadF1(bitLength));
-		probList.add(loadF2(bitLength));
-		probList.add(loadF3(bitLength));
-		probList.add(loadF4(bitLength));
-		probList.add(loadF5(bitLength));
-		probList.add(loadF6(bitLength));
-		probList.add(loadF7(bitLength));
-		probList.add(loadF8(bitLength));
-		probList.add(loadAckley(bitLength));
+	/**
+	 * Adds the problems defined by all functions from this class that start with "loadF".
+	 * @param probList the list to add shit to.
+	 */
+	public static void loadBenchmarkProblems(List<Problem> probList){
+		int bitLength = BITLENGTH;
+		
+		List<Method> methods = new ArrayList<>(Arrays.asList(BenchmarkLoader.class.getMethods()));
+		// Purging non-problem methods.
+		for(int i=methods.size()-1; i>=0; i--){
+			if(!methods.get(i).getName().startsWith("loadF")){
+				methods.remove(i);
+			}
+		}
+		// Sorting methods by name
+		Collections.sort(methods, (Method m1, Method m2) -> {
+			int num1 = Integer.parseInt(m1.getName().split("-")[0].strip().substring(5));
+			int num2 = Integer.parseInt(m2.getName().split("-")[0].strip().substring(5));
+			if(num1 == num2)
+				return 0;
+			return num1<num2 ? -1 : 1;
+		});
+		// Adding problem instances.
+		for(int i=0; i<methods.size(); i++){
+			Method m = methods.get(i);
+			try{
+				Problem p = (BenchmarkProblem) m.invoke(BenchmarkLoader.class, bitLength);
+				probList.add(p);
+			} catch(Exception e){
+				e.printStackTrace();
+				System.exit(404);
+			}
+			
+		}
 	}
 	
-	public BenchmarkProblem loadByName(String name, int bitLength){
-		name = name.substring(0, 3);
-		switch(name){
-			case "F1 ":
-				return loadF1(bitLength);
-			case "F2 ":
-				return loadF2(bitLength);
-			case "F3 ":
-				return loadF3(bitLength);
-			case "F4 ":
-				return loadF4(bitLength);
-			case "F5 ":
-				return loadF5(bitLength);
-			case "F6 ":
-				return loadF6(bitLength);
-			case "F7 ":
-				return loadF7(bitLength);
-			case "F8 ":
-				return loadF8(bitLength);
-			case "F16":
-				return loadAckley(bitLength);
+	public static BenchmarkProblem loadByName(String name, int bitLength){
+		name = name.split("-")[0].strip();
+		
+		try{
+			Method meth = BenchmarkLoader.class.getMethod("load"+name, int.class);
+			return (BenchmarkProblem) meth.invoke(BenchmarkLoader.class, bitLength);
+		} catch(Exception e){
+			e.printStackTrace();
+			System.exit(404);
 		}
-		System.out.println("[BenchmarkLoader] Problem " + name + " not found.");
+		System.exit(404);
 		return null;
 	}
 	
-	private BenchmarkProblem loadF1(int bitLength){
+	public static BenchmarkProblem loadF1(int bitLength){
 		BenchmarkProblem prob = new BenchmarkProblem(bitLength, DIMENSIONALITY, (bits, dims) -> {
 			BigInteger[] axesBig = partitionBitstring(bits, dims);
 			double[] axes = normalize(axesBig, bitLength/dims, -100, 100);
@@ -87,7 +103,7 @@ public class BenchmarkLoader {
 		return prob;
 	}
 	
-	private BenchmarkProblem loadF2(int bitLength){
+	public static BenchmarkProblem loadF2(int bitLength){
 		BenchmarkProblem prob = new BenchmarkProblem(bitLength, DIMENSIONALITY, (bits, dims) -> {
 			BigInteger[] axesBig = partitionBitstring(bits, dims);
 			double[] axes = normalize(axesBig, bitLength/dims, -100, 100);
@@ -128,7 +144,7 @@ public class BenchmarkLoader {
 		return prob;
 	}
 	
-	private BenchmarkProblem loadF3(int bitLength){
+	public static BenchmarkProblem loadF3(int bitLength){
 		BenchmarkProblem prob = new BenchmarkProblem(bitLength, DIMENSIONALITY, (bits, dims) -> {
 			BigInteger[] axesBig = partitionBitstring(bits, dims);
 			double[] axes = normalize(axesBig, bitLength/dims, -100, 100);
@@ -159,7 +175,7 @@ public class BenchmarkLoader {
 		return prob;
 	}
 	
-	private BenchmarkProblem loadF4(int bitLength){
+	public static BenchmarkProblem loadF4(int bitLength){
 		BenchmarkProblem prob = new BenchmarkProblem(bitLength, DIMENSIONALITY, (bits, dims) -> {
 			BigInteger[] axesBig = partitionBitstring(bits, dims);
 			double[] axes = normalize(axesBig, bitLength/dims, -100, 100);
@@ -191,7 +207,7 @@ public class BenchmarkLoader {
 		return prob;
 	}
 	
-	private BenchmarkProblem loadF5(int bitLength){
+	public static BenchmarkProblem loadF5(int bitLength){
 		BenchmarkProblem prob = new BenchmarkProblem(bitLength, DIMENSIONALITY, (bits, dims) -> {
 			BigInteger[] axesBig = partitionBitstring(bits, dims);
 			double[] axes = normalize(axesBig, bitLength/dims, -100, 100);
@@ -221,7 +237,7 @@ public class BenchmarkLoader {
 		return prob;
 	}
 	
-	private BenchmarkProblem loadF6(int bitLength){
+	public static BenchmarkProblem loadF6(int bitLength){
 		BenchmarkProblem prob = new BenchmarkProblem(bitLength, DIMENSIONALITY, (bits, dims) -> {
 			BigInteger[] axesBig = partitionBitstring(bits, dims);
 			double[] axes = normalize(axesBig, bitLength/dims, -100, 100);
@@ -248,7 +264,7 @@ public class BenchmarkLoader {
 		return prob;
 	}
 	
-	private BenchmarkProblem loadF7(int bitLength){
+	public static BenchmarkProblem loadF7(int bitLength){
 		BenchmarkProblem prob = new BenchmarkProblem(bitLength, DIMENSIONALITY, (bits, dims) -> {
 			BigInteger[] axesBig = partitionBitstring(bits, dims);
 			double[] axes = normalize(axesBig, bitLength/dims, -3, 2);
@@ -280,7 +296,7 @@ public class BenchmarkLoader {
 		return prob;
 	}
 	
-	private BenchmarkProblem loadF8(int bitLength){
+	public static BenchmarkProblem loadF8(int bitLength){
 		BenchmarkProblem prob = new BenchmarkProblem(bitLength, DIMENSIONALITY, (bits, dims) -> {
 			BigInteger[] axesBig = partitionBitstring(bits, dims);
 			double[] axes = normalize(axesBig, bitLength/dims, -100, 100);
@@ -308,7 +324,93 @@ public class BenchmarkLoader {
 		return prob;
 	}
 	
-	private BenchmarkProblem loadAckley(int bitLength){
+	public static CompositionBenchmarkProblem loadF9(int bitLength){
+		String[] fNames = new String[]{"f9", "f9", "f10", "f10", "f11", "f11", "f12", "f12", "f13", "f13"};
+		double[][] fMultipliers = constructMultiplierArray(fNames);
+		double[] ranges = new double[]{10, 20, 10, 20, 10, 20, 10, 20, 10, 20};
+		double[] lambdas = new double[]{1, 1, 1e-6, 1e-6, 1e-6, 1e-6, 1e-4, 1e-4, 1e-5, 1e-5};
+		double[] biases = new double[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		
+		double[] searchArea = new double[]{-100, 100};
+		double[][] shifts = generateShifts(SEED, 0.5, searchArea, new int[]{fNames.length, DIMENSIONALITY});
+		
+		CompositionBenchmarkProblem prob = new CompositionBenchmarkProblem(bitLength, DIMENSIONALITY, searchArea, fNames, fMultipliers, ranges, biases, lambdas, shifts);
+		prob.name = "F9 - Composition function 1";
+		prob.numGlobalOptima = 5;
+		prob.numLocalOptima = -1;
+		return prob;
+	}
+	
+	public static CompositionBenchmarkProblem loadF10(int bitLength){
+		String[] fNames = new String[]{"f10", "f10", "f13", "f13", "f14", "f14", "f12", "f12", "f9", "f9"};
+		double[][] fMultipliers = constructMultiplierArray(fNames);
+		double[] ranges = new double[]{10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
+		double[] lambdas = new double[]{1e-5,1e-5,1e-6,1e-6,1e-6,1e-6,1e-4,1e-4,1,1};
+		double[] biases = new double[]{0, 10, 20, 30, 40, 50, 60, 70, 80, 90};
+		
+		double[] searchArea = new double[]{-20, 20};
+		double[][] shifts = generateShifts(SEED, 1, searchArea, new int[]{fNames.length, DIMENSIONALITY});
+		
+		CompositionBenchmarkProblem prob = new CompositionBenchmarkProblem(bitLength, DIMENSIONALITY, searchArea, fNames, fMultipliers, ranges, biases, lambdas, shifts);
+		prob.name = "F10 - Composition function 2";
+		prob.numGlobalOptima = 5;
+		prob.numLocalOptima = -1;
+		return prob;
+	}
+	
+	public static CompositionBenchmarkProblem loadF11(int bitLength){
+		String[] fNames = new String[]{"f14", "f14", "f18", "f18", "f21", "f21", "f24", "f24", "f19", "f19"};
+		double[][] fMultipliers = constructMultiplierArray(fNames, "f14",2.048,100d, "f18",5.12,100d, "f21",5d,100d, "f19",1000d,100d);
+		double[] ranges = new double[]{10, 10, 10, 10, 10, 10, 10, 10, 10, 10};
+		double[] lambdas = new double[]{0.1, 0.1, 10, 10, 10, 10, 100, 100, 1, 1};
+		double[] biases = new double[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		
+		double[] searchArea = new double[]{-100, 100};
+		double[][] shifts = generateShifts(SEED, 1, searchArea, new int[]{fNames.length, DIMENSIONALITY});
+		
+		CompositionBenchmarkProblem prob = new CompositionBenchmarkProblem(bitLength, DIMENSIONALITY, searchArea, fNames, fMultipliers, ranges, biases, lambdas, shifts);
+		prob.name = "F11 - Composition function 3";
+		prob.numGlobalOptima = 5;
+		prob.numLocalOptima = -1;
+		return prob;
+	}
+	
+	public static CompositionBenchmarkProblem loadF12(int bitLength){
+		String[] fNames = new String[]{"f14", "f14", "f15", "f15", "f21", "f21", "f24", "f24", "f19", "f19"};
+		double[][] fMultipliers = constructMultiplierArray(fNames, "f14",2.048,100d, "f15",5.12,100d, "f21",5d,100d, "f19",1000d,100d);
+		double[] ranges = new double[]{10, 10, 20, 20, 30, 30, 40, 40, 50, 50};
+		double[] lambdas = new double[]{0.1, 0.1, 10, 10, 10, 10, 100, 100, 1, 1};
+		double[] biases = new double[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		
+		double[] searchArea = new double[]{-100, 100};
+		double[][] shifts = generateShifts(SEED, 0.5, searchArea, new int[]{fNames.length, DIMENSIONALITY});
+		
+		CompositionBenchmarkProblem prob = new CompositionBenchmarkProblem(bitLength, DIMENSIONALITY, searchArea, fNames, fMultipliers, ranges, biases, lambdas, shifts);
+		prob.name = "F12 - Composition function 4";
+		prob.numGlobalOptima = 5;
+		prob.numLocalOptima = -1;
+		return prob;
+	}
+	
+	public static CompositionBenchmarkProblem loadF13(int bitLength){
+		String[] fNames = new String[]{"f14", "f22", "f18", "f15", "f16", "f20", "f24", "f23", "f21", "f19"};
+		double[][] fMultipliers = constructMultiplierArray(fNames, "f14",2.048,100d, "f22",5d,100d, "f18",5.12d,100d, "f16",0.5d,100d, "f20",5d,100d, "f23",5d,100d, "f21",5d,100d, "f19",1000d,100d);
+		double[] ranges = new double[]{10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
+		double[] lambdas = new double[]{0.1, 10, 10, 0.1, 2.5, 1e-3, 100, 2.5, 10, 1};
+		double[] biases = new double[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		
+		double[] searchArea = new double[]{-10, 10};
+		double[][] shifts = generateShifts(SEED, 1, searchArea, new int[]{fNames.length, DIMENSIONALITY});
+		
+		CompositionBenchmarkProblem prob = new CompositionBenchmarkProblem(bitLength, DIMENSIONALITY, searchArea, fNames, fMultipliers, ranges, biases, lambdas, shifts);
+		prob.name = "F13 - Composition function 5";
+		prob.numGlobalOptima = 5;
+		prob.numLocalOptima = -1;
+		return prob;
+	}
+	
+	
+	public static BenchmarkProblem loadF16(int bitLength){
 		BenchmarkProblem prob = new BenchmarkProblem(bitLength, DIMENSIONALITY, (bits, dims) -> {
 			BigInteger[] axesBig = partitionBitstring(bits, dims);
 			double[] axes = normalize(axesBig, bitLength/dims, -100, 100);
@@ -320,6 +422,40 @@ public class BenchmarkLoader {
 		prob.numGlobalOptima = 1;
 		prob.numLocalOptima = -1;
 		return prob;
+	}
+	
+	private static double[][] constructMultiplierArray(String[] fNames, Object ... in){
+		double[][] mults = new double[fNames.length][2];
+		for(int i=0; i<fNames.length; i++){
+			mults[i] = new double[]{1, 1};
+		}
+		
+		for(int i=0; i<fNames.length; i++){
+			for(int j=0; j<in.length; j+=3){
+				String identifier = (String) in[j];
+				if(fNames[i].equals(identifier)){
+					mults[i] = new double[]{(double) in[j+1], (double) in[j+2]};
+				}
+			}
+		}
+		return mults;
+	}
+	
+	private static double[][] generateShifts(int seed, double noiseRatio, double[] searchArea, int[] dimensions){
+		double[][] shifts = new double[dimensions[0]][dimensions[1]];
+		Random rng = new Random();
+		if(seed != -1)
+			rng.setSeed(seed);
+		
+		double diff = searchArea[1] - searchArea[0];
+		diff *= noiseRatio; // Dont wanna shift the functions too drastically.
+		
+		for(int i=0; i<dimensions[0]; i++){
+			for(int j=0; j<dimensions[1]; j++){
+				shifts[i][j] = (-diff/2) + rng.nextDouble()*diff;
+			}
+		}
+		return shifts;
 	}
 	
 	public static double[] normalize(BigInteger[] in, int maxBits, double floor, double ceiling){

@@ -38,7 +38,7 @@ public class Main extends Application{
 
 		List<Problem> probList = new ArrayList<>();
 		
-		new BenchmarkLoader().loadBenchmarkProblems(probList);
+		BenchmarkLoader.loadBenchmarkProblems(probList);
 		
 		File probFolder = new File("Testing Data");
 		readProblems(probFolder, probList, "");

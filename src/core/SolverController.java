@@ -107,7 +107,7 @@ public class SolverController {
 	public void setProblem(Problem p){
 		prob = p;
 		generateCharts();
-		if(prob.getClass() == BenchmarkProblem.class){
+		if(BenchmarkProblem.class.isAssignableFrom(prob.getClass())){
 			heatMap = BenchmarkVisualizer.getFullyFeaturedHeatmap((BenchmarkProblem)prob);
 			album.add(heatMap);
 			fxImage.setImage(heatMap);
@@ -173,7 +173,7 @@ public class SolverController {
 			
 			
 			// Mucking about with images.
-			if(prob.getClass() == BenchmarkProblem.class)
+			if(BenchmarkProblem.class.isAssignableFrom(prob.getClass()))
 				generateVisualization(pop);
 		}
 	}
@@ -210,7 +210,7 @@ public class SolverController {
 	}
 	
 	private void setAlbumIndex(int i){
-		if(prob.getClass() != BenchmarkProblem.class)
+		if(!BenchmarkProblem.class.isAssignableFrom(prob.getClass()))
 			return;
 				
 		albumIndex = i;

@@ -13,16 +13,18 @@ import algorithm.GAUtilities;
  */
 public class BenchmarkProblem extends Problem{
 	
-	public BenchmarkFunction bmFunc;
+	protected BenchmarkFunction bmFunc;
 	public int numGlobalOptima, numLocalOptima; // Local optima includes global optima.
 	private int dimensionality; 
 	
 	public BenchmarkProblem(int numFeatures, int dimensionality, BenchmarkFunction bmf){
 		this.bmFunc = bmf;
 		this.numFeatures = numFeatures;
+		this.fitnessPunishRatio = 0;
 		setDimensionality(dimensionality);
 	}
 	
+	@Override
 	public double evaluateBitstring(boolean[] bits, boolean punish){
 		this.fitnessEvaluations++;
 		double fitness = this.bmFunc.evaluateFitness(bits, dimensionality);
@@ -35,12 +37,9 @@ public class BenchmarkProblem extends Problem{
 		return fitness;
 	}
 	
-	public void setDimensionality(int dims){
+	public final void setDimensionality(int dims){
 		this.dimensionality = dims;
 		this.distanceMeasure = new NDimensionalMappingDistance(dims);
 	}
 	
-	public int getDimensionality(){
-		return this.dimensionality;
-	}
 }

@@ -7,7 +7,6 @@ package statistics;
 
 import algorithm.GAIndividual;
 import algorithm.OptimizerConfig;
-import problems.DatasetClassificationProblem;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
