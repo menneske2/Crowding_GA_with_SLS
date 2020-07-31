@@ -5,11 +5,14 @@
  */
 package core;
 
+import cec15_nich_java_code.cec15_nich_func;
 import problems.BenchmarkProblem;
 import problems.BenchmarkLoader;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -37,12 +40,12 @@ public class BenchmarkVisualizer {
 		double[][] normFArray = normalizeFitnessArray(fArray);
 		
 		WritableImage im = createHeatMap(normFArray, Color.BLACK, Color.CHOCOLATE); // fitness, low color, high color.
-		colourFitnessPeaks(im, normFArray, 0.98, 0.001, Color.CHOCOLATE, Color.WHITE); // im, fitness, top threshold, height difference between lines, color low, color high.
+		colourFitnessPeaks(im, normFArray, 0.99, 0.001, Color.CHOCOLATE, Color.WHITE); // im, fitness, top threshold, height difference between lines, color low, color high.
 		drawHeightCurves(im, normFArray, 0.004, Color.DARKGRAY); // im, fitness, height difference between lines, color.
 		
-		markLocalOptima(im, fArray, 6, SHAPE_CROSS, 3, Color.BLUE); // im, fitness, detection radius, draw radius, color.
+		markLocalOptima(im, fArray, 4, SHAPE_CROSS, 3, Color.BLUE); // im, fitness, detection radius, draw radius, color.
 		double optimaSensitivity = 0.3;
-		markGlobalOptima(im, fArray, 6, optimaSensitivity, SHAPE_CROSS, 3, Color.DARKORANGE); // im, fitness, sensitivity, drawRadius, color.
+		markGlobalOptima(im, fArray, 4, optimaSensitivity, SHAPE_CROSS, 3, Color.DARKORANGE); // im, fitness, sensitivity, drawRadius, color.
 		
 		return im;
 	}
@@ -139,8 +142,8 @@ public class BenchmarkVisualizer {
 	}
 	
 	private static void placeBitsOnMap(WritableImage im, boolean[] bits, int shape, int radius,  Color c){
-		BigInteger[] partitions = BenchmarkLoader.partitionBitstring(bits, 2);
-		double[] normalized = BenchmarkLoader.normalize(partitions, bits.length/2, 0, (int)im.getWidth());
+		BigInteger[] partitions = BenchmarkProblem.partitionBitstring(bits, 2);
+		double[] normalized = BenchmarkProblem.normalize(partitions, bits.length/2, 0, (int)im.getWidth());
 		int locX = (int)Math.round(normalized[0]);
 		int locY = (int)Math.round(normalized[1]);
 		
@@ -251,21 +254,18 @@ public class BenchmarkVisualizer {
 		prob = BenchmarkLoader.loadByName(prob.name, resolution);
 		
 		int axisLength = (int) Math.pow(2, prob.numFeatures/2);
-		
-		double lowest = Double.POSITIVE_INFINITY;
-		double highest = Double.NEGATIVE_INFINITY;
+
 		double[][] fitnesses = new double[axisLength][axisLength];
 		for(int x=0; x<axisLength; x++){
 			for(int y=0; y<axisLength; y++){
 				boolean[] bits = coordsToBoolArray(x, y, prob.numFeatures);
 				double fitness = prob.evaluateBitstring(bits, false);
 				fitnesses[x][y] = fitness;
-				highest = Math.max(highest, fitness);
-				lowest = Math.min(lowest, fitness);
 			}
 		}
 		return fitnesses;
 	}
+	
 	
 	private static double[][] normalizeFitnessArray(double[][] fArray){
 		int axisLength = fArray.length;

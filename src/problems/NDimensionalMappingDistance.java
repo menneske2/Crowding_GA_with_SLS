@@ -8,7 +8,6 @@ package problems;
 import java.math.BigInteger;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
-import problems.BenchmarkLoader;
 
 /**
  *
@@ -31,8 +30,8 @@ public class NDimensionalMappingDistance implements DistanceMeasure{
 		}
 		double[][] positions = new double[2][dims];
 		for(int i=0; i<bitstrings.length; i++){
-			BigInteger[] partitioned = BenchmarkLoader.partitionBitstring(bitstrings[i], dims);
-			positions[i] = BenchmarkLoader.normalize(partitioned, ind1.length/dims, 0, 1);
+			BigInteger[] partitioned = BenchmarkProblem.partitionBitstring(bitstrings[i], dims);
+			positions[i] = BenchmarkProblem.normalize(partitioned, ind1.length/dims, 0, 1);
 		}
 		
 		// Calculating euclidean distance.

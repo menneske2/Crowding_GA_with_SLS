@@ -3,14 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package problems;
+package statistics;
 
 /**
  *
  * @author Fredrik-Oslo
  */
-public interface BenchmarkFunction {
+public class PerformanceMeasures {
 	
-	public double evaluateFitness(boolean[] bits, int dimensionality);
+//	public static double calcPeakRatio(Problem prob, List<GAIndividual> pop){
+//		
+//	}
 	
 }
