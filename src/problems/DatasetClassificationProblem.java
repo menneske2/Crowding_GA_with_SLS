@@ -32,6 +32,7 @@ public class DatasetClassificationProblem extends Problem{
 		this.datasetTrain = datasets.get(0);
 		this.datasetValid = datasets.get(1);
 		this.distanceMeasure = new JaccardDistance();
+		this.fitnessPunishRatio = 0.5;
 	}
 	
 	public String getIndexName(int index){

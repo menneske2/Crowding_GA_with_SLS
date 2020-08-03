@@ -1,15 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
 
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
 
 
-<VBox minHeight="575" maxHeight="575" minWidth="400" maxWidth="400" spacing="20" xmlns:fx="http://javafx.com/fxml/1" fx:controller="core.MainMenuController">
-	<Label prefWidth="Infinity" minHeight="30" fx:id="title" text="svermen over alle svermer" alignment="center"/>
+<VBox minHeight="600" maxHeight="600" minWidth="400" maxWidth="400" spacing="20" xmlns:fx="http://javafx.com/fxml/1" fx:controller="core.MainMenuController">
+	
+	<HBox minHeight="30" maxHeight="30" prefWidth="Infinity" alignment="center">
+		<Label text="Dimensionality:" prefWidth="150" prefHeight="Infinity" alignment="center_left"/>
+		<TextField fx:id="fxDimensionality" minWidth="50" maxWidth="50"/>
+	</HBox>
 
 	<VBox prefHeight="Infinity" prefWidth="350" spacing="0">
 		<ScrollPane minHeight="500" maxHeight="500" prefWidth="Infinity">
@@ -17,6 +23,7 @@
 			</ListView>
 		</ScrollPane>
 		<Button text="Solve problem" onAction="#initChosenProblem" alignment="center" prefHeight="50" prefWidth="Infinity"/>
+		<Button text="Dataharvest" onAction="#dataHarvest" alignment="center" prefHeight="50" prefWidth="Infinity"/>
 	</VBox>
 	
 </VBox>

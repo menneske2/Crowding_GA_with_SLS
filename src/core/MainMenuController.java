@@ -12,8 +12,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import problems.BenchmarkProblem;
 import problems.Problem;
+import statistics.DataHarvester;
 
 /**
  *
@@ -22,9 +25,10 @@ import problems.Problem;
 public class MainMenuController {
 
 	@FXML private ListView problems;
-
-	public MainMenuController(){
-		
+	@FXML private TextField fxDimensionality;
+	
+	public void initialize(){
+		fxDimensionality.setText("2");
 	}
 
 	@FXML
@@ -32,7 +36,31 @@ public class MainMenuController {
 		Problem chosen = (Problem) problems.getSelectionModel().getSelectedItem();
 		if(chosen == null)
 			chosen = (Problem) problems.getItems().get(0);
-		openProblem(chosen.clone());
+		chosen = chosen.clone();
+		
+		if(BenchmarkProblem.class.isAssignableFrom(chosen.getClass())){
+			BenchmarkProblem p = (BenchmarkProblem) chosen;
+			int dims = Integer.parseInt(fxDimensionality.getText());
+			p.setDimensionality(dims);
+		}
+		
+		openProblem(chosen);
+	}
+	
+	@FXML 
+	private void dataHarvest(ActionEvent e){
+		Problem chosen = (Problem) problems.getSelectionModel().getSelectedItem();
+		if(chosen == null)
+			chosen = (Problem) problems.getItems().get(0);
+		chosen = chosen.clone();
+		
+		if(BenchmarkProblem.class.isAssignableFrom(chosen.getClass())){
+			BenchmarkProblem p = (BenchmarkProblem) chosen;
+			int dims = Integer.parseInt(fxDimensionality.getText());
+			p.setDimensionality(dims);
+		}
+		
+		DataHarvester harvest = new DataHarvester(chosen);
 	}
 
 	public void addProblems(List<Problem> probs){

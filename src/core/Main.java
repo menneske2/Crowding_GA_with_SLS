@@ -43,8 +43,6 @@ public class Main extends Application{
 		File probFolder = new File("Testing Data");
 		readProblems(probFolder, probList, "");
 		mmc.addProblems(probList);
-		
-		DataHarvester harvest = new DataHarvester(probList);
 
         stage.setTitle("Crowding GA with SLS");
         stage.setScene(new Scene(root));

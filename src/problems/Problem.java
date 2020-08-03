@@ -18,7 +18,6 @@ public abstract class Problem implements Cloneable{
 	public DistanceMeasure distanceMeasure;
 	public double fitnessPunishRatio = 0.5;
 	
-	
 	public int fitnessEvaluations = 0;
 	
 	

@@ -12,12 +12,8 @@ package cec15_nich_java_code;
   and Technical Report, Nanyang Technological University, Singapore, November 2014
 */
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.util.Scanner;
-import java.io.BufferedReader;
-import java.io.FileReader;
 
 
 
@@ -205,63 +201,63 @@ public class cec15_nich_func {
 			{
 			case 1:	
 				f[i]=twopeaks_func(t,f[i],nx,OShift,M,1,1);
-				f[i]+=100.0;
+//				f[i]+=100.0;
 				break;
 			case 2:	
 				f[i]=fiveuneven_func(t,f[i],nx,OShift,M,1,1);
-				f[i]+=200.0;
+//				f[i]+=200.0;
 				break;
 			case 3:	
 				f[i]=equalmin_func(t,f[i],nx,OShift,M,1,1);
-				f[i]+=300.0;
+//				f[i]+=300.0;
 				break;
 			case 4:	
 				f[i]=decreasemin_func(t,f[i],nx,OShift,M,1,1);
-				f[i]+=400.0;
+//				f[i]+=400.0;
 				break;
 			case 5:
 				f[i]=unevenmin_func(t,f[i],nx,OShift,M,1,1);
-				f[i]+=500.0;
+//				f[i]+=500.0;
 				break;
 			case 6:
 				f[i]=himmelblau_func(t,f[i],nx,OShift,M,1,1);
-				f[i]+=600.0;
+//				f[i]+=600.0;
 				break;
 			case 7:	
 				f[i]=camelback_func(t,f[i],nx,OShift,M,1,1);
-				f[i]+=700.0;
+//				f[i]+=700.0;
 				break;
 			case 8:	
 				f[i]=vincent_func(t,f[i],nx,OShift,M,1,1);
-				f[i]+=800.0;
+//				f[i]+=800.0;
 				break;
 			case 9:	
 				f[i]=cf01(t,f[i],nx,OShift,M,1);
-				f[i]+=900.0;
+//				f[i]+=900.0;
 				break;
 			case 10:	
 				f[i]=cf02(t,f[i],nx,OShift,M,1);
-				f[i]+=1000.0;
+//				f[i]+=1000.0;
 				break;
 			case 11:	
 				f[i]=cf03(t,f[i],nx,OShift,M,1);
-				f[i]+=1100.0;
+//				f[i]+=1100.0;
 				break;
 			case 12:	
 				f[i]=cf04(t,f[i],nx,OShift,M,1);
-				f[i]+=1200.0;
+//				f[i]+=1200.0;
 				break;
 			case 13:	
 				f[i]=cf05(t,f[i],nx,OShift,M,1);
-				f[i]+=1300.0;
+//				f[i]+=1300.0;
 				break;
 			case 14:	
 				f[i]=cf06(t,f[i],nx,OShift,M,1);
-				f[i]+=1400.0;
+//				f[i]+=1400.0;
 				break;
 			case 15:	
 				f[i]=cf07(t,f[i],nx,OShift,M,1);
-				f[i]+=1500.0;
+//				f[i]+=1500.0;
 				break;
 			
 

@@ -199,8 +199,8 @@ public class SolverController {
 		
 		if(BenchmarkProblem.class.isAssignableFrom(p.getClass())){
 			BenchmarkProblem pp = (BenchmarkProblem) p;
-			double tolerance = 1e-1;
-			pp.countGlobalsHit(pop, tolerance);
+			double tolerance = 1;
+			System.out.println("Found " + pp.getPeakRatio(pop, tolerance) + "/" + pp.getMaxOptima() + " optima.");
 		}
 	}
 	

@@ -8,6 +8,9 @@ package problems;
 import algorithm.GAIndividual;
 import algorithm.GAUtilities;
 import cec15_nich_java_code.cec15_nich_func;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,18 +25,19 @@ public class BenchmarkProblem extends Problem{
 	private final cec15_nich_func tf = new cec15_nich_func();
 	
 	protected final double[] searchRange;
-	protected int dimensionality; 
+	protected int dimensionality;
 	
+	public List<double[]> optimasInPaper;
 	public NumOptimaCalculator numOptimaCalc;
-	protected List<Double> gOptimaOptions;
 	
 	
-	public BenchmarkProblem(int funcNumber, int numFeatures, int dimensionality){
+	public BenchmarkProblem(int funcNumber){
 		this.funcNumber = funcNumber;
 		this.searchRange = new double[]{-100, 100};
-		this.numFeatures = numFeatures;
 		this.fitnessPunishRatio = 0;
-		setDimensionality(dimensionality);
+		
+		this.numFeatures = 500;
+		setDimensionality(2);
 	}
 	
 	@Override
@@ -59,44 +63,60 @@ public class BenchmarkProblem extends Problem{
 		return fitness;
 	}
 	
-	public void setGlobalOptima(List<Double> optima){
-		this.gOptimaOptions = optima;
+	private void assembleOptimaList(){
+		File optimaFile = new File("cec15_nich\\optima\\optima_positions_"+funcNumber+"_"+dimensionality+"D.txt");
+		try{
+			BufferedReader reader = new BufferedReader(new FileReader(optimaFile));
+			optimasInPaper = new ArrayList<>();
+			while(true){
+				String line = reader.readLine();
+				if(line == null) break;
+				String[] segments = line.strip().split(" ");
+				double[] coords = new double[dimensionality];
+				int i=0;
+				for(String seg : segments){
+					if(!seg.equals("")){
+						double val = Double.parseDouble(seg.strip());
+						coords[i] = val;
+						i++;
+					}
+				}
+				optimasInPaper.add(coords);
+			}
+		} catch(Exception e){
+			System.out.println("Optima file for problem #"+funcNumber+" in "+dimensionality+" dimensions not found.");
+		}
 	}
 	
-	public int countGlobalsHit(List<GAIndividual> pop, double tolerance){
-		if(this.gOptimaOptions == null)
-			return -1;
-		
-		List<double[]> points = new ArrayList<>();
-		for(var gai : pop){
-			points.add(this.translateToCoordinates(gai.genome));
+	public int getPeakRatio(List<GAIndividual> pop, double tolerance){
+		int numFound = 0;
+		for(double[] optima : optimasInPaper){
+			for(var gai : pop){
+				double[] gaiCoords = this.translateToCoordinates(gai.genome);
+				// Calculating euclidean distance.
+				double dist = 0;
+				for(int i=0; i<gaiCoords.length; i++){
+					dist += Math.pow(gaiCoords[i] - optima[i], 2);
+				}
+				dist = Math.sqrt(dist);
+				if(dist <= tolerance){
+					numFound++;
+					break;
+				}
+			}
 		}
 		
-//		System.out.format("[%.3f", axes[0]);
-//		for(int i=1; i<axes.length; i++){
-//			System.out.format(", %.3f", axes[i]);
-//		}
-//		System.out.println("]");
-//		
-//		boolean isOptima = true;
-//		for(var coord : axes){
-//			boolean probable = false;
-//			for(var possibility : gOptimaOptions){
-//				if(Math.abs(coord-possibility) <= tolerance){
-//					probable = true;
-//				}
-//			}
-//			if(probable == false){
-//				isOptima = false;
-//				break;
-//			}
-//		}
-		return 0;
+		return numFound;
+	}
+	
+	public int getMaxOptima(){
+		return this.optimasInPaper.size();
 	}
 	
 	public final void setDimensionality(int dims){
 		this.dimensionality = dims;
 		this.distanceMeasure = new NDimensionalMappingDistance(dims);
+		assembleOptimaList();
 	}
 	
 	public int getDimensionality(){
@@ -114,8 +134,9 @@ public class BenchmarkProblem extends Problem{
 	
 	public static BigInteger[] partitionBitstring(boolean[] bits, int partitions){
 		if(bits.length%partitions != 0){
-			System.out.println("[BenchmarkLoader] invalid combination of bitlength and partitioning");
-			System.exit(96);
+			System.out.println("bitlength: " + bits.length);
+			System.out.println("[BenchmarkProblem] invalid combination of bitlength and partitioning");
+			throw new Error();
 		}
 		BigInteger[] toReturn = new BigInteger[partitions];
 		int len = bits.length / partitions;

@@ -5,14 +5,11 @@
  */
 package core;
 
-import cec15_nich_java_code.cec15_nich_func;
 import problems.BenchmarkProblem;
 import problems.BenchmarkLoader;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -34,18 +31,23 @@ public class BenchmarkVisualizer {
 	private static final int SHAPE_SQUARE = 3;
 	private static final int SHAPE_CIRCLE = 4;
 	
+	private static final int BITSTRING_LENGTH = 18;
 	
 	public static Image getFullyFeaturedHeatmap(BenchmarkProblem prob){
-		double[][] fArray = generateFitnessArray(prob, 18); // problem, bitstring length
+		double[][] fArray = generateFitnessArray(prob, BITSTRING_LENGTH);
 		double[][] normFArray = normalizeFitnessArray(fArray);
 		
 		WritableImage im = createHeatMap(normFArray, Color.BLACK, Color.CHOCOLATE); // fitness, low color, high color.
-		colourFitnessPeaks(im, normFArray, 0.99, 0.001, Color.CHOCOLATE, Color.WHITE); // im, fitness, top threshold, height difference between lines, color low, color high.
+		colourFitnessPeaks(im, normFArray, 0.97, 0.001, Color.CHOCOLATE, Color.WHITE); // im, fitness, topThreshold, height difference between lines, color low, color high.
 		drawHeightCurves(im, normFArray, 0.004, Color.DARKGRAY); // im, fitness, height difference between lines, color.
 		
-		markLocalOptima(im, fArray, 4, SHAPE_CROSS, 3, Color.BLUE); // im, fitness, detection radius, draw radius, color.
-		double optimaSensitivity = 0.3;
-		markGlobalOptima(im, fArray, 4, optimaSensitivity, SHAPE_CROSS, 3, Color.DARKORANGE); // im, fitness, sensitivity, drawRadius, color.
+		// Try using the ones from the paper, if not, find your own optima.
+		if(!markPaperOptima2D(im, prob, SHAPE_CROSS, 3, Color.BLUE)){
+			markLocalOptima(im, fArray, 5, 6, SHAPE_CROSS, 3, Color.BLUE); // im, fitness, detectRadius, exhaustiveDetectRadius, shape, draw radius, color.
+			markGlobalOptima(im, fArray, 5, 6, 0.3, SHAPE_CROSS, 3, Color.DARKGREEN); // im, fitness, detectRadius, exhaustiveDetectRadius, sensitivity, shape, drawRadius, color.
+		}
+		
+		
 		
 		return im;
 	}
@@ -54,14 +56,29 @@ public class BenchmarkVisualizer {
 		WritableImage copy = copyImage(heatMap);
 		
 		for(var bitstring : solutions){
-			placeBitsOnMap(copy, bitstring, SHAPE_DIAMOND, 2, Color.RED); // im, bits, drawRadius, color
+			placeBitsOnMap(copy, bitstring, SHAPE_CIRCLE, 2, Color.BLACK); // im, bits, drawRadius, color
 		}
 		return copy;
 	}
 	
+	private static boolean markPaperOptima2D(WritableImage im, BenchmarkProblem prob, int shape, int drawRadius, Color c){
+		try{
+			for(double[] point : prob.optimasInPaper){
+				double x = normalizeTo01(point[0], -100, 100) * Math.pow(2,BITSTRING_LENGTH/2);
+				double y = normalizeTo01(point[1], -100, 100) * Math.pow(2,BITSTRING_LENGTH/2);
+				int x2 = (int) Math.round(x);
+				int y2 = (int) Math.round(y);
+				markLocation(x2, y2, im, shape, drawRadius, c);
+			}
+			return true;
+		} catch(Exception e){
+			return false;
+		}
+	}
 	
-	private static void markGlobalOptima(WritableImage im, double[][] fArray, int detectRadius, double sensitivity, int shape, int drawRadius, Color c){
-		double highest = 0;
+	
+	private static void markGlobalOptima(WritableImage im, double[][] fArray, int detectRadius, int exhaustiveDetectRadius, double sensitivity, int shape, int drawRadius, Color c){
+		double highest = Double.NEGATIVE_INFINITY;
 		for(int x=0; x<fArray.length; x++){
 			for(int y=0; y<fArray[0].length; y++){
 				highest = Math.max(highest, fArray[x][y]);
@@ -75,21 +92,20 @@ public class BenchmarkVisualizer {
 				if(fArray[x][y] >= limit){
 					newFArray[x][y] = fArray[x][y];
 				} else{
-					newFArray[x][y] = -1;
+					newFArray[x][y] = Double.NaN;
 				}
 			}
 		}
-		markLocalOptima(im, newFArray, detectRadius, shape, drawRadius, c);
+		markLocalOptima(im, newFArray, detectRadius, exhaustiveDetectRadius, shape, drawRadius, c);
 	}
 	
 	
-	private static void markLocalOptima(WritableImage im, double[][] fArray, int detectRadius, int shape, int drawRadius, Color c){
-		PixelWriter pw = im.getPixelWriter();
+	private static void markLocalOptima(WritableImage im, double[][] fArray, int detectRadius, int exhaustiveDetectRadius, int shape, int drawRadius, Color c){
 		int numOptima = 0;
 		for(int x=0; x<im.getWidth(); x++){
 			for(int y=0; y<im.getHeight(); y++){
 				double val = fArray[x][y];
-				if(val == -1) continue;
+				if(Double.isNaN(val)) continue;
 				boolean isOptima = true;
 				// Left/right
 				for(int x2=x-detectRadius; x2<x+detectRadius; x2++){
@@ -132,13 +148,32 @@ public class BenchmarkVisualizer {
 					}
 				}
 				
-				if(isOptima){
+				if(isOptima && thoroughOptimaCheck(x, y, fArray, exhaustiveDetectRadius)){
 					numOptima++;
 					markLocation(x, y, im, shape, drawRadius, c);
 				}
 			}
 		}
-		System.out.println("Number of optima: " + numOptima);
+//		System.out.println("Number of optima: " + numOptima);
+	}
+	
+	private static boolean thoroughOptimaCheck(int x, int y, double[][] fArray, int radius){
+		double val = fArray[x][y];
+		boolean isOptima = true;
+
+		for(int x2=x-radius; x2<x+radius; x2++){
+			for(int y2=y-radius; y2<y+radius; y2++){
+				try{
+					double val2 = fArray[x2][y2];
+					if(Double.isNaN(val)) continue;
+					if(val2 > val)
+						isOptima = false;
+				} catch(Exception e){
+
+				}
+			}
+		}
+		return isOptima;
 	}
 	
 	private static void placeBitsOnMap(WritableImage im, boolean[] bits, int shape, int radius,  Color c){
@@ -251,7 +286,8 @@ public class BenchmarkVisualizer {
 	}
 	
 	private static double[][] generateFitnessArray(BenchmarkProblem prob, int resolution){
-		prob = BenchmarkLoader.loadByName(prob.name, resolution);
+		prob = BenchmarkLoader.loadByName(prob.name);
+		prob.numFeatures = resolution;
 		
 		int axisLength = (int) Math.pow(2, prob.numFeatures/2);
 
