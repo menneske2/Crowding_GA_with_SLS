@@ -5,6 +5,8 @@
  */
 package core;
 
+import algorithm.GAIndividual;
+import problems.Problem;
 import problems.BenchmarkProblem;
 import problems.BenchmarkLoader;
 import java.math.BigInteger;
@@ -19,6 +21,7 @@ import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import statistics.PerformanceMeasures;
 
 /**
  *
@@ -52,12 +55,27 @@ public class BenchmarkVisualizer {
 		return im;
 	}
 	
-	public static Image getSolutionsOnHeatmap(Image heatMap, List<boolean[]> solutions){
+	public static Image getSolutionsOnHeatmap(Problem prob, Image heatMap, List<GAIndividual> pop){
 		WritableImage copy = copyImage(heatMap);
 		
-		for(var bitstring : solutions){
+		List<boolean[]> bitstrings = new ArrayList<>();
+		for(var gai : pop)
+			bitstrings.add(gai.genome);
+		
+		for(var bitstring : bitstrings){
 			placeBitsOnMap(copy, bitstring, SHAPE_CIRCLE, 2, Color.BLACK); // im, bits, drawRadius, color
 		}
+		if(BenchmarkProblem.class.isAssignableFrom(prob.getClass())){
+			BenchmarkProblem p = (BenchmarkProblem) prob;
+			if(p.optimasInPaper != null){
+				double tolerance = 0.8;
+				List<boolean[]> optima = PerformanceMeasures.getOptimaFound(p, pop, tolerance);
+				for(var bits : optima){
+					placeBitsOnMap(copy, bits, SHAPE_CIRCLE, 3, Color.CYAN);
+				}
+			}
+		}
+		
 		return copy;
 	}
 	
@@ -176,7 +194,7 @@ public class BenchmarkVisualizer {
 		return isOptima;
 	}
 	
-	private static void placeBitsOnMap(WritableImage im, boolean[] bits, int shape, int radius,  Color c){
+	public static void placeBitsOnMap(WritableImage im, boolean[] bits, int shape, int radius,  Color c){
 		BigInteger[] partitions = BenchmarkProblem.partitionBitstring(bits, 2);
 		double[] normalized = BenchmarkProblem.normalize(partitions, bits.length/2, 0, (int)im.getWidth());
 		int locX = (int)Math.round(normalized[0]);

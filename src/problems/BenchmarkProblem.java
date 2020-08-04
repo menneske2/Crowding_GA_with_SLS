@@ -5,7 +5,6 @@
  */
 package problems;
 
-import algorithm.GAIndividual;
 import algorithm.GAUtilities;
 import cec15_nich_java_code.cec15_nich_func;
 import java.io.BufferedReader;
@@ -86,31 +85,6 @@ public class BenchmarkProblem extends Problem{
 		} catch(Exception e){
 			System.out.println("Optima file for problem #"+funcNumber+" in "+dimensionality+" dimensions not found.");
 		}
-	}
-	
-	public int getPeakRatio(List<GAIndividual> pop, double tolerance){
-		int numFound = 0;
-		for(double[] optima : optimasInPaper){
-			for(var gai : pop){
-				double[] gaiCoords = this.translateToCoordinates(gai.genome);
-				// Calculating euclidean distance.
-				double dist = 0;
-				for(int i=0; i<gaiCoords.length; i++){
-					dist += Math.pow(gaiCoords[i] - optima[i], 2);
-				}
-				dist = Math.sqrt(dist);
-				if(dist <= tolerance){
-					numFound++;
-					break;
-				}
-			}
-		}
-		
-		return numFound;
-	}
-	
-	public int getMaxOptima(){
-		return this.optimasInPaper.size();
 	}
 	
 	public final void setDimensionality(int dims){

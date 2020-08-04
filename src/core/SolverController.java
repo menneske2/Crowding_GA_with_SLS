@@ -6,6 +6,7 @@
 package core;
 
 
+import algorithm.DataReceiver;
 import problems.DatasetClassificationProblem;
 import algorithm.GAIndividual;
 import algorithm.GeneticAlgorithm;
@@ -32,14 +33,16 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import problems.BenchmarkProblem;
 import problems.Problem;
+import statistics.PerformanceMeasures;
 
 /**
  *
  * @author Fredrik
  */
-public class SolverController {
+public class SolverController implements DataReceiver{
 	
 	// EA options
 	@FXML TextField fxSeed;
@@ -149,17 +152,17 @@ public class SolverController {
 		this.updateConfig();
 	}
 	
-	public void progressReport(int generation, int FEs, List<GAIndividual> pop, double best, double avg, double entropy, double nNiches, 
+	public void progressReport(int generation, int FEs, List<GAIndividual> pop, double bestNoPunish, double avgNoPunish, double entropy, double nNiches, 
 			double mutaChance, double crossChance, double crowdingFactor){
 		if(generation < 8000 || generation%10 == 9){
 			Collections.sort(pop);
 			double bestFit = pop.get(0).fitness;
 			int featuresInBest = pop.get(0).numberOfFeatures();
 			fxGenerationCounter.setText("Generation: " + (generation+1));
-			fxScore.setText("Best score: " + best);
+			fxScore.setText("Best score: " + bestNoPunish);
 			// Performance chart
-			charts.get(0).getData().get(0).getData().add(new XYChart.Data(FEs, best));
-			charts.get(0).getData().get(1).getData().add(new XYChart.Data(FEs, avg));
+			charts.get(0).getData().get(0).getData().add(new XYChart.Data(FEs, bestNoPunish));
+			charts.get(0).getData().get(1).getData().add(new XYChart.Data(FEs, avgNoPunish));
 			charts.get(0).getData().get(2).getData().add(new XYChart.Data(FEs, bestFit));
 			// Diversity chart
 			charts.get(1).getData().get(0).getData().add(new XYChart.Data(generation, entropy));
@@ -199,16 +202,14 @@ public class SolverController {
 		
 		if(BenchmarkProblem.class.isAssignableFrom(p.getClass())){
 			BenchmarkProblem pp = (BenchmarkProblem) p;
-			double tolerance = 1;
-			System.out.println("Found " + pp.getPeakRatio(pop, tolerance) + "/" + pp.getMaxOptima() + " optima.");
+			double tolerance = 0.6;
+			System.out.println("Found " + PerformanceMeasures.getNumOptimaFound(pp, pop, tolerance) + "/" + pp.optimasInPaper.size() + " optima.");
 		}
 	}
 	
 	private void generateVisualization(List<GAIndividual> pop){
-		List<boolean[]> bitstrings = new ArrayList<>();
-		for(var gai : pop)
-			bitstrings.add(gai.genome);
-		Image im = BenchmarkVisualizer.getSolutionsOnHeatmap(heatMap, bitstrings);
+		Image im = BenchmarkVisualizer.getSolutionsOnHeatmap(prob, heatMap, pop);
+		
 		album.add(im);
 		fxImgScrollbar.setMax(album.size()-1);
 		fxImgScrollbar.setValue(album.size()-1);
@@ -333,6 +334,11 @@ public class SolverController {
 		conf.SLS_TAKE_FIRST_IMPROVEMENT = fxSLSTakeFirst.selectedProperty().get();
 		conf.SLS_MAX_FLIPS_IN_GREEDY = Integer.parseInt(fxSLSMaxFlipsGreedy.getText());
 		conf.SLS_P_NOISY = Float.parseFloat(fxSLSNoiseP.getText());
+	}
+
+	@Override
+	public boolean requiresWaiting() {
+		return true;
 	}
 
 }

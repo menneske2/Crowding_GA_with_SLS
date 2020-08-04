@@ -5,7 +5,6 @@
  */
 package algorithm;
 
-import core.SolverController;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,7 +23,7 @@ public class GeneticAlgorithm implements Runnable{
 	
 	protected final Problem prob;
 	protected final OptimizerConfig conf;
-	protected final SolverController feedbackStation;
+	protected final DataReceiver feedbackStation;
 	protected final BlockingQueue comsChannel;
 
 	protected final Random rng;
@@ -32,7 +31,7 @@ public class GeneticAlgorithm implements Runnable{
 	protected final SLS sls;
 	private final PIDController controller;
 	
-	public GeneticAlgorithm(Problem prob, OptimizerConfig conf, SolverController feedbackStation, BlockingQueue comsChannel){
+	public GeneticAlgorithm(Problem prob, OptimizerConfig conf, DataReceiver feedbackStation, BlockingQueue comsChannel){
 		this.prob = prob;
 		this.conf = conf;
 		this.feedbackStation = feedbackStation;
@@ -122,9 +121,14 @@ public class GeneticAlgorithm implements Runnable{
 
 		long timeTaken = new Date().getTime() - startTime.getTime();
 
-		Platform.runLater(()->{
+		if(feedbackStation.requiresWaiting()){
+			Platform.runLater(()->{
+				feedbackStation.registerSolution(prob, population, timeTaken);
+			});
+		} else{
 			feedbackStation.registerSolution(prob, population, timeTaken);
-		});
+		}
+		
 	}
 	
 	
@@ -132,7 +136,6 @@ public class GeneticAlgorithm implements Runnable{
 	private double sendProgressReport(int generation, List<Niche> niches){
 		final int genCopy = generation; // it needs to be an effectively final variable.
 		double bestR = prob.evaluateBitstring(population.get(0).genome, false);
-		double bestFit = prob.evaluateBitstring(population.get(0).genome, true);
 		double avgR = 0;
 		for(var p : population){
 			avgR += prob.evaluateBitstring(p.genome, false);
@@ -146,10 +149,15 @@ public class GeneticAlgorithm implements Runnable{
 
 		List<GAIndividual> popCopy = new ArrayList<>(population);
 
-		Platform.runLater(()->{
+		if(feedbackStation.requiresWaiting()){
+			Platform.runLater(()->{
+				feedbackStation.progressReport(genCopy, prob.fitnessEvaluations, popCopy , bestR, avg, entropy, nNiches, 
+						conf.MUTATION_CHANCE, conf.CROSSOVER_CHANCE, crowdingFactor);
+			});
+		} else{
 			feedbackStation.progressReport(genCopy, prob.fitnessEvaluations, popCopy , bestR, avg, entropy, nNiches, 
 					conf.MUTATION_CHANCE, conf.CROSSOVER_CHANCE, crowdingFactor);
-		});
+		}
 		return entropy;
 	}
 	
