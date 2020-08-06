@@ -20,7 +20,7 @@ import problems.BenchmarkProblem;
 public class PerformanceMeasures {
 	
 	public static int getNumOptimaFound(BenchmarkProblem prob, List<GAIndividual> pop){
-		double epsilon = 0.4 * prob.getDimensionality();
+		double epsilon = 0.5 * prob.getDimensionality();
 		if(prob.optimasInPaper == null)
 			return -1;
 		int numFound = 0;
@@ -43,7 +43,7 @@ public class PerformanceMeasures {
 	}
 	
 	public static List<boolean[]> getOptimaFound(BenchmarkProblem prob, List<GAIndividual> pop){
-		double epsilon = 0.4*prob.getDimensionality();
+		double epsilon = 0.5*prob.getDimensionality();
 		if(prob.optimasInPaper == null)
 			return null;
 		List<boolean[]> optima2 = new ArrayList<>();
@@ -128,8 +128,31 @@ public class PerformanceMeasures {
 		return mean;
 	}
 	
-	public double getSTD(double[] vals){
+	public static double getSTD(List<Integer> vals){
+		double[] vals2 = new double[vals.size()];
+		for(int i=0; i<vals.size(); i++){
+			vals2[i] = vals.get(i);
+		}
+		return getSTD(vals2);
+	}
+	
+	public static double getSTD(double[] vals){
 		StandardDeviation std = new StandardDeviation(false);
 		return std.evaluate(vals);
+	}
+	
+	public static double[] analyzeBest5(List<DoubleArray> best5){
+		int len = best5.get(0).values.length;
+		
+		double[] vals = new double[best5.size()*len];
+		for(int i=0; i<best5.size(); i++){
+			for(int j=0; j<len; j++){
+				vals[i*len+j] = best5.get(i).values[j];
+			}
+		}
+		double mean = getMean(vals);
+		double std = getSTD(vals);
+		
+		return new double[]{mean, std};
 	}
 }

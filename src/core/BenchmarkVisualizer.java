@@ -6,7 +6,9 @@
 package core;
 
 import algorithm.GAIndividual;
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
 import problems.Problem;
 import problems.BenchmarkProblem;
 import problems.BenchmarkLoader;
@@ -82,11 +84,31 @@ public class BenchmarkVisualizer {
 	private static boolean markPaperOptima2D(WritableImage im, BenchmarkProblem prob, int shape, int drawRadius, Color c){
 		try{
 			for(double[] point : prob.optimasInPaper){
-				double x = normalizeTo01(point[0], -100, 100) * Math.pow(2,BITSTRING_LENGTH/2);
-				double y = normalizeTo01(point[1], -100, 100) * Math.pow(2,BITSTRING_LENGTH/2);
-				int x2 = (int) Math.round(x);
-				int y2 = (int) Math.round(y);
-				markLocation(x2, y2, im, shape, drawRadius, c);
+				if(prob.getDimensionality() >= 3){
+					boolean[] bits = new boolean[prob.numFeatures];
+					int axisLength = bits.length / prob.getDimensionality();
+					for(int i=0; i<point.length; i++){
+						BigDecimal x = theBigNormalizer(point[0], -100, 100);
+						String m = "";
+						for(int j=0; j<axisLength; j++) m+="1";
+						BigDecimal max = new BigDecimal(new BigInteger(m, 2));
+						x = x.multiply(max);
+						x = x.round(MathContext.UNLIMITED);
+						String bs = x.toBigInteger().toString(2);
+						while(bs.length() < axisLength)
+							bs = "0" + bs;
+						for(int j=0; j<bs.length(); j++){
+							bits[i*axisLength + j] = bs.charAt(j)=='1';
+						}
+					}
+					placeBitsOnMap(prob, im, bits, shape, drawRadius, c);
+				} else{
+					double x = normalizeTo01(point[0], -100, 100) * Math.pow(2,BITSTRING_LENGTH/2);
+					double y = normalizeTo01(point[1], -100, 100) * Math.pow(2,BITSTRING_LENGTH/2);
+					int x2 = (int) Math.round(x);
+					int y2 = (int) Math.round(y);
+					markLocation(x2, y2, im, shape, drawRadius, c);
+				}
 			}
 			return true;
 		} catch(Exception e){
@@ -199,7 +221,6 @@ public class BenchmarkVisualizer {
 		double[] normalized = BenchmarkProblem.normalize(partitions, bits.length/2, 0, (int)im.getWidth());
 		int locX = (int)Math.round(normalized[0]);
 		int locY = (int)Math.round(normalized[1]);
-		
 		markLocation(locX, locY, im, shape, radius, c);
 	}
 	
@@ -373,6 +394,13 @@ public class BenchmarkVisualizer {
 		stage.setScene(scene);
 		stage.setTitle("Heatmap");
 		stage.show();
+	}
+	
+	private static BigDecimal theBigNormalizer(double in, double inLowest, double inHighest){
+		BigDecimal x = new BigDecimal(in);
+		x = x.subtract(new BigDecimal(inLowest));
+		x = x.divide(new BigDecimal(inHighest-inLowest));
+		return x;
 	}
 	
 	// Normalizes to values in the range [0, 1]

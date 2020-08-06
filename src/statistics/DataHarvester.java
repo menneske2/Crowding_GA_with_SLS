@@ -7,6 +7,7 @@ package statistics;
 
 import algorithm.OptimizerConfig;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -45,7 +46,7 @@ public class DataHarvester {
 		optimaFound = new ArrayList<>();
 		best5 = new ArrayList<>();
 		
-//		if(true) return;
+		if(true) return;
 		
 		for(int i=0; i<probList.size(); i++){
 			if(!BenchmarkProblem.class.isAssignableFrom(probList.get(i).getClass())) 
@@ -99,33 +100,26 @@ public class DataHarvester {
 		Collections.sort(optimaFound);
 		System.out.println("Worst run:\t" + optimaFound.get(0));
 		System.out.println("Best run:\t" + optimaFound.get(optimaFound.size()-1));
-		System.out.println("Mean:\t" + PerformanceMeasures.getMean(optimaFound));
+		System.out.print("Mean:\t\t" + PerformanceMeasures.getMean(optimaFound));
+		System.out.println("(" + PerformanceMeasures.getSTD(optimaFound) + ")");
 		
 		System.out.println("\nBest 5 optima data:");
 		Collections.sort(best5);
-		System.out.println("Worst run:\t" + best5.get(0));
-		System.out.println("Best run:\t" + best5.get(best5.size()-1));
-		double[] sums = new double[best5.get(0).values.length];
-		for(var dArray : best5){
-			for(int i=0; i<sums.length; i++){
-				sums[i] += dArray.values[i];
-			}
-		}
-		for(int i=0; i<sums.length; i++){
-			sums[i] /= best5.size();
-		}
-		DoubleArray sum = new DoubleArray(sums);
-		System.out.println("Mean:\t\t" + sum);
+		System.out.println("Worst run:\t" + best5.get(best5.size()-1));
+		System.out.println("Best run:\t" + best5.get(0));
+		double[] best5Data = PerformanceMeasures.analyzeBest5(best5);
+		System.out.println("Mean:\t" + best5Data[0]);
+		System.out.println("STDs:\t" + best5Data[1]);
 		// beste/verste = plusset sammen fitness. 
 		// vis gjennomsnitt for både beste/verste og totalt.
 	}
 	
-	private String dArrayToString(double[] in, int decimals){
+	private String arrayToString(double[] in, int decimals){
 		String out = "[";
 		for(int i=0; i<in.length; i++){
 			double toWrite = in[i];
 			if(decimals != -1)
-				toWrite = Math.round(10*decimals*toWrite) / 10*decimals;
+				toWrite = Math.round(Math.pow(10, decimals)*toWrite) / Math.pow(10, decimals);
 			out += toWrite + ", ";
 		}
 		out = out.substring(0, out.length()-2) + "]";

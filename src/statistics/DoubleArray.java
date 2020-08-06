@@ -16,6 +16,9 @@ public class DoubleArray implements Comparable<DoubleArray>{
 	public DoubleArray(double[] arr){
 		this.values = arr;
 	}
+	public DoubleArray(int len){
+		this.values = new double[len];
+	}
 	
 	public double getSum(){
 		double sum = 0;
@@ -40,15 +43,17 @@ public class DoubleArray implements Comparable<DoubleArray>{
 	@Override
 	public String toString(){
 		int decimals = 3;
+		int meanDecimals = 1;
 		String out = "[";
 		for(int i=0; i<values.length; i++){
 			double toWrite = values[i];
 			if(decimals != -1)
-				toWrite = Math.round(10*decimals*toWrite) / 10*decimals;
+				toWrite = Math.round(Math.pow(10, decimals)*toWrite) / Math.pow(10, decimals);
 			out += toWrite + ", ";
 		}
 		out = out.substring(0, out.length()-2) + "]";
-		out += " Mean: " + Math.round(10*decimals*this.getMean()) / 10*decimals;
+		out += " Mean: " + Math.round(Math.pow(10, meanDecimals)*this.getMean()) / Math.pow(10, meanDecimals);
+		out += "(" + Math.round(Math.pow(10, meanDecimals)*PerformanceMeasures.getSTD(values)) / Math.pow(10, meanDecimals) + ")";
 		
 		return out;
 	}
