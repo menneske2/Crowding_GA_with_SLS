@@ -6,6 +6,7 @@
 package core;
 
 import algorithm.GAIndividual;
+import java.math.BigInteger;
 import problems.Problem;
 import problems.BenchmarkProblem;
 import problems.BenchmarkLoader;
@@ -34,11 +35,9 @@ public class BenchmarkVisualizer {
 	private static final int SHAPE_CIRCLE = 4;
 	
 	private static final int BITSTRING_LENGTH = 18;
-	private static final int RESOLUTION = 512;
 	
 	public static Image getFullyFeaturedHeatmap(BenchmarkProblem prob){
-//		double[][] fArray = generateFitnessArray(prob, BITSTRING_LENGTH);
-		double[][] fArray = generateFitnessArray(prob, RESOLUTION);
+		double[][] fArray = generateFitnessArray(prob, BITSTRING_LENGTH);
 		double[][] normFArray = normalizeFitnessArray(fArray);
 		
 		WritableImage im = createHeatMap(normFArray, Color.BLACK, Color.CHOCOLATE); // fitness, low color, high color.
@@ -84,10 +83,8 @@ public class BenchmarkVisualizer {
 	private static boolean markPaperOptima2D(WritableImage im, BenchmarkProblem prob, int shape, int drawRadius, Color c){
 		try{
 			for(double[] point : prob.optimasInPaper){
-//				double x = normalizeTo01(point[0], -100, 100) * Math.pow(2,BITSTRING_LENGTH/2);
-//				double y = normalizeTo01(point[1], -100, 100) * Math.pow(2,BITSTRING_LENGTH/2);
-				double x = normalizeTo01(point[0], -100, 100) * RESOLUTION;
-				double y = normalizeTo01(point[1], -100, 100) * RESOLUTION;
+				double x = normalizeTo01(point[0], -100, 100) * Math.pow(2,BITSTRING_LENGTH/2);
+				double y = normalizeTo01(point[1], -100, 100) * Math.pow(2,BITSTRING_LENGTH/2);
 				int x2 = (int) Math.round(x);
 				int y2 = (int) Math.round(y);
 				markLocation(x2, y2, im, shape, drawRadius, c);
@@ -199,10 +196,8 @@ public class BenchmarkVisualizer {
 	}
 	
 	public static void placeBitsOnMap(BenchmarkProblem prob, WritableImage im, boolean[] bits, int shape, int radius,  Color c){
-		double[] normalized = prob.translateToCoordinates(bits);
-		normalized = prob.normalizeCoords(normalized, 0, im.getWidth());
-//		BigInteger[] partitions = BenchmarkProblem.partitionBitstring(bits, 2);
-//		double[] normalized = BenchmarkProblem.normalize(partitions, bits.length/2, 0, (int)im.getWidth());
+		BigInteger[] partitions = BenchmarkProblem.partitionBitstring(bits, 2);
+		double[] normalized = BenchmarkProblem.normalize(partitions, bits.length/2, 0, (int)im.getWidth());
 		int locX = (int)Math.round(normalized[0]);
 		int locY = (int)Math.round(normalized[1]);
 		
@@ -312,17 +307,14 @@ public class BenchmarkVisualizer {
 	private static double[][] generateFitnessArray(BenchmarkProblem prob, int resolution){
 		prob = BenchmarkLoader.loadByName(prob.name);
 		prob.setDimensionality(2);
-		prob.numFeatures = resolution*2;
-//		prob.numFeatures = resolution;
+		prob.numFeatures = resolution;
 		
-		int axisLength = resolution;
-//		int axisLength = (int) Math.pow(2, prob.numFeatures/2);
+		int axisLength = (int) Math.pow(2, prob.numFeatures/2);
 
 		double[][] fitnesses = new double[axisLength][axisLength];
 		for(int x=0; x<axisLength; x++){
 			for(int y=0; y<axisLength; y++){
 				boolean[] bits = coordsToBoolArray(x, y, prob.numFeatures);
-//				boolean[] bits = coordsToBoolArray(x, y, prob.numFeatures);
 				double fitness = prob.evaluateBitstring(bits, false);
 				fitnesses[x][y] = fitness;
 			}
@@ -392,35 +384,19 @@ public class BenchmarkVisualizer {
 	}
 	
 	private static boolean[] coordsToBoolArray(int x, int y, int totLen){
-		boolean[] bits = new boolean[totLen];
-		for(int i=0; i<bits.length; i++){
-			if(i%2 == 0 && x>0){ 
-				bits[i] = true;
-				x--;
-			} else if(i%2 == 1 && y>0){
-				bits[i] = true;
-				y--;
-			} else{
-				bits[i] = false;
-			}
+		int axisLength = totLen/2;
+		String s = Integer.toBinaryString(y);
+		while(s.length() < axisLength){
+			s = "0" + s;
 		}
-		return bits;
+		s = Integer.toBinaryString(x) + s;
+		while(s.length() < axisLength*2){
+			s = "0" + s;
+		}
+		boolean[] bArray = new boolean[axisLength*2];
+		for(int i=0; i<bArray.length; i++){
+			bArray[i] = s.charAt(i) == '1';
+		}
+		return bArray;
 	}
-	
-//	private static boolean[] coordsToBoolArray(int x, int y, int totLen){
-//		int axisLength = totLen/2;
-//		String s = Integer.toBinaryString(y);
-//		while(s.length() < axisLength){
-//			s = "0" + s;
-//		}
-//		s = Integer.toBinaryString(x) + s;
-//		while(s.length() < axisLength*2){
-//			s = "0" + s;
-//		}
-//		boolean[] bArray = new boolean[axisLength*2];
-//		for(int i=0; i<bArray.length; i++){
-//			bArray[i] = s.charAt(i) == '1';
-//		}
-//		return bArray;
-//	}
 }

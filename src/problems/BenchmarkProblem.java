@@ -98,81 +98,49 @@ public class BenchmarkProblem extends Problem{
 		return this.dimensionality;
 	}
 	
+	
 	public double[] translateToCoordinates(boolean[] bits){
-		if(bits.length%dimensionality != 0){
-			System.out.println("[BenchmarkProblem] invalid combination of bitlength and dimensionality");
-			System.out.println("bitlength: " + bits.length);
-			throw new Error();
+		BigInteger[] axesBig = partitionBitstring(bits, dimensionality);
+		double[] axes = normalize(axesBig, numFeatures/dimensionality, searchRange[0], searchRange[1]);
+		if(searchRange.length > 2){
+			axes[1] = normalize(axesBig, numFeatures/dimensionality, searchRange[2], searchRange[3])[1];
 		}
-		
-		double featPerAxis = bits.length / dimensionality;
-		double pointVal = (searchRange[1] - searchRange[0]) / featPerAxis;
-		double[] axes = new double[dimensionality];
-		for(int i=0; i<axes.length; i++){
-			axes[i] = searchRange[0];
-		}
-		
-		for(int i=0; i<bits.length; i++){
-			if(bits[i]){
-				axes[i%dimensionality] += pointVal;
-			}
-		}
-		
 		return axes;
 	}
 	
-	// This is only used by other classes.
-	public double[] normalizeCoords(double[] axes, double lower, double upper){
-		double diff = searchRange[1] - searchRange[0];
-		double[] normalized = new double[axes.length];
-		for(int i=0; i<axes.length; i++){
-			normalized[i] = lower + ((axes[i]-searchRange[0]) / diff) * upper;
+	public static BigInteger[] partitionBitstring(boolean[] bits, int partitions){
+		if(bits.length%partitions != 0){
+			System.out.println("bitlength: " + bits.length);
+			System.out.println("[BenchmarkProblem] invalid combination of bitlength and partitioning");
+			throw new Error();
 		}
-		return normalized;
+		BigInteger[] toReturn = new BigInteger[partitions];
+		int len = bits.length / partitions;
+		
+		for(int i=0; i<partitions; i++){
+			String bs = "";
+			for(int j=0; j<len; j++){
+				Boolean b = bits[i*len + j];
+				bs += (b.hashCode() & 0b10) >> 1;
+			}
+			toReturn[i] = new BigInteger(bs, 2);
+		}
+		return toReturn;
 	}
 	
-//	public double[] translateToCoordinates(boolean[] bits){
-//		BigInteger[] axesBig = partitionBitstring(bits, dimensionality);
-//		double[] axes = normalize(axesBig, numFeatures/dimensionality, searchRange[0], searchRange[1]);
-//		if(searchRange.length > 2){
-//			axes[1] = normalize(axesBig, numFeatures/dimensionality, searchRange[2], searchRange[3])[1];
-//		}
-//		return axes;
-//	}
-//	
-//	public static BigInteger[] partitionBitstring(boolean[] bits, int partitions){
-//		if(bits.length%partitions != 0){
-//			System.out.println("bitlength: " + bits.length);
-//			System.out.println("[BenchmarkProblem] invalid combination of bitlength and partitioning");
-//			throw new Error();
-//		}
-//		BigInteger[] toReturn = new BigInteger[partitions];
-//		int len = bits.length / partitions;
-//		
-//		for(int i=0; i<partitions; i++){
-//			String bs = "";
-//			for(int j=0; j<len; j++){
-//				Boolean b = bits[i*len + j];
-//				bs += (b.hashCode() & 0b10) >> 1;
-//			}
-//			toReturn[i] = new BigInteger(bs, 2);
-//		}
-//		return toReturn;
-//	}
-//	
-//	public static double[] normalize(BigInteger[] in, int maxBits, double floor, double ceiling){
-//		String toParse = "";
-//		for(int i=0; i<maxBits; i++)
-//			toParse += "1";
-//		BigInteger max = new BigInteger(toParse, 2);
-//		
-//		double[] toReturn = new double[in.length];
-//		for(int i=0; i<in.length; i++){
-//			BigInteger num = in[i];
-//			double ratio = num.doubleValue()/max.doubleValue();
-//			toReturn[i] = floor + ratio*(ceiling-floor);
-//		}
-//		return toReturn;
-//	}
+	public static double[] normalize(BigInteger[] in, int maxBits, double floor, double ceiling){
+		String toParse = "";
+		for(int i=0; i<maxBits; i++)
+			toParse += "1";
+		BigInteger max = new BigInteger(toParse, 2);
+		
+		double[] toReturn = new double[in.length];
+		for(int i=0; i<in.length; i++){
+			BigInteger num = in[i];
+			double ratio = num.doubleValue()/max.doubleValue();
+			toReturn[i] = floor + ratio*(ceiling-floor);
+		}
+		return toReturn;
+	}
 	
 }
