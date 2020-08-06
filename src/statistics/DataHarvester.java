@@ -22,8 +22,8 @@ import problems.Problem;
  */
 public class DataHarvester {
 	
-	private final int NUM_THREADS = 2;
-	private final int RUNS_PER_DATAPOINT = 2;
+	private final int NUM_THREADS = 5;
+	private final int RUNS_PER_DATAPOINT = 25;
 	
 	private final ExecutorService threadPool;
 	
@@ -44,6 +44,9 @@ public class DataHarvester {
 		threadPool = Executors.newFixedThreadPool(NUM_THREADS);
 		optimaFound = new ArrayList<>();
 		best5 = new ArrayList<>();
+		
+//		if(true) return;
+		
 		for(int i=0; i<probList.size(); i++){
 			if(!BenchmarkProblem.class.isAssignableFrom(probList.get(i).getClass())) 
 				continue;
@@ -78,7 +81,8 @@ public class DataHarvester {
 		if(BenchmarkProblem.class.isAssignableFrom(prob.getClass())){
 			BenchmarkProblem p = (BenchmarkProblem) prob;
 //			conf.FITNESS_EVALUATIONS = (int)Math.round(2000 * p.getDimensionality() * Math.sqrt(p.optimasInPaper.size()));
-			System.out.println("Using " + conf.FITNESS_EVALUATIONS + " fitness evaluations per run.");
+			conf.FITNESS_EVALUATIONS = 100000;
+//			System.out.println("Using " + conf.FITNESS_EVALUATIONS + " fitness evaluations per run.");
 		}
 		
 		runTest(prob, conf);
@@ -102,15 +106,16 @@ public class DataHarvester {
 		System.out.println("Worst run:\t" + best5.get(0));
 		System.out.println("Best run:\t" + best5.get(best5.size()-1));
 		double[] sums = new double[best5.get(0).values.length];
-		for(var da : best5){
+		for(var dArray : best5){
 			for(int i=0; i<sums.length; i++){
-				sums[i] += da.values[i];
+				sums[i] += dArray.values[i];
 			}
 		}
 		for(int i=0; i<sums.length; i++){
 			sums[i] /= best5.size();
 		}
-		System.out.println("Mean:\t" + dArrayToString(sums, 3));
+		DoubleArray sum = new DoubleArray(sums);
+		System.out.println("Mean:\t\t" + sum);
 		// beste/verste = plusset sammen fitness. 
 		// vis gjennomsnitt for både beste/verste og totalt.
 	}
@@ -135,7 +140,7 @@ public class DataHarvester {
 				Logger.getLogger(DataHarvester.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
-		this.notifyAll();
+//		this.notifyAll();
 	}
 	
 	private void runTest(Problem prob, OptimizerConfig conf){
@@ -143,10 +148,12 @@ public class DataHarvester {
 			Runnable tester = new AlgTester(this, prob.clone(), conf.clone());
 			threadPool.submit(tester);
 		}
+		System.out.print("Running: ");
 	}
 	
 	public synchronized void reportResults(int optimaFound, double[] best5){
-		System.out.println((this.best5.size()+1) + ": Optima found: " + optimaFound + "\tBest 5 fitnesses: " + dArrayToString(best5, 3));
+//		System.out.println((this.best5.size()+1) + ": Optima found: " + optimaFound + "\tBest 5 fitnesses: " + dArrayToString(best5, 3));
+		System.out.print(".");
 		this.optimaFound.add(optimaFound);
 		this.best5.add(new DoubleArray(best5));
 		this.notifyAll();

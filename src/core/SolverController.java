@@ -203,8 +203,7 @@ public class SolverController implements DataReceiver{
 		if(BenchmarkProblem.class.isAssignableFrom(p.getClass())){
 			BenchmarkProblem pp = (BenchmarkProblem) p;
 			if(pp.optimasInPaper != null){
-				double tolerance = 0.6;
-				System.out.println("Found " + PerformanceMeasures.getNumOptimaFound(pp, pop, tolerance) + "/" + pp.optimasInPaper.size() + " optima.");
+				System.out.println("Found " + PerformanceMeasures.getNumOptimaFound(pp, pop) + "/" + pp.optimasInPaper.size() + " optima.");
 			}
 		}
 	}

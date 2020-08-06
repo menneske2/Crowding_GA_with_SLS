@@ -19,7 +19,8 @@ import problems.BenchmarkProblem;
  */
 public class PerformanceMeasures {
 	
-	public static int getNumOptimaFound(BenchmarkProblem prob, List<GAIndividual> pop, double epsilon){
+	public static int getNumOptimaFound(BenchmarkProblem prob, List<GAIndividual> pop){
+		double epsilon = 0.4 * prob.getDimensionality();
 		if(prob.optimasInPaper == null)
 			return -1;
 		int numFound = 0;
@@ -41,7 +42,8 @@ public class PerformanceMeasures {
 		return numFound;
 	}
 	
-	public static List<boolean[]> getOptimaFound(BenchmarkProblem prob, List<GAIndividual> pop, double epsilon){
+	public static List<boolean[]> getOptimaFound(BenchmarkProblem prob, List<GAIndividual> pop){
+		double epsilon = 0.4*prob.getDimensionality();
 		if(prob.optimasInPaper == null)
 			return null;
 		List<boolean[]> optima2 = new ArrayList<>();
@@ -88,6 +90,7 @@ public class PerformanceMeasures {
 					chosen.add(pop.get(i));
 					pop.remove(i);
 					found = true;
+					break;
 				}
 			}
 			if(!found)
@@ -102,8 +105,8 @@ public class PerformanceMeasures {
 		return f;
 	}
 	
-	public static double getPeakRatio(BenchmarkProblem prob, List<GAIndividual> pop, double epsilon){
-		double numFound = getNumOptimaFound(prob, pop, epsilon);
+	public static double getPeakRatio(BenchmarkProblem prob, List<GAIndividual> pop){
+		double numFound = getNumOptimaFound(prob, pop);
 		double max = prob.optimasInPaper.size();
 		return numFound/max;
 	}

@@ -22,7 +22,7 @@ public class OptimizerConfig implements Cloneable{
 	public float CROSSOVER_CHANCE = 0.7f;
 	public float MUTATION_CHANCE = 0.2f;
 	public float CROWDING_SCALING_FACTOR = 0.0f;
-	public float NICHING_EPSILON = 0.01f;
+	public float NICHING_EPSILON = 0.02f;
 	public boolean PID_ENABLED = true;
 	public float PID_CONTROL_RATE = 0.02f;
 	public int ACTIVE_NICHES = 25;
@@ -32,7 +32,7 @@ public class OptimizerConfig implements Cloneable{
 	public int MAX_NICHE_SIZE = 3;
 	public boolean SLS_TAKE_FIRST_IMPROVEMENT = true; // if false, checks all possibilities before moving in greedy step.
 	public int SLS_MAX_FLIPS = 30;
-	public int SLS_MAX_FLIPS_IN_GREEDY = 20; // If greedy search can't find an improvement after x tries, assume local optimality.
+	public int SLS_MAX_FLIPS_IN_GREEDY = 40; // If greedy search can't find an improvement after x tries, assume local optimality.
 	public float SLS_P_NOISY = 0.3f;
 	
 	@Override

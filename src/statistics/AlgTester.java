@@ -47,10 +47,9 @@ public class AlgTester implements DataReceiver, Runnable{
 	public void registerSolution(Problem p, List<GAIndividual> pop, long timeSpent){
 		double separation = 20;
 		if(BenchmarkProblem.class.isAssignableFrom(p.getClass()))
-			separation = 1 * ((BenchmarkProblem) p).getDimensionality();
+			separation = 0.01 * ((BenchmarkProblem) p).getDimensionality();
 		double[] bestN = PerformanceMeasures.nBestSeparatedBy(pop, p.distanceMeasure, 5, separation);
 		// Best-n was used to evaluate the composition functions.
-		
 		if(p.name.startsWith("F14") || p.name.startsWith("F15")){
 			harvester.reportResults(-1, bestN);
 			return;
@@ -59,9 +58,7 @@ public class AlgTester implements DataReceiver, Runnable{
 		int numOptimaFound = -1;
 		if(BenchmarkProblem.class.isAssignableFrom(p.getClass())){
 			BenchmarkProblem pp = (BenchmarkProblem) p;
-			// suganthan bruker epsilon = 0.1*D. dette er for høy accuracy for denne algoritmen siden binære representasjoner ikke er like fleksible som ekte.
-			double epsilon = 0.4 * pp.getDimensionality();
-			numOptimaFound = PerformanceMeasures.getNumOptimaFound(pp, pop, epsilon);
+			numOptimaFound = PerformanceMeasures.getNumOptimaFound(pp, pop);
 			for(int i=0; i<bestN.length; i++){
 				bestN[i] = -bestN[i];
 			}

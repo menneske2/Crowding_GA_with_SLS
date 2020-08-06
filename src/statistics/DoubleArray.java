@@ -48,7 +48,7 @@ public class DoubleArray implements Comparable<DoubleArray>{
 			out += toWrite + ", ";
 		}
 		out = out.substring(0, out.length()-2) + "]";
-		out += "\tMean: " + Math.round(10*decimals*this.getMean()) / 10*decimals;
+		out += " Mean: " + Math.round(10*decimals*this.getMean()) / 10*decimals;
 		
 		return out;
 	}

@@ -69,8 +69,7 @@ public class BenchmarkVisualizer {
 				placeBitsOnMap(p, copy, bitstring, SHAPE_CIRCLE, 2, Color.BLACK); // im, bits, drawRadius, color
 			}
 			if(p.optimasInPaper != null){
-				double tolerance = 0.8;
-				List<boolean[]> optima = PerformanceMeasures.getOptimaFound(p, pop, tolerance);
+				List<boolean[]> optima = PerformanceMeasures.getOptimaFound(p, pop);
 				for(var bits : optima){
 					placeBitsOnMap(p, copy, bits, SHAPE_CIRCLE, 3, Color.CYAN);
 				}
