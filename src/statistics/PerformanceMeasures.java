@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
-import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import problems.BenchmarkProblem;
 
@@ -21,6 +20,8 @@ import problems.BenchmarkProblem;
 public class PerformanceMeasures {
 	
 	public static int getNumOptimaFound(BenchmarkProblem prob, List<GAIndividual> pop, double epsilon){
+		if(prob.optimasInPaper == null)
+			return -1;
 		int numFound = 0;
 		for(double[] optima : prob.optimasInPaper){
 			for(var gai : pop){
@@ -41,6 +42,8 @@ public class PerformanceMeasures {
 	}
 	
 	public static List<boolean[]> getOptimaFound(BenchmarkProblem prob, List<GAIndividual> pop, double epsilon){
+		if(prob.optimasInPaper == null)
+			return null;
 		List<boolean[]> optima2 = new ArrayList<>();
 		for(double[] optima : prob.optimasInPaper){
 			for(var gai : pop){

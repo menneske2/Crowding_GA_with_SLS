@@ -51,10 +51,15 @@ public class AlgTester implements DataReceiver, Runnable{
 		double[] bestN = PerformanceMeasures.nBestSeparatedBy(pop, p.distanceMeasure, 5, separation);
 		// Best-n was used to evaluate the composition functions.
 		
+		if(p.name.startsWith("F14") || p.name.startsWith("F15")){
+			harvester.reportResults(-1, bestN);
+			return;
+		}
+		
 		int numOptimaFound = -1;
 		if(BenchmarkProblem.class.isAssignableFrom(p.getClass())){
 			BenchmarkProblem pp = (BenchmarkProblem) p;
-			// de bruker epsilon = 0.1*D. dette er for høy accuracy for denne algoritmen siden binære representasjoner ikke er like fleksible som ekte.
+			// suganthan bruker epsilon = 0.1*D. dette er for høy accuracy for denne algoritmen siden binære representasjoner ikke er like fleksible som ekte.
 			double epsilon = 0.4 * pp.getDimensionality();
 			numOptimaFound = PerformanceMeasures.getNumOptimaFound(pp, pop, epsilon);
 			for(int i=0; i<bestN.length; i++){

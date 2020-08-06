@@ -22,8 +22,8 @@ import problems.Problem;
  */
 public class DataHarvester {
 	
-	private final int NUM_THREADS = 4;
-	private final int RUNS_PER_DATAPOINT = 24;
+	private final int NUM_THREADS = 2;
+	private final int RUNS_PER_DATAPOINT = 2;
 	
 	private final ExecutorService threadPool;
 	
@@ -40,8 +40,58 @@ public class DataHarvester {
 		threadPool.shutdown();
 	}
 	
+	public DataHarvester(List<Problem> probList){
+		threadPool = Executors.newFixedThreadPool(NUM_THREADS);
+		optimaFound = new ArrayList<>();
+		best5 = new ArrayList<>();
+		for(int i=0; i<probList.size(); i++){
+			if(!BenchmarkProblem.class.isAssignableFrom(probList.get(i).getClass())) 
+				continue;
+			BenchmarkProblem prob = (BenchmarkProblem) probList.get(i);
+			System.out.println("\n-------------------\n" + prob.name + "\n-------------------");
+			for(int j=2; j<=30; j++){
+				prob.setDimensionality(j);
+				if(prob.name.startsWith("F14") || prob.name.startsWith("F15")){
+					if(j!=10 && j!=20 && j!=30)
+						continue;
+				}
+				else if(prob.optimasInPaper == null){
+					continue;
+				}
+				System.out.println("-------------------\nDimensionality: " + j + "\n-------------------");
+				harvestData(prob);
+				waitForData();
+				analyzeData();
+				
+				best5.clear();
+				optimaFound.clear();
+			}
+		}
+		threadPool.shutdown();
+	}
+	
+	private void harvestData(Problem prob){
+		OptimizerConfig conf = new OptimizerConfig();
+		conf.SEED = OptimizerConfig.NO_SEED;
+		prob.fitnessPunishRatio = 0.0;
+		conf.FITNESS_EVALUATIONS = 1000;
+		if(BenchmarkProblem.class.isAssignableFrom(prob.getClass())){
+			BenchmarkProblem p = (BenchmarkProblem) prob;
+//			conf.FITNESS_EVALUATIONS = (int)Math.round(2000 * p.getDimensionality() * Math.sqrt(p.optimasInPaper.size()));
+			System.out.println("Using " + conf.FITNESS_EVALUATIONS + " fitness evaluations per run.");
+		}
+		
+		runTest(prob, conf);
+		
+		// i artikkelen til suganthan er maxFEs = 2000 * D * sqrt(q), hvor D er dimensjoner og q er antall peaks i tekstfilene deres.
+		// de gjør 25 runs og måler kun antall peaks funnet. 
+		// de viser beste, verste, gjennomsnitt og standardavvik. 
+		
+		// du burde også vise beste, verste, gjennomsnitt og standardavvik for selve fitness scoren. husk å gange med -1 siden de skal være minimiseringsproblemer.
+	}
+	
 	private void analyzeData(){
-		System.out.println("\nOptima-finding data:");
+		System.out.println("Optima-finding data:");
 		Collections.sort(optimaFound);
 		System.out.println("Worst run:\t" + optimaFound.get(0));
 		System.out.println("Best run:\t" + optimaFound.get(optimaFound.size()-1));
@@ -85,31 +135,10 @@ public class DataHarvester {
 				Logger.getLogger(DataHarvester.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
-	}
-	
-	private void harvestData(Problem prob){
-		OptimizerConfig conf = new OptimizerConfig();
-		conf.SEED = OptimizerConfig.NO_SEED;
-		prob.fitnessPunishRatio = 0.0;
-		conf.FITNESS_EVALUATIONS = 1000;
-		if(BenchmarkProblem.class.isAssignableFrom(prob.getClass())){
-			BenchmarkProblem p = (BenchmarkProblem) prob;
-			conf.FITNESS_EVALUATIONS = (int)Math.round(2000 * p.getDimensionality() * Math.sqrt(p.optimasInPaper.size()));
-			System.out.println("Using " + conf.FITNESS_EVALUATIONS + " fitness evaluations per run.");
-		}
-		
-		
-		// i artikkelen til suganthan er maxFEs = 2000 * D * sqrt(q), hvor D er dimensjoner og q er antall peaks i tekstfilene deres.
-		// de gjør 25 runs og måler kun antall peaks funnet. 
-		// de viser beste, verste, gjennomsnitt og standardavvik. 
-		
-		// du burde også vise beste, verste, gjennomsnitt og standardavvik for selve fitness scoren. husk å gange med -1 siden de skal være minimiseringsproblemer.
-		
-		runTest(prob, conf);
+		this.notifyAll();
 	}
 	
 	private void runTest(Problem prob, OptimizerConfig conf){
-		System.out.println("Running " + RUNS_PER_DATAPOINT + " instances.");
 		for(int i=0; i<RUNS_PER_DATAPOINT; i++){
 			Runnable tester = new AlgTester(this, prob.clone(), conf.clone());
 			threadPool.submit(tester);

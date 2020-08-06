@@ -44,9 +44,13 @@ public class Main extends Application{
 		readProblems(probFolder, probList, "");
 		mmc.addProblems(probList);
 
+//		new DataHarvester(probList);
+		
         stage.setTitle("Crowding GA with SLS");
         stage.setScene(new Scene(root));
 		stage.show();
+		
+		
 	}
 	
 	private void readProblems(File folder, List<Problem> probList, String prefix){

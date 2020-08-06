@@ -9,7 +9,6 @@ import algorithm.GAIndividual;
 import problems.Problem;
 import problems.BenchmarkProblem;
 import problems.BenchmarkLoader;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.Group;
@@ -35,9 +34,11 @@ public class BenchmarkVisualizer {
 	private static final int SHAPE_CIRCLE = 4;
 	
 	private static final int BITSTRING_LENGTH = 18;
+	private static final int RESOLUTION = 512;
 	
 	public static Image getFullyFeaturedHeatmap(BenchmarkProblem prob){
-		double[][] fArray = generateFitnessArray(prob, BITSTRING_LENGTH);
+//		double[][] fArray = generateFitnessArray(prob, BITSTRING_LENGTH);
+		double[][] fArray = generateFitnessArray(prob, RESOLUTION);
 		double[][] normFArray = normalizeFitnessArray(fArray);
 		
 		WritableImage im = createHeatMap(normFArray, Color.BLACK, Color.CHOCOLATE); // fitness, low color, high color.
@@ -61,17 +62,18 @@ public class BenchmarkVisualizer {
 		List<boolean[]> bitstrings = new ArrayList<>();
 		for(var gai : pop)
 			bitstrings.add(gai.genome);
+	
 		
-		for(var bitstring : bitstrings){
-			placeBitsOnMap(copy, bitstring, SHAPE_CIRCLE, 2, Color.BLACK); // im, bits, drawRadius, color
-		}
 		if(BenchmarkProblem.class.isAssignableFrom(prob.getClass())){
 			BenchmarkProblem p = (BenchmarkProblem) prob;
+			for(var bitstring : bitstrings){
+				placeBitsOnMap(p, copy, bitstring, SHAPE_CIRCLE, 2, Color.BLACK); // im, bits, drawRadius, color
+			}
 			if(p.optimasInPaper != null){
 				double tolerance = 0.8;
 				List<boolean[]> optima = PerformanceMeasures.getOptimaFound(p, pop, tolerance);
 				for(var bits : optima){
-					placeBitsOnMap(copy, bits, SHAPE_CIRCLE, 3, Color.CYAN);
+					placeBitsOnMap(p, copy, bits, SHAPE_CIRCLE, 3, Color.CYAN);
 				}
 			}
 		}
@@ -82,8 +84,10 @@ public class BenchmarkVisualizer {
 	private static boolean markPaperOptima2D(WritableImage im, BenchmarkProblem prob, int shape, int drawRadius, Color c){
 		try{
 			for(double[] point : prob.optimasInPaper){
-				double x = normalizeTo01(point[0], -100, 100) * Math.pow(2,BITSTRING_LENGTH/2);
-				double y = normalizeTo01(point[1], -100, 100) * Math.pow(2,BITSTRING_LENGTH/2);
+//				double x = normalizeTo01(point[0], -100, 100) * Math.pow(2,BITSTRING_LENGTH/2);
+//				double y = normalizeTo01(point[1], -100, 100) * Math.pow(2,BITSTRING_LENGTH/2);
+				double x = normalizeTo01(point[0], -100, 100) * RESOLUTION;
+				double y = normalizeTo01(point[1], -100, 100) * RESOLUTION;
 				int x2 = (int) Math.round(x);
 				int y2 = (int) Math.round(y);
 				markLocation(x2, y2, im, shape, drawRadius, c);
@@ -194,9 +198,11 @@ public class BenchmarkVisualizer {
 		return isOptima;
 	}
 	
-	public static void placeBitsOnMap(WritableImage im, boolean[] bits, int shape, int radius,  Color c){
-		BigInteger[] partitions = BenchmarkProblem.partitionBitstring(bits, 2);
-		double[] normalized = BenchmarkProblem.normalize(partitions, bits.length/2, 0, (int)im.getWidth());
+	public static void placeBitsOnMap(BenchmarkProblem prob, WritableImage im, boolean[] bits, int shape, int radius,  Color c){
+		double[] normalized = prob.translateToCoordinates(bits);
+		normalized = prob.normalizeCoords(normalized, 0, im.getWidth());
+//		BigInteger[] partitions = BenchmarkProblem.partitionBitstring(bits, 2);
+//		double[] normalized = BenchmarkProblem.normalize(partitions, bits.length/2, 0, (int)im.getWidth());
 		int locX = (int)Math.round(normalized[0]);
 		int locY = (int)Math.round(normalized[1]);
 		
@@ -305,14 +311,18 @@ public class BenchmarkVisualizer {
 	
 	private static double[][] generateFitnessArray(BenchmarkProblem prob, int resolution){
 		prob = BenchmarkLoader.loadByName(prob.name);
-		prob.numFeatures = resolution;
+		prob.setDimensionality(2);
+		prob.numFeatures = resolution*2;
+//		prob.numFeatures = resolution;
 		
-		int axisLength = (int) Math.pow(2, prob.numFeatures/2);
+		int axisLength = resolution;
+//		int axisLength = (int) Math.pow(2, prob.numFeatures/2);
 
 		double[][] fitnesses = new double[axisLength][axisLength];
 		for(int x=0; x<axisLength; x++){
 			for(int y=0; y<axisLength; y++){
 				boolean[] bits = coordsToBoolArray(x, y, prob.numFeatures);
+//				boolean[] bits = coordsToBoolArray(x, y, prob.numFeatures);
 				double fitness = prob.evaluateBitstring(bits, false);
 				fitnesses[x][y] = fitness;
 			}
@@ -382,19 +392,35 @@ public class BenchmarkVisualizer {
 	}
 	
 	private static boolean[] coordsToBoolArray(int x, int y, int totLen){
-		int axisLength = totLen/2;
-		String s = Integer.toBinaryString(y);
-		while(s.length() < axisLength){
-			s = "0" + s;
+		boolean[] bits = new boolean[totLen];
+		for(int i=0; i<bits.length; i++){
+			if(i%2 == 0 && x>0){ 
+				bits[i] = true;
+				x--;
+			} else if(i%2 == 1 && y>0){
+				bits[i] = true;
+				y--;
+			} else{
+				bits[i] = false;
+			}
 		}
-		s = Integer.toBinaryString(x) + s;
-		while(s.length() < axisLength*2){
-			s = "0" + s;
-		}
-		boolean[] bArray = new boolean[axisLength*2];
-		for(int i=0; i<bArray.length; i++){
-			bArray[i] = s.charAt(i) == '1';
-		}
-		return bArray;
+		return bits;
 	}
+	
+//	private static boolean[] coordsToBoolArray(int x, int y, int totLen){
+//		int axisLength = totLen/2;
+//		String s = Integer.toBinaryString(y);
+//		while(s.length() < axisLength){
+//			s = "0" + s;
+//		}
+//		s = Integer.toBinaryString(x) + s;
+//		while(s.length() < axisLength*2){
+//			s = "0" + s;
+//		}
+//		boolean[] bArray = new boolean[axisLength*2];
+//		for(int i=0; i<bArray.length; i++){
+//			bArray[i] = s.charAt(i) == '1';
+//		}
+//		return bArray;
+//	}
 }

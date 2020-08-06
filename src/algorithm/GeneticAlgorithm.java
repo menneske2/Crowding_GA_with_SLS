@@ -250,15 +250,24 @@ public class GeneticAlgorithm implements Runnable{
 			
 			
 			for(int i=0; i<2; i++){
-				// "Turn off 10 random features"-mutation.
+				// Bitflip-mutation.
 				if(rng.nextFloat() < conf.MUTATION_CHANCE) {
-					for(int j=0; j<10; j++){
-						int point = rng.nextInt(genomeLength);
-						childGenomes[i][point] = false;
-					}
-					
+					int point = rng.nextInt(genomeLength);
+					childGenomes[i][point] = !childGenomes[i][point];
 				}
 			}
+			
+			
+//			for(int i=0; i<2; i++){
+//				// "Turn off 10 random features"-mutation.
+//				if(rng.nextFloat() < conf.MUTATION_CHANCE) {
+//					for(int j=0; j<10; j++){
+//						int point = rng.nextInt(genomeLength);
+//						childGenomes[i][point] = false;
+//					}
+//					
+//				}
+//			}
 			
 			// Creating the actual offspring.
 			GAIndividual[] children = new GAIndividual[2];
