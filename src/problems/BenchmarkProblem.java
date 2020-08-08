@@ -35,7 +35,7 @@ public class BenchmarkProblem extends Problem{
 		this.searchRange = new double[]{-100, 100};
 		this.fitnessPunishRatio = 0;
 		
-		this.numFeatures = 720;
+		this.numFeatures = 480;
 		setDimensionality(2);
 	}
 	

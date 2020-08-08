@@ -28,7 +28,7 @@ public class OptimizerConfig implements Cloneable{
 	public int ACTIVE_NICHES = 25;
 	
 	// SLS-parameters
-	public boolean SLS_Enabled = false;
+	public boolean SLS_Enabled = true;
 	public int MAX_NICHE_SIZE = 3;
 	public boolean SLS_TAKE_FIRST_IMPROVEMENT = true; // if false, checks all possibilities before moving in greedy step.
 	public int SLS_MAX_FLIPS = 30;

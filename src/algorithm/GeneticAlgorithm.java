@@ -78,17 +78,8 @@ public class GeneticAlgorithm implements Runnable{
 				controller.updateCrowdingScalingFactor(conf, niches);
 			
 			
-			if(conf.SLS_Enabled){
-				List<Niche> tooBig = new ArrayList<>();
-				for(var n : niches){
-					if(n.getPoints().size() > conf.MAX_NICHE_SIZE)
-						tooBig.add(n);
-				}
-				if(!tooBig.isEmpty())
-					SLSPurge(tooBig);
-			}
 			
-			if(!conf.SLS_Enabled){
+			if(conf.SLS_Enabled){
 				for(var niche : niches){
 					sls.optimizeNiche(niche);
 					purgeExcessInNiche(niche);
@@ -159,35 +150,6 @@ public class GeneticAlgorithm implements Runnable{
 					conf.MUTATION_CHANCE, conf.CROSSOVER_CHANCE, crowdingFactor);
 		}
 		return entropy;
-	}
-	
-	private void SLSPurge(List<Niche> niches){
-			long preTime = new Date().getTime();
-			double[] improvements = new double[niches.size()];
-			for(int i=0; i<niches.size(); i++){
-				// reinitialize by picking a good niche and chain-mutating? 2 good niches and crossover?
-				Niche chosen = niches.get(i);
-				double pre = chosen.getBest().fitness;
-				improvements[i] = sls.optimizeNiche(chosen) - pre;
-			}
-			long timeSpent = new Date().getTime() - preTime;
-
-			// Committing genocide in all niches. The elite ones get 1 survivor.
-			Collections.sort(niches);
-			for(int i=0; i<niches.size(); i++){
-				int start = conf.MAX_NICHE_SIZE;
-				Collections.sort(niches.get(i).getPoints());
-				for(int j=start; j<niches.get(i).getPoints().size(); j++){
-					var gai = niches.get(i).getPoints().get(j);
-					population.remove(gai);
-					niches.get(i).getPoints().remove(j);
-					j--;
-				}
-				if(niches.get(i).getPoints().isEmpty()){
-					niches.remove(i);
-					i--;
-				}
-			}
 	}
 	
 	private void purgeExcessInNiche(Niche niche){
