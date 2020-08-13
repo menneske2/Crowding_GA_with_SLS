@@ -9,7 +9,9 @@ import algorithm.GAIndividual;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.math3.ml.distance.DistanceMeasure;
+import jsat.linear.DenseVector;
+import jsat.linear.Vec;
+import jsat.linear.distancemetrics.DistanceMetric;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import problems.BenchmarkProblem;
 
@@ -20,7 +22,7 @@ import problems.BenchmarkProblem;
 public class PerformanceMeasures {
 	
 	public static int getNumOptimaFound(BenchmarkProblem prob, List<GAIndividual> pop){
-		double epsilon = 0.5 * prob.getDimensionality();
+		double epsilon = 0.25 * prob.getDimensionality();
 		if(prob.optimasInPaper == null)
 			return -1;
 		int numFound = 0;
@@ -43,7 +45,7 @@ public class PerformanceMeasures {
 	}
 	
 	public static List<boolean[]> getOptimaFound(BenchmarkProblem prob, List<GAIndividual> pop){
-		double epsilon = 0.5*prob.getDimensionality();
+		double epsilon = 0.25*prob.getDimensionality();
 		if(prob.optimasInPaper == null)
 			return null;
 		List<boolean[]> optima2 = new ArrayList<>();
@@ -65,13 +67,8 @@ public class PerformanceMeasures {
 		return optima2;
 	}
 	
-	/**
-	 * Gets the top n peaks.
-	 * @param n the amount of peaks
-	 * @param epsilon how far one peak must be from another in order to be considered.
-	 * @return 
-	 */
-	public static double[] nBestSeparatedBy(List<GAIndividual> pop, DistanceMeasure distMeasure, int n, double epsilon){
+
+	public static double[] nBestSeparatedBy(List<GAIndividual> pop, DistanceMetric distMetric, int n, double epsilon){
 		if(n > pop.size()) return null;
 		pop = new ArrayList<>(pop);
 		Collections.sort(pop);
@@ -81,8 +78,10 @@ public class PerformanceMeasures {
 			boolean found = false;
 			for(int i=0; i<pop.size(); i++){
 				boolean newPeak = true;
+				Vec candVec = new DenseVector(pop.get(i).getPoint());
 				for(var gai : chosen){
-					if(distMeasure.compute(gai.getPoint(), pop.get(i).getPoint()) <= epsilon){
+					Vec gaiVec = new DenseVector(gai.getPoint());
+					if(distMetric.dist(candVec, gaiVec) <= epsilon){
 						newPeak = false;
 					}
 				}
@@ -147,7 +146,7 @@ public class PerformanceMeasures {
 		double[] vals = new double[best5.size()*len];
 		for(int i=0; i<best5.size(); i++){
 			for(int j=0; j<len; j++){
-				vals[i*len+j] = best5.get(i).values[j];
+				vals[i*len+j] = Math.abs(best5.get(i).values[j]);
 			}
 		}
 		double mean = getMean(vals);

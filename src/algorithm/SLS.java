@@ -34,12 +34,11 @@ public class SLS {
 	/**
 	 * Attempts to move the best individual in a niche to the local optima.
 	 */
-	public double optimizeNiche(Niche niche){
+	public void optimizeNiche(Niche niche){
 		GAIndividual gai = niche.getBest();
 		boolean[] optimized = optimize(gai.genome);
 		gai.genome = optimized;
 		gai.evaluateFitness();
-		return gai.fitness;
 	}
 	
 	/**

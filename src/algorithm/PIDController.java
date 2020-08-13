@@ -13,12 +13,8 @@ import java.util.List;
  */
 public class PIDController {
 	
-	public PIDController(){
-		
-	}
-	
-	public void updateCrowdingScalingFactor(OptimizerConfig conf, List<Niche> niches){ 
-		double error = conf.ACTIVE_NICHES - niches.size();
+	public void updateCrowdingScalingFactor(OptimizerConfig conf, int numNiches){ 
+		double error = conf.ACTIVE_NICHES - numNiches;
 		double controlRate = 0.02;
 		double deltaCC = controlRate * error;
 		conf.CROWDING_SCALING_FACTOR += deltaCC;

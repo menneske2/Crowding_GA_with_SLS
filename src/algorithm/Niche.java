@@ -5,19 +5,26 @@
  */
 package algorithm;
 
-import org.apache.commons.math3.ml.clustering.Cluster;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
  * @author Fredrik-Oslo
  */
-public class Niche extends Cluster<GAIndividual> implements Comparable<Niche>{
+public class Niche implements Comparable<Niche>{
 	
-	public Niche(Cluster<GAIndividual> cluster){
-		super();
-		for(var gai : cluster.getPoints()){
+	private final List<GAIndividual> points;
+	
+	public Niche(List<GAIndividual> gais){
+		points = new ArrayList<>();
+		for(var gai : gais){
 			this.addPoint(gai);
 		}
+	}
+	
+	public void addPoint(GAIndividual gai){
+		this.points.add(gai);
 	}
 	
 	public GAIndividual getBest(){
@@ -30,6 +37,10 @@ public class Niche extends Cluster<GAIndividual> implements Comparable<Niche>{
 			}
 		}
 		return best;
+	}
+	
+	public List<GAIndividual> getPoints(){
+		return this.points;
 	}
 
 	@Override

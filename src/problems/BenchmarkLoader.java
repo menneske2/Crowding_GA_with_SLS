@@ -69,210 +69,90 @@ public class BenchmarkLoader {
 	public static BenchmarkProblem loadF1(){
 		BenchmarkProblem prob = new BenchmarkProblem(1);
 		prob.name = "F1 - Expanded two-peak trap";
-		prob.numOptimaCalc = new NumOptimaCalculator(){
-			public int numGlobal(int d){
-				return 1;
-			}
-			public int numLocal(int d){
-				return (int)Math.pow(2, d)-1;
-			}
-		};
 		return prob;
 	}
 	
 	public static BenchmarkProblem loadF2(){
 		BenchmarkProblem prob = new BenchmarkProblem(2);
 		prob.name = "F2 - Expanded five-uneven-peak trap";
-		prob.numOptimaCalc = new NumOptimaCalculator(){
-			public int numGlobal(int d){
-				return (int)Math.pow(2,d);
-			}
-			public int numLocal(int d){
-				return (int)Math.pow(5, d)-(int)Math.pow(2,d);
-			}
-		};
 		return prob;
 	}
 	
 	public static BenchmarkProblem loadF3(){
 		BenchmarkProblem prob = new BenchmarkProblem(3);
 		prob.name = "F3 - Expanded equal minima";
-		prob.numOptimaCalc = new NumOptimaCalculator(){
-			public int numGlobal(int d){
-				return (int)Math.pow(5,d);
-			}
-			public int numLocal(int d){
-				return 0;
-			}
-		};
 		return prob;
 	}
 	
 	public static BenchmarkProblem loadF4(){
 		BenchmarkProblem prob = new BenchmarkProblem(4);
 		prob.name = "F4 - Expanded decreasing minima";
-		prob.numOptimaCalc = new NumOptimaCalculator(){
-			public int numGlobal(int d){
-				return 1;
-			}
-			public int numLocal(int d){
-				return (int)Math.pow(5, d)-1;
-			}
-		};
 		return prob;
 	}
 	
 	public static BenchmarkProblem loadF5(){
 		BenchmarkProblem prob = new BenchmarkProblem(5);
 		prob.name = "F5 - Expanded uneven minima";
-		prob.numOptimaCalc = new NumOptimaCalculator(){
-			public int numGlobal(int d){
-				return (int)Math.pow(5,d);
-			}
-			public int numLocal(int d){
-				return 0;
-			}
-		};
 		return prob;
 	}
 	
 	public static BenchmarkProblem loadF6(){
 		BenchmarkProblem prob = new BenchmarkProblem(6);
 		prob.name = "F6 - Expanded Himmelblau's function";
-		prob.numOptimaCalc = new NumOptimaCalculator(){
-			public int numGlobal(int d){
-				return (int)Math.pow(4,d/2);
-			}
-			public int numLocal(int d){
-				return 0;
-			}
-		};
 		return prob;
 	}
 	
 	public static BenchmarkProblem loadF7(){
 		BenchmarkProblem prob = new BenchmarkProblem(7);
 		prob.name = "F7 - Expanded six-hump camel back";
-		prob.numOptimaCalc = new NumOptimaCalculator(){
-			public int numGlobal(int d){
-				return (int)Math.pow(2,d/2);
-			}
-			public int numLocal(int d){
-				return 0;
-			}
-		};
 		return prob;
 	}
 	
 	public static BenchmarkProblem loadF8(){
 		BenchmarkProblem prob = new BenchmarkProblem(8);
 		prob.name = "F8 - Modified Vincent function";
-		prob.numOptimaCalc = new NumOptimaCalculator(){
-			public int numGlobal(int d){
-				return (int)Math.pow(6,d);
-			}
-			public int numLocal(int d){
-				return 0;
-			}
-		};
 		return prob;
 	}
 	
 	public static BenchmarkProblem loadF9(){
 		BenchmarkProblem prob = new BenchmarkProblem(9);
 		prob.name = "F9 - Composition function 1";
-		prob.numOptimaCalc = new NumOptimaCalculator(){
-			public int numGlobal(int d){
-				return 5;
-			}
-			public int numLocal(int d){
-				return 0;
-			}
-		};
 		return prob;
 	}
 	
 	public static BenchmarkProblem loadF10(){
 		BenchmarkProblem prob = new BenchmarkProblem(10);
 		prob.name = "F10 - Composition function 2";
-		prob.numOptimaCalc = new NumOptimaCalculator(){
-			public int numGlobal(int d){
-				return 5;
-			}
-			public int numLocal(int d){
-				return 0;
-			}
-		};
 		return prob;
 	}
 	
 	public static BenchmarkProblem loadF11(){
 		BenchmarkProblem prob = new BenchmarkProblem(11);
 		prob.name = "F11 - Composition function 3";
-		prob.numOptimaCalc = new NumOptimaCalculator(){
-			public int numGlobal(int d){
-				return 5;
-			}
-			public int numLocal(int d){
-				return 0;
-			}
-		};
 		return prob;
 	}
 	
 	public static BenchmarkProblem loadF12(){
 		BenchmarkProblem prob = new BenchmarkProblem(12);
 		prob.name = "F12 - Composition function 4";
-		prob.numOptimaCalc = new NumOptimaCalculator(){
-			public int numGlobal(int d){
-				return 5;
-			}
-			public int numLocal(int d){
-				return 0;
-			}
-		};
 		return prob;
 	}
 	
 	public static BenchmarkProblem loadF13(){
 		BenchmarkProblem prob = new BenchmarkProblem(13);
 		prob.name = "F13 - Composition function 5";
-		prob.numOptimaCalc = new NumOptimaCalculator(){
-			public int numGlobal(int d){
-				return 5;
-			}
-			public int numLocal(int d){
-				return 0;
-			}
-		};
 		return prob;
 	}
 	
 	public static BenchmarkProblem loadF14(){
 		BenchmarkProblem prob = new BenchmarkProblem(14);
 		prob.name = "F14 - Composition function 6";
-		prob.numOptimaCalc = new NumOptimaCalculator(){
-			public int numGlobal(int d){
-				return 5;
-			}
-			public int numLocal(int d){
-				return 0;
-			}
-		};
 		return prob;
 	}
 	
 	public static BenchmarkProblem loadF15(){
 		BenchmarkProblem prob = new BenchmarkProblem(15);
 		prob.name = "F15 - Composition function 7";
-		prob.numOptimaCalc = new NumOptimaCalculator(){
-			public int numGlobal(int d){
-				return 5;
-			}
-			public int numLocal(int d){
-				return 0;
-			}
-		};
 		return prob;
 	}
 	

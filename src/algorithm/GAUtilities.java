@@ -6,10 +6,17 @@
 package algorithm;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import org.apache.commons.math3.ml.clustering.Cluster;
-import org.apache.commons.math3.ml.clustering.DBSCANClusterer;
-import org.apache.commons.math3.ml.distance.DistanceMeasure;
+import jsat.DataSet;
+import jsat.SimpleDataSet;
+import jsat.classifiers.DataPoint;
+import jsat.clustering.Clusterer;
+import jsat.clustering.DBSCAN;
+import jsat.clustering.GapStatistic;
+import jsat.linear.DenseVector;
+import jsat.linear.Vec;
+import problems.Problem;
 
 /**
  *
@@ -67,12 +74,62 @@ public class GAUtilities {
 		return genomeSum;
 	}
 	
-	public static List<Niche> getNiches(List<GAIndividual> pop, double epsilon, DistanceMeasure distanceMeasure){
-		DBSCANClusterer clusterer = new DBSCANClusterer(epsilon, 0, distanceMeasure);
-		List<Cluster<GAIndividual>> clusters = clusterer.cluster(pop);
+//	public static double[] bitsToDoubles(boolean[] bits){
+//		double[] da = new double[bits.length];
+//		for(int i=0; i<bits.length; i++){
+//			da[i] = bits[i] ? 1 : 0;
+//		}
+//		return da;
+//	}
+	
+	public static boolean[] doublesToBits(double[] da){
+		boolean[] bits = new boolean[da.length];
+		for(int i=0; i<da.length; i++){
+			bits[i] = da[i]==1;
+		}
+		return bits;
+	}
+	
+	private static DataSet popToDataSet(List<GAIndividual> pop){
+		List<DataPoint> data = new ArrayList<>();
+		for(var gai : pop){
+			Vec vector = new DenseVector(gai.getPoint());
+			data.add(new DataPoint(vector));
+		}
+		return new SimpleDataSet(data);
+	}
+	
+	private static List<GAIndividual> pointsToGais(List<DataPoint> points, List<GAIndividual> pop){
+		List<GAIndividual> toReturn = new ArrayList<>();
+		List<GAIndividual> popCopy = new ArrayList<>(pop);
+		for(int i=0; i<points.size(); i++){
+			boolean[] bits = doublesToBits(points.get(i).getNumericalValues().arrayCopy());
+			for(var gai : popCopy){
+				if(Arrays.equals(bits, gai.genome)){
+					toReturn.add(gai);
+					popCopy.remove(gai);
+					break;
+				}
+			}
+		}
+		return toReturn;
+	}
+	
+	public synchronized static List<Niche> getNiches(List<GAIndividual> pop, Problem prob){
+		DataSet dataset = popToDataSet(pop);
+		Clusterer clusterer = prob.clusteringAlgorithm;
+		List<List<DataPoint>> clusters = null;
+		if(clusterer.getClass() == DBSCAN.class){
+			clusters = ((DBSCAN)clusterer).cluster(dataset, 0.02, 0);
+		} else{
+			clusters = clusterer.cluster(dataset);
+		}
+		
 		List<Niche> toReturn = new ArrayList<>();
 		for(var cluster : clusters){
-			toReturn.add(new Niche(cluster));
+			Niche n = new Niche(pointsToGais(cluster, pop));
+			if(!n.getPoints().isEmpty())
+				toReturn.add(n);
 		}
 		return toReturn;
 	}

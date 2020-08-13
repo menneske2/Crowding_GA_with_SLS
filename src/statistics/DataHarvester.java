@@ -13,6 +13,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jsat.clustering.Clusterer;
+import jsat.clustering.GapStatistic;
+import jsat.clustering.kmeans.GMeans;
+import jsat.linear.distancemetrics.DistanceMetric;
+import jsat.linear.distancemetrics.EuclideanDistance;
 import problems.BenchmarkProblem;
 import problems.Problem;
 
@@ -39,7 +44,7 @@ public class DataHarvester {
 		best5 = new ArrayList<>();
 		harvestData(prob);
 		waitForData();
-		analyzeData();
+		analyzeData(prob);
 		threadPool.shutdown();
 	}
 	
@@ -47,20 +52,44 @@ public class DataHarvester {
 		threadPool = Executors.newFixedThreadPool(NUM_THREADS);
 		optimaFound = new ArrayList<>();
 		best5 = new ArrayList<>();
-		//		if(true) return;
+		
+		if(true) return;
+
+//		setClusterer(probList, new DBSCAN());
+//		bigHarvest(probList);
+//		setClusterer(probList, new FLAME(null, 4, 20));
+//		bigHarvest(probList);
+//		setClusterer(probList, new HDBSCAN());
+//		bigHarvest(probList);
+//		setClusterer(probList, new LSDBC());
+//		bigHarvest(probList);
+		setClusterer(probList, new GMeans());
+		bigHarvest(probList);
+//		setClusterer(probList, new XMeans());
+//		bigHarvest(probList);
+		setClusterer(probList, new GapStatistic());
 		bigHarvest(probList);
 		threadPool.shutdown();
 	}
 	
-	public void bigHarvest(List<Problem> probList){
-		for(int i=0; i<probList.size(); i++){
+	private void setClusterer(List<Problem> probList, Clusterer clusterer){
+		System.out.println("\n\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+		System.out.println(clusterer.toString());
+		System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n");
+		for(Problem p : probList){
+			p.clusteringAlgorithm = clusterer;
+		}
+	}
+	
+	private void bigHarvest(List<Problem> probList){
+		for(int i=12; i<probList.size(); i++){
 			if(!BenchmarkProblem.class.isAssignableFrom(probList.get(i).getClass())) 
 				continue;
 			BenchmarkProblem prob = (BenchmarkProblem) probList.get(i);
 			System.out.println("\n-------------------\n" + prob.name + "\n-------------------");
 			for(int j=2; j<=30; j++){
-//				if(prob.name.startsWith("F2") && j==2)
-//					continue;
+				if(prob.name.startsWith("F13") && j!=30)
+					continue;
 				prob.setDimensionality(j);
 				if(prob.name.startsWith("F14") || prob.name.startsWith("F15")){
 					if(j!=10 && j!=20 && j!=30)
@@ -72,7 +101,7 @@ public class DataHarvester {
 				System.out.println("-------------------\nDimensionality: " + j + "\n-------------------");
 				harvestData(prob);
 				waitForData();
-				analyzeData();
+				analyzeData(prob);
 				
 				best5.clear();
 				optimaFound.clear();
@@ -90,7 +119,6 @@ public class DataHarvester {
 			BenchmarkProblem p = (BenchmarkProblem) prob;
 //			conf.FITNESS_EVALUATIONS = (int)Math.round(2000 * p.getDimensionality() * Math.sqrt(p.optimasInPaper.size()));
 			activeConf.FITNESS_EVALUATIONS = 150000;
-			p.numFeatures = 10 * p.getDimensionality();
 //			System.out.println("Using " + conf.FITNESS_EVALUATIONS + " fitness evaluations per run.");
 		}
 		System.out.print("Running: ");
@@ -103,7 +131,9 @@ public class DataHarvester {
 		// du burde også vise beste, verste, gjennomsnitt og standardavvik for selve fitness scoren. husk å gange med -1 siden de skal være minimiseringsproblemer.
 	}
 	
-	private void analyzeData(){
+	private void analyzeData(Problem prob){
+		if(BenchmarkProblem.class.isAssignableFrom(prob.getClass()) && ((BenchmarkProblem)prob).optimasInPaper != null)
+			System.out.println("Known optima: " + ((BenchmarkProblem)prob).optimasInPaper.size());
 		System.out.println("Optima-finding data:");
 		Collections.sort(optimaFound);
 		System.out.println("Best run:\t" + optimaFound.get(optimaFound.size()-1));
@@ -118,6 +148,9 @@ public class DataHarvester {
 		double[] best5Data = PerformanceMeasures.analyzeBest5(best5);
 		System.out.println("Mean:\t" + best5Data[0]);
 		System.out.println("STDs:\t" + best5Data[1]);
+//		System.out.format("Pastable: %.2f(%.2f)\n", best5Data[0], best5Data[1]);
+		String out = "Pastable: " + Math.round(best5Data[0]*100)/100.0 + "(" + Math.round(best5Data[1]*100)/100.0 + ")";
+		System.out.println(out);
 		// beste/verste = plusset sammen fitness. 
 		// vis gjennomsnitt for både beste/verste og totalt.
 	}

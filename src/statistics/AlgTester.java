@@ -48,7 +48,7 @@ public class AlgTester implements DataReceiver, Runnable{
 		double separation = 20;
 		if(BenchmarkProblem.class.isAssignableFrom(p.getClass()))
 			separation = 0.01 * ((BenchmarkProblem) p).getDimensionality();
-		double[] bestN = PerformanceMeasures.nBestSeparatedBy(pop, p.distanceMeasure, 5, separation);
+		double[] bestN = PerformanceMeasures.nBestSeparatedBy(pop, p.distanceMetric, 5, separation);
 		// Best-n was used to evaluate the composition functions.
 		if(p.name.startsWith("F14") || p.name.startsWith("F15")){
 			harvester.reportResults(-1, bestN);

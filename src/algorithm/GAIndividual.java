@@ -7,24 +7,18 @@ package algorithm;
 
 
 import problems.Problem;
-import java.util.Random;
-import org.apache.commons.math3.ml.clustering.Clusterable;
 /**
  *
  * @author Fredrik-Oslo
  */
-public class GAIndividual implements Comparable<GAIndividual>, Cloneable, Clusterable{
+public class GAIndividual implements Comparable<GAIndividual>, Cloneable{
 	
 	private final Problem prob;
-	private final OptimizerConfig conf;
-	private final Random rng;
 	public boolean[] genome;
 	public double fitness;
 	
-	public GAIndividual(Problem prob, OptimizerConfig conf, Random rng, boolean[] genome){
+	public GAIndividual(Problem prob, boolean[] genome){
 		this.prob = prob;
-		this.conf = conf;
-		this.rng = rng;
 		this.genome = genome;
 	}
 	
@@ -74,7 +68,6 @@ public class GAIndividual implements Comparable<GAIndividual>, Cloneable, Cluste
 	}
 
 	
-	@Override
 	/**
 	 * Method used by the clustering algorithm.
 	 */

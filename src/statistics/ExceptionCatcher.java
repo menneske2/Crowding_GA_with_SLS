@@ -25,6 +25,7 @@ public class ExceptionCatcher implements Runnable{
 			runner.run();
 		} catch(Exception e){
 //			e.printStackTrace();
+//			System.exit(4);
 			harvester.reportCrash();
 		}
 	}

@@ -13,6 +13,17 @@ import java.io.FileReader;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import jsat.clustering.DBSCAN;
+import jsat.clustering.FLAME;
+import jsat.clustering.GapStatistic;
+import jsat.clustering.HDBSCAN;
+import jsat.clustering.LSDBC;
+import jsat.clustering.SeedSelectionMethods;
+import jsat.clustering.kmeans.ElkanKMeans;
+import jsat.clustering.kmeans.GMeans;
+import jsat.clustering.kmeans.KMeans;
+import jsat.clustering.kmeans.KMeansPDN;
+import jsat.clustering.kmeans.XMeans;
 
 /**
  *
@@ -27,15 +38,15 @@ public class BenchmarkProblem extends Problem{
 	protected int dimensionality;
 	
 	public List<double[]> optimasInPaper;
-	public NumOptimaCalculator numOptimaCalc;
 	
 	
 	public BenchmarkProblem(int funcNumber){
 		this.funcNumber = funcNumber;
 		this.searchRange = new double[]{-100, 100};
 		this.fitnessPunishRatio = 0;
-		
-		this.numFeatures = 480;
+
+//		this.clusteringAlgorithm = new KMeansPDN();
+		this.clusteringAlgorithm = new HDBSCAN();
 		setDimensionality(2);
 	}
 	
@@ -90,8 +101,44 @@ public class BenchmarkProblem extends Problem{
 	
 	public final void setDimensionality(int dims){
 		this.dimensionality = dims;
-		this.distanceMeasure = new NDimensionalMappingDistance(this, dims);
+		this.distanceMetric = new NDimensionalMappingDistance(dims);
+		this.numFeatures = 10*dims;
+		
+		Class c = clusteringAlgorithm.getClass();
+		if(c == FLAME.class){
+			clusteringAlgorithm = new FLAME(distanceMetric, 4, 20);
+		} else if(c == HDBSCAN.class){
+			clusteringAlgorithm = new HDBSCAN(distanceMetric, 5);
+			((HDBSCAN)clusteringAlgorithm).setMinPoints(1);
+		} else if(c == LSDBC.class){
+			clusteringAlgorithm = new LSDBC(distanceMetric, 1, 4);
+		} else if(c == DBSCAN.class){
+			clusteringAlgorithm = new DBSCAN(distanceMetric);
+		} else if(c == GMeans.class){
+			KMeans kMeans = new ElkanKMeans(this.distanceMetric);
+			GMeans alg = new GMeans(kMeans);
+//			alg.setIterativeRefine(false); // gjør den ish 50% raskere.
+			alg.setMinClusterSize(2);
+			alg.setSeedSelection(SeedSelectionMethods.SeedSelection.KPP);
+			alg.setIterationLimit(10);
+			this.clusteringAlgorithm = alg;
+		} else if(c == XMeans.class){
+			KMeans kMeans = new ElkanKMeans(this.distanceMetric);
+			XMeans alg = new XMeans(kMeans);
+			alg.setMinClusterSize(2);
+			alg.setSeedSelection(SeedSelectionMethods.SeedSelection.KPP);
+			alg.setIterationLimit(10);
+			this.clusteringAlgorithm = alg;
+		} else if(c == KMeansPDN.class){
+			KMeans kMeans = new ElkanKMeans(this.distanceMetric);
+			kMeans.setIterationLimit(10);
+			kMeans.setSeedSelection(SeedSelectionMethods.SeedSelection.KPP);
+			KMeansPDN alg = new KMeansPDN(kMeans);
+			this.clusteringAlgorithm = alg;
+		}
+		
 		assembleOptimaList();
+		
 	}
 	
 	public int getDimensionality(){

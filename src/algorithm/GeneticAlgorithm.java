@@ -53,7 +53,7 @@ public class GeneticAlgorithm implements Runnable{
 		int generation = 0;
 		
 		// Sending initialization statistics.
-		sendProgressReport(generation, GAUtilities.getNiches(population, conf.NICHING_EPSILON, prob.distanceMeasure));
+		sendProgressReport(generation, GAUtilities.getNiches(population, prob));
 		
 		while(true){
 			// Termination criterias
@@ -69,13 +69,12 @@ public class GeneticAlgorithm implements Runnable{
 			}
 			
 			
-			List<Niche> niches = GAUtilities.getNiches(population, conf.NICHING_EPSILON, prob.distanceMeasure);
 			
-			
+			List<Niche> niches = GAUtilities.getNiches(population, prob);
 			
 			// Using PID-controller
 			if(conf.PID_ENABLED)
-				controller.updateCrowdingScalingFactor(conf, niches);
+				controller.updateCrowdingScalingFactor(conf, niches.size());
 			
 			
 			
@@ -103,6 +102,7 @@ public class GeneticAlgorithm implements Runnable{
 			// Gathering statistics and sending progress report to main client.
 			double entropy = sendProgressReport(generation, niches);
 			if(entropy == 0.0){
+				System.out.println("Entropy is zero. Stopping.");
 				break;
 			}
 			
@@ -162,6 +162,8 @@ public class GeneticAlgorithm implements Runnable{
 	
 	private List<GAIndividual> newEAGeneration(List<GAIndividual> elitist){
 		List<GAIndividual> newPop = new ArrayList<>(elitist);
+		if(population.isEmpty())
+			System.out.println("bruh");
 		int genomeLength = population.get(0).genome.length;
 		
 		while(newPop.size() < conf.POPULATION_SIZE){
@@ -234,7 +236,7 @@ public class GeneticAlgorithm implements Runnable{
 			// Creating the actual offspring.
 			GAIndividual[] children = new GAIndividual[2];
 			for(int i=0; i<2; i++){
-				GAIndividual gai = new GAIndividual(prob, conf, rng, childGenomes[i]);
+				GAIndividual gai = new GAIndividual(prob, childGenomes[i]);
 				gai.evaluateFitness();
 				children[i] = gai;
 			}
@@ -283,7 +285,7 @@ public class GeneticAlgorithm implements Runnable{
 			for(int i=0; i<chromosome.length; i++){
 				chromosome[i] = rng.nextBoolean();
 			}
-			GAIndividual newborn = new GAIndividual(prob, conf, rng, chromosome);
+			GAIndividual newborn = new GAIndividual(prob, chromosome);
 			newborn.evaluateFitness();
 			population.add(newborn);
 		}
