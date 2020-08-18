@@ -13,9 +13,9 @@ public class OptimizerConfig implements Cloneable{
 	
 	public static final int NO_SEED = -1;
 	
-	public int SEED = NO_SEED;
+	public int SEED = 1;
 	public int GENERATIONS = -1;
-	public int FITNESS_EVALUATIONS = -1;
+	public int FITNESS_EVALUATIONS = 500000;
 	public int POPULATION_SIZE = 150;
 	public int ELITIST_NICHES = 20;
 	public int TOURNAMENT_SIZE = 2;
@@ -25,7 +25,7 @@ public class OptimizerConfig implements Cloneable{
 	public float NICHING_EPSILON = 0.02f;
 	public boolean PID_ENABLED = true;
 	public float PID_CONTROL_RATE = 0.02f;
-	public int ACTIVE_NICHES = 25;
+	public int ACTIVE_NICHES = 20;
 	
 	// SLS-parameters
 	public boolean SLS_Enabled = true;

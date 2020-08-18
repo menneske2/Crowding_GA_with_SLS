@@ -219,6 +219,7 @@ public class BenchmarkVisualizer {
 	public static void placeBitsOnMap(BenchmarkProblem prob, WritableImage im, boolean[] bits, int shape, int radius,  Color c){
 		BigInteger[] partitions = BenchmarkProblem.partitionBitstring(bits, 2);
 		double[] normalized = BenchmarkProblem.normalize(partitions, bits.length/2, 0, (int)im.getWidth());
+//		double[] normalized = BenchmarkProblem.translateToCoordinates(bits, 2, bits.length, 0, (int)im.getWidth());
 		int locX = (int)Math.round(normalized[0]);
 		int locY = (int)Math.round(normalized[1]);
 		markLocation(locX, locY, im, shape, radius, c);

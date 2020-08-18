@@ -14,7 +14,7 @@ import jsat.linear.distancemetrics.DistanceMetric;
  *
  * @author Fredrik-Oslo
  */
-public class JaccardDistance implements DistanceMetric{
+public class JaccardDistanceOld implements DistanceMetric{
 
 //	@Override
 //	/**

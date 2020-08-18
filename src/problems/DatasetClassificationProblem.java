@@ -16,6 +16,7 @@ import jsat.classifiers.DataPointPair;
 import jsat.classifiers.bayesian.NaiveBayes;
 import jsat.linear.DenseVector;
 import jsat.linear.Vec;
+import smile.math.distance.JaccardDistance;
 
 /**
  *
@@ -46,8 +47,8 @@ public class DatasetClassificationProblem extends Problem{
 	
 	@Override
 	public double evaluateBitstring(boolean[] bits, boolean punish){
-		this.fitnessEvaluations++;
-		
+		if(punish) // if not, its for statistics gathering only.
+			this.fitnessEvaluations++;
 		
 		ClassificationDataSet reducedTrain = reduceFeatures(datasetTrain, bits);
 		ClassificationDataSet reducedValid = reduceFeatures(datasetValid, bits);

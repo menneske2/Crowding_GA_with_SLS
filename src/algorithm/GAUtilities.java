@@ -5,18 +5,20 @@
  */
 package algorithm;
 
+import java.util.logging.Logger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import jsat.DataSet;
 import jsat.SimpleDataSet;
 import jsat.classifiers.DataPoint;
-import jsat.clustering.Clusterer;
-import jsat.clustering.DBSCAN;
-import jsat.clustering.GapStatistic;
 import jsat.linear.DenseVector;
 import jsat.linear.Vec;
+import problems.BenchmarkProblem;
 import problems.Problem;
+import smile.clustering.MEC;
+import smile.clustering.PartitionClustering;
+import smile.math.distance.EuclideanDistance;
 
 /**
  *
@@ -115,23 +117,39 @@ public class GAUtilities {
 		return toReturn;
 	}
 	
+	
 	public synchronized static List<Niche> getNiches(List<GAIndividual> pop, Problem prob){
-		DataSet dataset = popToDataSet(pop);
-		Clusterer clusterer = prob.clusteringAlgorithm;
-		List<List<DataPoint>> clusters = null;
-		if(clusterer.getClass() == DBSCAN.class){
-			clusters = ((DBSCAN)clusterer).cluster(dataset, 0.02, 0);
-		} else{
-			clusters = clusterer.cluster(dataset);
+		double[][] data = popToDoubles(pop, prob);
+		PartitionClustering clusterer = MEC.fit(data, new EuclideanDistance(), 75, 0.02);
+		
+		int[] labels = clusterer.y;
+		List<Niche> niches = new ArrayList<>();
+		for(int i=0; i<=Arrays.stream(labels).max().getAsInt(); i++)
+			niches.add(new Niche());
+		
+		for(int i=0; i<labels.length; i++){
+			niches.get(labels[i]).addPoint(pop.get(i));
 		}
 		
-		List<Niche> toReturn = new ArrayList<>();
-		for(var cluster : clusters){
-			Niche n = new Niche(pointsToGais(cluster, pop));
-			if(!n.getPoints().isEmpty())
-				toReturn.add(n);
+		for(int i=niches.size()-1; i>0; i--){
+			if(niches.get(i).getPoints().isEmpty()){
+				niches.remove(i);
+				i++;
+			}
 		}
-		return toReturn;
+		
+		return niches;
+	}
+	
+	public static double[][] popToDoubles(List<GAIndividual> pop, Problem prob){
+		if(prob.getClass() != BenchmarkProblem.class)
+			return null;
+		BenchmarkProblem p = (BenchmarkProblem) prob;
+		double[][] daa = new double[pop.size()][p.getDimensionality()];
+		for(int i=0; i<pop.size(); i++){
+			daa[i] = p.translateToCoordinates(pop.get(i).genome, 0, 1);
+		}
+		return daa;
 	}
 	
 	

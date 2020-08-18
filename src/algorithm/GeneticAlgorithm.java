@@ -68,6 +68,13 @@ public class GeneticAlgorithm implements Runnable{
 				break;
 			}
 			
+//			if(generation < 10){
+//				List<GAIndividual> newGen = newEAGeneration(null);
+//				population = newGen;
+//				Collections.sort(population);
+//				generation++;
+//				continue;
+//			}
 			
 			
 			List<Niche> niches = GAUtilities.getNiches(population, prob);
@@ -161,9 +168,10 @@ public class GeneticAlgorithm implements Runnable{
 	}
 	
 	private List<GAIndividual> newEAGeneration(List<GAIndividual> elitist){
-		List<GAIndividual> newPop = new ArrayList<>(elitist);
-		if(population.isEmpty())
-			System.out.println("bruh");
+		
+		List<GAIndividual> newPop = new ArrayList<>();
+		if(elitist != null) newPop = new ArrayList<>(elitist);
+		
 		int genomeLength = population.get(0).genome.length;
 		
 		while(newPop.size() < conf.POPULATION_SIZE){

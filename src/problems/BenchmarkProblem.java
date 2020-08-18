@@ -45,14 +45,15 @@ public class BenchmarkProblem extends Problem{
 		this.searchRange = new double[]{-100, 100};
 		this.fitnessPunishRatio = 0;
 
-//		this.clusteringAlgorithm = new KMeansPDN();
-		this.clusteringAlgorithm = new HDBSCAN();
+		this.clusteringAlgorithm = new GapStatistic();
+//		this.clusteringAlgorithm = new HDBSCAN();
 		setDimensionality(2);
 	}
 	
 	@Override
 	public double evaluateBitstring(boolean[] bits, boolean punish) {
-		this.fitnessEvaluations++;
+		if(punish) // if not, its for statistic-gathering only.
+			this.fitnessEvaluations++;
 		
 		double[] axes = translateToCoordinates(bits);
 		double[] f = new double[]{0};
@@ -104,41 +105,7 @@ public class BenchmarkProblem extends Problem{
 		this.distanceMetric = new NDimensionalMappingDistance(dims);
 		this.numFeatures = 10*dims;
 		
-		Class c = clusteringAlgorithm.getClass();
-		if(c == FLAME.class){
-			clusteringAlgorithm = new FLAME(distanceMetric, 4, 20);
-		} else if(c == HDBSCAN.class){
-			clusteringAlgorithm = new HDBSCAN(distanceMetric, 5);
-			((HDBSCAN)clusteringAlgorithm).setMinPoints(1);
-		} else if(c == LSDBC.class){
-			clusteringAlgorithm = new LSDBC(distanceMetric, 1, 4);
-		} else if(c == DBSCAN.class){
-			clusteringAlgorithm = new DBSCAN(distanceMetric);
-		} else if(c == GMeans.class){
-			KMeans kMeans = new ElkanKMeans(this.distanceMetric);
-			GMeans alg = new GMeans(kMeans);
-//			alg.setIterativeRefine(false); // gjør den ish 50% raskere.
-			alg.setMinClusterSize(2);
-			alg.setSeedSelection(SeedSelectionMethods.SeedSelection.KPP);
-			alg.setIterationLimit(10);
-			this.clusteringAlgorithm = alg;
-		} else if(c == XMeans.class){
-			KMeans kMeans = new ElkanKMeans(this.distanceMetric);
-			XMeans alg = new XMeans(kMeans);
-			alg.setMinClusterSize(2);
-			alg.setSeedSelection(SeedSelectionMethods.SeedSelection.KPP);
-			alg.setIterationLimit(10);
-			this.clusteringAlgorithm = alg;
-		} else if(c == KMeansPDN.class){
-			KMeans kMeans = new ElkanKMeans(this.distanceMetric);
-			kMeans.setIterationLimit(10);
-			kMeans.setSeedSelection(SeedSelectionMethods.SeedSelection.KPP);
-			KMeansPDN alg = new KMeansPDN(kMeans);
-			this.clusteringAlgorithm = alg;
-		}
-		
 		assembleOptimaList();
-		
 	}
 	
 	public int getDimensionality(){
@@ -147,11 +114,16 @@ public class BenchmarkProblem extends Problem{
 	
 	
 	public double[] translateToCoordinates(boolean[] bits){
+		return translateToCoordinates(bits, searchRange[0], searchRange[1]);
+	}
+	
+	public double[] translateToCoordinates(boolean[] bits, double min, double max){
+		return translateToCoordinates(bits, dimensionality, numFeatures, min, max);
+	}
+	
+	public static double[] translateToCoordinates(boolean[] bits, int dimensionality, int numFeatures, double min, double max){
 		BigInteger[] axesBig = partitionBitstring(bits, dimensionality);
-		double[] axes = normalize(axesBig, numFeatures/dimensionality, searchRange[0], searchRange[1]);
-		if(searchRange.length > 2){
-			axes[1] = normalize(axesBig, numFeatures/dimensionality, searchRange[2], searchRange[3])[1];
-		}
+		double[] axes = normalize(axesBig, numFeatures/dimensionality, min, max);
 		return axes;
 	}
 	

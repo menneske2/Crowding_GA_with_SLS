@@ -16,6 +16,10 @@ public class Niche implements Comparable<Niche>{
 	
 	private final List<GAIndividual> points;
 	
+	public Niche(){
+		points = new ArrayList<>();
+	}
+	
 	public Niche(List<GAIndividual> gais){
 		points = new ArrayList<>();
 		for(var gai : gais){

@@ -6,7 +6,7 @@
 package problems;
 
 import jsat.clustering.Clusterer;
-import jsat.linear.distancemetrics.DistanceMetric;
+import smile.math.distance.Distance;
 
 /**
  *
@@ -17,7 +17,7 @@ public abstract class Problem implements Cloneable{
 	public String name;
 	public int numFeatures;
 	public Clusterer clusteringAlgorithm;
-	public DistanceMetric distanceMetric;
+	public Distance<double[]> distanceMetric;
 	public double fitnessPunishRatio = 0.5;
 	
 	public int fitnessEvaluations = 0;

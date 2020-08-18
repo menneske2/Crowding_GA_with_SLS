@@ -11,9 +11,9 @@ import java.util.Collections;
 import java.util.List;
 import jsat.linear.DenseVector;
 import jsat.linear.Vec;
-import jsat.linear.distancemetrics.DistanceMetric;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import problems.BenchmarkProblem;
+import smile.math.distance.Distance;
 
 /**
  *
@@ -68,7 +68,7 @@ public class PerformanceMeasures {
 	}
 	
 
-	public static double[] nBestSeparatedBy(List<GAIndividual> pop, DistanceMetric distMetric, int n, double epsilon){
+	public static double[] nBestSeparatedBy(List<GAIndividual> pop, Distance<double[]> distMetric, int n, double epsilon){
 		if(n > pop.size()) return null;
 		pop = new ArrayList<>(pop);
 		Collections.sort(pop);
@@ -78,10 +78,10 @@ public class PerformanceMeasures {
 			boolean found = false;
 			for(int i=0; i<pop.size(); i++){
 				boolean newPeak = true;
-				Vec candVec = new DenseVector(pop.get(i).getPoint());
+				double[] candVec = pop.get(i).getPoint();
 				for(var gai : chosen){
-					Vec gaiVec = new DenseVector(gai.getPoint());
-					if(distMetric.dist(candVec, gaiVec) <= epsilon){
+					double[] gaiVec = gai.getPoint();
+					if(distMetric.d(candVec, gaiVec) <= epsilon){
 						newPeak = false;
 					}
 				}
