@@ -13,17 +13,8 @@ import java.io.FileReader;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import jsat.clustering.DBSCAN;
-import jsat.clustering.FLAME;
 import jsat.clustering.GapStatistic;
-import jsat.clustering.HDBSCAN;
-import jsat.clustering.LSDBC;
-import jsat.clustering.SeedSelectionMethods;
-import jsat.clustering.kmeans.ElkanKMeans;
-import jsat.clustering.kmeans.GMeans;
-import jsat.clustering.kmeans.KMeans;
-import jsat.clustering.kmeans.KMeansPDN;
-import jsat.clustering.kmeans.XMeans;
+import smile.math.distance.EuclideanDistance;
 
 /**
  *
@@ -32,7 +23,7 @@ import jsat.clustering.kmeans.XMeans;
 public class BenchmarkProblem extends Problem{
 	
 	private final int funcNumber;
-	private final cec15_nich_func tf = new cec15_nich_func();
+	private cec15_nich_func tf = new cec15_nich_func();
 	
 	public final double[] searchRange;
 	protected int dimensionality;
@@ -44,10 +35,18 @@ public class BenchmarkProblem extends Problem{
 		this.funcNumber = funcNumber;
 		this.searchRange = new double[]{-100, 100};
 		this.fitnessPunishRatio = 0;
-
-		this.clusteringAlgorithm = new GapStatistic();
-//		this.clusteringAlgorithm = new HDBSCAN();
+		this.distanceMetric = new EuclideanDistance();
 		setDimensionality(2);
+	}
+
+	@Override
+	public BenchmarkProblem clone(){
+		BenchmarkProblem p = (BenchmarkProblem) super.clone();
+		if(this.optimasInPaper != null)
+			p.optimasInPaper = new ArrayList<>(this.optimasInPaper);
+		p.tf = new cec15_nich_func();
+		p.setDimensionality(p.getDimensionality());
+		return p;
 	}
 	
 	@Override
@@ -102,7 +101,6 @@ public class BenchmarkProblem extends Problem{
 	
 	public final void setDimensionality(int dims){
 		this.dimensionality = dims;
-		this.distanceMetric = new NDimensionalMappingDistance(dims);
 		this.numFeatures = 10*dims;
 		
 		assembleOptimaList();

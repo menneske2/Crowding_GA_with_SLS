@@ -13,8 +13,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import jsat.clustering.Clusterer;
-import jsat.clustering.GapStatistic;
 import problems.BenchmarkProblem;
 import problems.Problem;
 
@@ -25,7 +23,7 @@ import problems.Problem;
 public class DataHarvester {
 	
 	private final int NUM_THREADS = 5;
-	private final int RUNS_PER_DATAPOINT = 25;
+	private final int RUNS_PER_DATAPOINT = 100;
 	
 	private final ExecutorService threadPool;
 	
@@ -43,6 +41,7 @@ public class DataHarvester {
 		optimaFound = new ArrayList<>();
 		best5 = new ArrayList<>();
 		writer = new ResultsWriter(filename);
+
 		harvestData(prob);
 		waitForData();
 		analyzeData(prob);
@@ -56,32 +55,26 @@ public class DataHarvester {
 		best5 = new ArrayList<>();
 		writer = new ResultsWriter(filename);
 		
-//		if(true) return;
+		if(true) return;
 
-//		setClusterer(probList, new DBSCAN());
-//		bigHarvest(probList);
-//		setClusterer(probList, new FLAME(null, 4, 20));
-//		bigHarvest(probList);
-//		setClusterer(probList, new HDBSCAN());
-//		bigHarvest(probList);
-//		setClusterer(probList, new LSDBC());
-//		bigHarvest(probList);
-//		setClusterer(probList, new GMeans());
-//		bigHarvest(probList);
-//		setClusterer(probList, new XMeans());
-//		bigHarvest(probList);
-//		setClusterer(probList, new GapStatistic());
+//		bigHarvestDataset(probList);
 		bigHarvest(probList);
 		writer.close();
 		threadPool.shutdown();
+		System.exit(0);
 	}
-	
-	private void setClusterer(List<Problem> probList, Clusterer clusterer){
-		writer.writeln("\n\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-		writer.writeln(clusterer.toString());
-		writer.writeln("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n");
-		for(Problem p : probList){
-			p.clusteringAlgorithm = clusterer;
+
+	private void bigHarvestDataset(List<Problem> probList){
+		for(var prob : probList){
+			if(prob.name.startsWith("Madelon") || prob.name.startsWith("Arcene")){
+				writer.writeln("\n-------------------\n" + prob.name + "\n-------------------");
+				harvestData(prob);
+				waitForData();
+				analyzeData(prob);
+
+				best5.clear();
+				optimaFound.clear();
+			}
 		}
 	}
 	
@@ -89,10 +82,11 @@ public class DataHarvester {
 		for(int i=0; i<probList.size(); i++){
 			if(!BenchmarkProblem.class.isAssignableFrom(probList.get(i).getClass())) 
 				continue;
+//			if(i == 8) break; // only do the first 8 problems.
 			BenchmarkProblem prob = (BenchmarkProblem) probList.get(i);
 			writer.writeln("\n-------------------\n" + prob.name + "\n-------------------");
 			for(int j=2; j<=30; j++){
-//				if(prob.name.startsWith("F11") && j!=30)
+//				if(prob.name.startsWith("F12") && j!=30)
 //					continue;
 				prob.setDimensionality(j);
 				if(prob.name.startsWith("F14") || prob.name.startsWith("F15")){
@@ -118,10 +112,9 @@ public class DataHarvester {
 		activeConf = new OptimizerConfig();
 		activeConf.SEED = OptimizerConfig.NO_SEED;
 		prob.fitnessPunishRatio = 0.0;
-		activeConf.FITNESS_EVALUATIONS = 1000;
+		activeConf.FITNESS_EVALUATIONS = 200000;
 		if(BenchmarkProblem.class.isAssignableFrom(prob.getClass())){
 			BenchmarkProblem p = (BenchmarkProblem) prob;
-//			conf.FITNESS_EVALUATIONS = (int)Math.round(2000 * p.getDimensionality() * Math.sqrt(p.optimasInPaper.size()));
 			activeConf.FITNESS_EVALUATIONS = 150000;
 //			writer.writeln("Using " + conf.FITNESS_EVALUATIONS + " fitness evaluations per run.");
 		}
@@ -154,9 +147,15 @@ public class DataHarvester {
 		writer.writeln("STDs:\t" + best5Data[1]);
 		String out = "Pastable: " + Math.round(best5Data[0]*100)/100.0 + "(" + Math.round(best5Data[1]*100)/100.0 + ")";
 		writer.writeln(out);
+
+		double[] best = new double[best5.size()];
+		for(int i=0; i<best5.size(); i++){
+			best[i] = best5.get(i).values[0];
+		}
+		DoubleArray da = new DoubleArray(best);
+		writer.writeln("best: " + da);
+
 		writer.flush();
-		// beste/verste = plusset sammen fitness. 
-		// vis gjennomsnitt for både beste/verste og totalt.
 	}
 	
 	

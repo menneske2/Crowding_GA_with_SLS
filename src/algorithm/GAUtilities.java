@@ -5,20 +5,13 @@
  */
 package algorithm;
 
-import java.util.logging.Logger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import jsat.DataSet;
-import jsat.SimpleDataSet;
-import jsat.classifiers.DataPoint;
-import jsat.linear.DenseVector;
-import jsat.linear.Vec;
 import problems.BenchmarkProblem;
 import problems.Problem;
 import smile.clustering.MEC;
 import smile.clustering.PartitionClustering;
-import smile.math.distance.EuclideanDistance;
 
 /**
  *
@@ -76,14 +69,6 @@ public class GAUtilities {
 		return genomeSum;
 	}
 	
-//	public static double[] bitsToDoubles(boolean[] bits){
-//		double[] da = new double[bits.length];
-//		for(int i=0; i<bits.length; i++){
-//			da[i] = bits[i] ? 1 : 0;
-//		}
-//		return da;
-//	}
-	
 	public static boolean[] doublesToBits(double[] da){
 		boolean[] bits = new boolean[da.length];
 		for(int i=0; i<da.length; i++){
@@ -92,35 +77,11 @@ public class GAUtilities {
 		return bits;
 	}
 	
-	private static DataSet popToDataSet(List<GAIndividual> pop){
-		List<DataPoint> data = new ArrayList<>();
-		for(var gai : pop){
-			Vec vector = new DenseVector(gai.getPoint());
-			data.add(new DataPoint(vector));
-		}
-		return new SimpleDataSet(data);
-	}
 	
-	private static List<GAIndividual> pointsToGais(List<DataPoint> points, List<GAIndividual> pop){
-		List<GAIndividual> toReturn = new ArrayList<>();
-		List<GAIndividual> popCopy = new ArrayList<>(pop);
-		for(int i=0; i<points.size(); i++){
-			boolean[] bits = doublesToBits(points.get(i).getNumericalValues().arrayCopy());
-			for(var gai : popCopy){
-				if(Arrays.equals(bits, gai.genome)){
-					toReturn.add(gai);
-					popCopy.remove(gai);
-					break;
-				}
-			}
-		}
-		return toReturn;
-	}
-	
-	
-	public synchronized static List<Niche> getNiches(List<GAIndividual> pop, Problem prob){
+	public static List<Niche> getNiches(List<GAIndividual> pop, Problem prob, double epsilon){
 		double[][] data = popToDoubles(pop, prob);
-		PartitionClustering clusterer = MEC.fit(data, new EuclideanDistance(), 75, 0.02);
+
+		PartitionClustering clusterer = MEC.fit(data, prob.distanceMetric, 50, epsilon);
 		
 		int[] labels = clusterer.y;
 		List<Niche> niches = new ArrayList<>();
@@ -142,14 +103,20 @@ public class GAUtilities {
 	}
 	
 	public static double[][] popToDoubles(List<GAIndividual> pop, Problem prob){
-		if(prob.getClass() != BenchmarkProblem.class)
-			return null;
-		BenchmarkProblem p = (BenchmarkProblem) prob;
-		double[][] daa = new double[pop.size()][p.getDimensionality()];
-		for(int i=0; i<pop.size(); i++){
-			daa[i] = p.translateToCoordinates(pop.get(i).genome, 0, 1);
+		if(prob.getClass() == BenchmarkProblem.class){
+			BenchmarkProblem p = (BenchmarkProblem) prob;
+			double[][] daa = new double[pop.size()][p.getDimensionality()];
+			for(int i=0; i<pop.size(); i++){
+				daa[i] = p.translateToCoordinates(pop.get(i).genome, 0, 1);
+			}
+			return daa;
+		} else{
+			double[][] daa = new double[pop.size()][prob.numFeatures];
+			for(int i=0; i<pop.size(); i++){
+				daa[i] = pop.get(i).getPoint();
+			}
+			return daa;
 		}
-		return daa;
 	}
 	
 	

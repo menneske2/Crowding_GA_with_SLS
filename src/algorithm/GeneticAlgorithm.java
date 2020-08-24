@@ -53,7 +53,7 @@ public class GeneticAlgorithm implements Runnable{
 		int generation = 0;
 		
 		// Sending initialization statistics.
-		sendProgressReport(generation, GAUtilities.getNiches(population, prob));
+		sendProgressReport(generation, GAUtilities.getNiches(population, prob, conf.NICHING_EPSILON));
 		
 		while(true){
 			// Termination criterias
@@ -68,16 +68,8 @@ public class GeneticAlgorithm implements Runnable{
 				break;
 			}
 			
-//			if(generation < 10){
-//				List<GAIndividual> newGen = newEAGeneration(null);
-//				population = newGen;
-//				Collections.sort(population);
-//				generation++;
-//				continue;
-//			}
 			
-			
-			List<Niche> niches = GAUtilities.getNiches(population, prob);
+			List<Niche> niches = GAUtilities.getNiches(population, prob, conf.NICHING_EPSILON);
 			
 			// Using PID-controller
 			if(conf.PID_ENABLED)
@@ -221,25 +213,25 @@ public class GeneticAlgorithm implements Runnable{
 			}
 			
 			
-			for(int i=0; i<2; i++){
-				// Bitflip-mutation.
-				if(rng.nextFloat() < conf.MUTATION_CHANCE) {
-					int point = rng.nextInt(genomeLength);
-					childGenomes[i][point] = !childGenomes[i][point];
-				}
-			}
-			
-			
 //			for(int i=0; i<2; i++){
-//				// "Turn off 10 random features"-mutation.
+//				// Bitflip-mutation.
 //				if(rng.nextFloat() < conf.MUTATION_CHANCE) {
-//					for(int j=0; j<10; j++){
-//						int point = rng.nextInt(genomeLength);
-//						childGenomes[i][point] = false;
-//					}
-//					
+//					int point = rng.nextInt(genomeLength);
+//					childGenomes[i][point] = !childGenomes[i][point];
 //				}
 //			}
+			
+			
+			for(int i=0; i<2; i++){
+				// "Turn off 10 random features"-mutation.
+				if(rng.nextFloat() < conf.MUTATION_CHANCE) {
+					for(int j=0; j<10; j++){
+						int point = rng.nextInt(genomeLength);
+						childGenomes[i][point] = false;
+					}
+					
+				}
+			}
 			
 			// Creating the actual offspring.
 			GAIndividual[] children = new GAIndividual[2];

@@ -16,7 +16,6 @@ import jsat.classifiers.DataPointPair;
 import jsat.classifiers.bayesian.NaiveBayes;
 import jsat.linear.DenseVector;
 import jsat.linear.Vec;
-import smile.math.distance.JaccardDistance;
 
 /**
  *
@@ -32,7 +31,7 @@ public class DatasetClassificationProblem extends Problem{
 		this.numFeatures = datasets.get(0).getNumFeatures();
 		this.datasetTrain = datasets.get(0);
 		this.datasetValid = datasets.get(1);
-		this.distanceMetric = new JaccardDistance();
+		this.distanceMetric = new JaccardDistance2();
 		this.fitnessPunishRatio = 0.5;
 	}
 	

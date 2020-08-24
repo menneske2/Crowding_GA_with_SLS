@@ -16,16 +16,16 @@ public class OptimizerConfig implements Cloneable{
 	public int SEED = 1;
 	public int GENERATIONS = -1;
 	public int FITNESS_EVALUATIONS = 500000;
-	public int POPULATION_SIZE = 150;
+	public int POPULATION_SIZE = 100;
 	public int ELITIST_NICHES = 20;
 	public int TOURNAMENT_SIZE = 2;
 	public float CROSSOVER_CHANCE = 0.7f;
 	public float MUTATION_CHANCE = 0.2f;
 	public float CROWDING_SCALING_FACTOR = 0.0f;
-	public float NICHING_EPSILON = 0.02f;
+	public float NICHING_EPSILON = 0.05f;
 	public boolean PID_ENABLED = true;
 	public float PID_CONTROL_RATE = 0.02f;
-	public int ACTIVE_NICHES = 20;
+	public int ACTIVE_NICHES = 25;
 	
 	// SLS-parameters
 	public boolean SLS_Enabled = true;

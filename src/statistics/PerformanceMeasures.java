@@ -22,30 +22,12 @@ import smile.math.distance.Distance;
 public class PerformanceMeasures {
 	
 	public static int getNumOptimaFound(BenchmarkProblem prob, List<GAIndividual> pop){
-		double epsilon = 0.25 * prob.getDimensionality();
-		if(prob.optimasInPaper == null)
-			return -1;
-		int numFound = 0;
-		for(double[] optima : prob.optimasInPaper){
-			for(var gai : pop){
-				double[] gaiCoords = prob.translateToCoordinates(gai.genome);
-				// Calculating euclidean distance.
-				double dist = 0;
-				for(int i=0; i<gaiCoords.length; i++){
-					dist += Math.pow(gaiCoords[i] - optima[i], 2);
-				}
-				dist = Math.sqrt(dist);
-				if(dist <= epsilon){
-					numFound++;
-					break;
-				}
-			}
-		}
-		return numFound;
+		List<boolean[]> optimaFound = getOptimaFound(prob, pop);
+		return optimaFound.size();
 	}
 	
 	public static List<boolean[]> getOptimaFound(BenchmarkProblem prob, List<GAIndividual> pop){
-		double epsilon = 0.25*prob.getDimensionality();
+		double epsilon = 0.5*prob.getDimensionality();
 		if(prob.optimasInPaper == null)
 			return null;
 		List<boolean[]> optima2 = new ArrayList<>();

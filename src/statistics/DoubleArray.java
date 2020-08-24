@@ -43,7 +43,7 @@ public class DoubleArray implements Comparable<DoubleArray>{
 	@Override
 	public String toString(){
 		int decimals = 3;
-		int meanDecimals = 1;
+		int meanDecimals = 3;
 		String out = "[";
 		for(int i=0; i<values.length; i++){
 			double toWrite = values[i];
