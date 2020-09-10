@@ -8,6 +8,7 @@ package statistics;
 import algorithm.GAIndividual;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javafx.embed.swing.SwingFXUtils;
@@ -20,7 +21,6 @@ import javafx.scene.image.Image;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javax.imageio.ImageIO;
-import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import problems.BenchmarkProblem;
 import smile.math.distance.Distance;
 
@@ -69,6 +69,8 @@ public class PerformanceMeasures {
 	}
 	
 	public static int getNumOptimaFound(BenchmarkProblem prob, List<GAIndividual> pop){
+		if(prob.optimasInPaper == null)
+			return -1;
 		List<boolean[]> optimaFound = getOptimaFound(prob, pop);
 		return optimaFound.size();
 	}
@@ -165,8 +167,13 @@ public class PerformanceMeasures {
 	}
 	
 	public static double getSTD(double[] vals){
-		StandardDeviation std = new StandardDeviation(false);
-		return std.evaluate(vals);
+		double mean = Arrays.stream(vals).average().getAsDouble();
+		double sumSquares = 0.0;
+		for(var val : vals){
+			sumSquares += Math.pow(val-mean, 2);
+		}
+		double variance = sumSquares / (vals.length-1);
+		return Math.sqrt(variance);
 	}
 	
 	public static double[] analyzeBest5(List<DoubleArray> best5){

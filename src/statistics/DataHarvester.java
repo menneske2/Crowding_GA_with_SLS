@@ -42,7 +42,7 @@ public class DataHarvester {
 		performanceData = new ArrayList<>();
 		writer = new ResultsWriter(filename);
 
-		int runs = 5;
+		int runs = 100;
 		harvestData(prob, runs);
 		waitForData(runs);
 		analyzeData(prob);
@@ -150,7 +150,6 @@ public class DataHarvester {
 				OptimizerConfig conf = new OptimizerConfig();
 				conf.SEED = OptimizerConfig.NO_SEED;
 				conf.FITNESS_EVALUATIONS = 1000000;
-				conf.MAX_NICHE_SIZE = 1;
 				int runs = 5;
 
 				writer.write("Running: ");
@@ -322,11 +321,7 @@ public class DataHarvester {
 	private void harvestData(Problem prob, int runs){
 		OptimizerConfig conf = new OptimizerConfig();
 		conf.SEED = OptimizerConfig.NO_SEED;
-		conf.FITNESS_EVALUATIONS = 200000;
-		if(BenchmarkProblem.class.isAssignableFrom(prob.getClass())){
-			BenchmarkProblem p = (BenchmarkProblem) prob;
-			conf.FITNESS_EVALUATIONS = 150000;
-		}
+		conf.FITNESS_EVALUATIONS = 150000;
 		writer.write("Running: ");
 		runTest(prob, conf, runs);
 	}
@@ -343,7 +338,7 @@ public class DataHarvester {
 	private void analyzeData(Problem prob){
 		if(BenchmarkProblem.class.isAssignableFrom(prob.getClass()) && ((BenchmarkProblem)prob).optimasInPaper != null)
 			writer.writeln("Known optima: " + ((BenchmarkProblem)prob).optimasInPaper.size());
-		writer.writeln("Optima-finding data:");
+		writer.writeln("Optima-finding data: (only available for some problem+dimension combos)");
 		Collections.sort(optimaFound);
 		writer.writeln("Best run:\t" + optimaFound.get(optimaFound.size()-1));
 		writer.writeln("Worst run:\t" + optimaFound.get(0));
