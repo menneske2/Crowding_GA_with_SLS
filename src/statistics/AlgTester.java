@@ -9,6 +9,7 @@ import algorithm.DataReceiver;
 import algorithm.GAIndividual;
 import algorithm.GeneticAlgorithm;
 import algorithm.OptimizerConfig;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -21,14 +22,18 @@ import problems.Problem;
  */
 public class AlgTester implements DataReceiver, Runnable{
 	
-	private Problem prob;
-	private OptimizerConfig conf;
+	public Problem prob;
+	public OptimizerConfig conf;
 	private final DataHarvester harvester;
+	public final int ID;
+
+	private final List<double[]> performanceData = new ArrayList<>();
 	
-	public AlgTester(DataHarvester harvester, Problem prob, OptimizerConfig conf){
+	public AlgTester(int ID, DataHarvester harvester, Problem prob, OptimizerConfig conf){
 		this.harvester = harvester;
 		this.prob = prob;
 		this.conf = conf;
+		this.ID = ID;
 	}
 
 	@Override
@@ -41,6 +46,7 @@ public class AlgTester implements DataReceiver, Runnable{
 	@Override
 	public void progressReport(int generation, int FEs, List<GAIndividual> pop, double bestNoPunish, double avgNoPunish, double entropy, double nNiches, 
 			double mutaChance, double crossChance, double crowdingFactor){
+		performanceData.add(new double[]{FEs, bestNoPunish});
 	}
 	
 	@Override
@@ -51,7 +57,7 @@ public class AlgTester implements DataReceiver, Runnable{
 		double[] bestN = PerformanceMeasures.nBestSeparatedBy(pop, p.distanceMetric, 5, separation);
 		// Best-n was used to evaluate the composition functions.
 		if(p.name.startsWith("F14") || p.name.startsWith("F15")){
-			harvester.reportResults(-1, bestN);
+			harvester.reportResults(ID, -1, bestN, performanceData);
 			return;
 		}
 		
@@ -64,7 +70,7 @@ public class AlgTester implements DataReceiver, Runnable{
 			}
 		}
 		
-		harvester.reportResults(numOptimaFound, bestN);
+		harvester.reportResults(ID, numOptimaFound, bestN, performanceData);
 	}
 	
 	@Override

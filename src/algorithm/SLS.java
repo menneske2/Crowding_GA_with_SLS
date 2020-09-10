@@ -17,9 +17,9 @@ import problems.Problem;
  */
 public class SLS {
 	
-	private Problem prob;
-	private OptimizerConfig conf;
-	private Random rng;
+	private final Problem prob;
+	private final OptimizerConfig conf;
+	private final Random rng;
 	
 	
 	public SLS(Problem prob, OptimizerConfig conf, Random rng){
@@ -32,31 +32,13 @@ public class SLS {
 	}
 	
 	/**
-	 * Attempts to move the best individual in a niche to the local optima.
+	 * Attempts to move the best individual in a niche towards the local optima.
 	 */
 	public void optimizeNiche(Niche niche){
 		GAIndividual gai = niche.getBest();
 		boolean[] optimized = optimize(gai.genome);
 		gai.genome = optimized;
 		gai.evaluateFitness();
-	}
-	
-	/**
-	 * Reaches local optimum 100% of the time, but very slow.
-	 * Unused as of 3/7
-	 * @param gai 
-	 */
-	public boolean[] exhaustivelyOptimize(boolean[] bits){
-		double bestFitness = prob.evaluateBitstring(bits, true);
-		while(true){
-			double newFitness = greedyStep(bits, bestFitness, true);
-			if(newFitness > bestFitness){
-				bestFitness = newFitness;
-			} else{
-				break;
-			}
-		}
-		return bits;
 	}
 	
 	private boolean[] optimize(boolean[] bits){

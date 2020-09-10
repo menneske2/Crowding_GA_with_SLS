@@ -33,7 +33,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import problems.BenchmarkProblem;
 import problems.Problem;
 import statistics.PerformanceMeasures;
@@ -299,12 +298,12 @@ public class SolverController implements DataReceiver{
 		fxMutation.setText("" + conf.MUTATION_CHANCE);
 		fxCrowdingCoefficient.setText("" + conf.CROWDING_SCALING_FACTOR);
 		fxNichingEpsilon.setText("" + conf.NICHING_EPSILON);
-		fxPIDEnabled.selectedProperty().set(conf.PID_ENABLED);
-		fxPIDControlRate.setText("" + conf.PID_CONTROL_RATE);
-		fxActiveNiches.setText("" + conf.ACTIVE_NICHES);
+		fxPIDEnabled.selectedProperty().set(conf.FC_ENABLED);
+		fxPIDControlRate.setText("" + conf.FC_CONTROL_RATE);
+		fxActiveNiches.setText("" + conf.FC_WANTED_NICHES);
 		
 		// SLS options
-		fxSLSEnabled.selectedProperty().set(conf.SLS_Enabled);
+		fxSLSEnabled.selectedProperty().set(conf.SLS_ENABLED);
 		fxMaxNicheSize.setText("" + conf.MAX_NICHE_SIZE);
 		fxSLSMaxFlips.setText("" + conf.SLS_MAX_FLIPS);
 		fxSLSTakeFirst.selectedProperty().set(conf.SLS_TAKE_FIRST_IMPROVEMENT);
@@ -324,12 +323,12 @@ public class SolverController implements DataReceiver{
 		conf.NICHING_EPSILON = Float.parseFloat(fxNichingEpsilon.getText());
 		conf.MUTATION_CHANCE = Float.parseFloat(fxMutation.getText());
 		conf.CROWDING_SCALING_FACTOR = Float.parseFloat(fxCrowdingCoefficient.getText());
-		conf.PID_ENABLED = fxPIDEnabled.selectedProperty().get();
-		conf.PID_CONTROL_RATE = Float.parseFloat(fxPIDControlRate.getText());
-		conf.ACTIVE_NICHES = Integer.parseInt(fxActiveNiches.getText());
+		conf.FC_ENABLED = fxPIDEnabled.selectedProperty().get();
+		conf.FC_CONTROL_RATE = Float.parseFloat(fxPIDControlRate.getText());
+		conf.FC_WANTED_NICHES = Integer.parseInt(fxActiveNiches.getText());
 		
 		// SLS options
-		conf.SLS_Enabled = fxSLSEnabled.selectedProperty().get();
+		conf.SLS_ENABLED = fxSLSEnabled.selectedProperty().get();
 		conf.MAX_NICHE_SIZE = Integer.parseInt(fxMaxNicheSize.getText());
 		conf.SLS_MAX_FLIPS = Integer.parseInt(fxSLSMaxFlips.getText());
 		conf.SLS_TAKE_FIRST_IMPROVEMENT = fxSLSTakeFirst.selectedProperty().get();

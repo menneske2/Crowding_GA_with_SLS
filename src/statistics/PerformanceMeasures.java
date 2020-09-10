@@ -6,11 +6,20 @@
 package statistics;
 
 import algorithm.GAIndividual;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import jsat.linear.DenseVector;
-import jsat.linear.Vec;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.Scene;
+import javafx.scene.chart.Axis;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.scene.image.Image;
+import javafx.scene.shape.Rectangle;
+import javafx.stage.Stage;
+import javax.imageio.ImageIO;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import problems.BenchmarkProblem;
 import smile.math.distance.Distance;
@@ -20,6 +29,44 @@ import smile.math.distance.Distance;
  * @author Fredrik-Oslo
  */
 public class PerformanceMeasures {
+
+	public static void savePerformanceChart(String[] names, List<List<double[]>> lines, double lowerBound, String filename){
+		Axis xAxis = new NumberAxis();
+		Axis yAxis = new NumberAxis(lowerBound, 1.0, 0.05);
+		xAxis.setLabel("Fitness evaluations");
+		yAxis.setLabel("Classification accuracy");
+
+		LineChart<Number, Number> chart = new LineChart<>(xAxis, yAxis);
+		chart.setAnimated(false);
+
+		for(int i=0; i<names.length; i++){
+			var line = lines.get(i);
+			XYChart.Series series = new XYChart.Series();
+			series.setName(names[i]);
+			for(var point : line){
+				XYChart.Data<Number, Number> data = new XYChart.Data<Number, Number>(point[0], point[1]);
+				Rectangle rect = new Rectangle(0,0);
+				rect.setVisible(false);
+				data.setNode(rect);
+				series.getData().add(data);
+			}
+			chart.getData().add(series);
+		}
+
+		Stage stage = new Stage();
+		Scene scene = new Scene(chart);
+		stage.setScene(scene);
+		stage.setTitle("Performance chart");
+		stage.show();
+
+		Image im = scene.snapshot(null);
+		try{
+			ImageIO.write(SwingFXUtils.fromFXImage(im, null), "png", new File(filename));
+		} catch(Exception e){
+			throw new Error();
+		}
+		stage.close();
+	}
 	
 	public static int getNumOptimaFound(BenchmarkProblem prob, List<GAIndividual> pop){
 		List<boolean[]> optimaFound = getOptimaFound(prob, pop);

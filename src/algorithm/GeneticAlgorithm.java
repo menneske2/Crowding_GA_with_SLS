@@ -56,31 +56,23 @@ public class GeneticAlgorithm implements Runnable{
 		sendProgressReport(generation, GAUtilities.getNiches(population, prob, conf.NICHING_EPSILON));
 		
 		while(true){
-			// Termination criterias
-			if(!comsChannel.isEmpty()){ // stop-button implementation.
-				System.out.println(comsChannel.poll());
+			if(shouldTerminate(generation))
 				break;
-			}
-			if(conf.GENERATIONS != -1 && generation>=conf.GENERATIONS){
-				break;
-			}
-			if(conf.FITNESS_EVALUATIONS != -1 && prob.fitnessEvaluations >= conf.FITNESS_EVALUATIONS){
-				break;
-			}
-			
-			
+
+			// A clustering algorithm partitions the population into clusters.
 			List<Niche> niches = GAUtilities.getNiches(population, prob, conf.NICHING_EPSILON);
-			
-			// Using PID-controller
-			if(conf.PID_ENABLED)
+
+			// Feedback controller
+			if(conf.FC_ENABLED)
 				controller.updateCrowdingScalingFactor(conf, niches.size());
-			
-			
-			
-			if(conf.SLS_Enabled){
+
+			// lazySLS
+			if(conf.SLS_ENABLED){
 				for(var niche : niches){
 					sls.optimizeNiche(niche);
-					purgeExcessInNiche(niche);
+					if(conf.CULLING_ENABLED){
+						purgeExcessInNiche(niche);
+					}
 				}
 			}
 			
@@ -99,13 +91,7 @@ public class GeneticAlgorithm implements Runnable{
 			generation++;
 			
 			// Gathering statistics and sending progress report to main client.
-			double entropy = sendProgressReport(generation, niches);
-			if(entropy == 0.0){
-				System.out.println("Entropy is zero. Stopping.");
-				break;
-			}
-			
-			
+			sendProgressReport(generation, niches);
 		}
 		
 
@@ -121,9 +107,21 @@ public class GeneticAlgorithm implements Runnable{
 		
 	}
 	
+	private boolean shouldTerminate(int generation){
+		if(!comsChannel.isEmpty()){ // stop-button implementation.
+			System.out.println(comsChannel.poll());
+			return true;
+		}
+		if(conf.GENERATIONS != -1 && generation>=conf.GENERATIONS){
+			return true;
+		}
+		if(conf.FITNESS_EVALUATIONS != -1 && prob.fitnessEvaluations >= conf.FITNESS_EVALUATIONS){
+			return true;
+		}
+		return false;
+	}
 	
-	
-	private double sendProgressReport(int generation, List<Niche> niches){
+	private void sendProgressReport(int generation, List<Niche> niches){
 		final int genCopy = generation; // it needs to be an effectively final variable.
 		double bestR = prob.evaluateBitstring(population.get(0).genome, false);
 		double avgR = 0;
@@ -148,7 +146,6 @@ public class GeneticAlgorithm implements Runnable{
 			feedbackStation.progressReport(genCopy, prob.fitnessEvaluations, popCopy , bestR, avg, entropy, nNiches, 
 					conf.MUTATION_CHANCE, conf.CROSSOVER_CHANCE, crowdingFactor);
 		}
-		return entropy;
 	}
 	
 	private void purgeExcessInNiche(Niche niche){
@@ -212,24 +209,24 @@ public class GeneticAlgorithm implements Runnable{
 				childGenomes[1] = parents[1].genome.clone();
 			}
 			
-			
-//			for(int i=0; i<2; i++){
-//				// Bitflip-mutation.
-//				if(rng.nextFloat() < conf.MUTATION_CHANCE) {
-//					int point = rng.nextInt(genomeLength);
-//					childGenomes[i][point] = !childGenomes[i][point];
-//				}
-//			}
-			
-			
-			for(int i=0; i<2; i++){
-				// "Turn off 10 random features"-mutation.
-				if(rng.nextFloat() < conf.MUTATION_CHANCE) {
-					for(int j=0; j<10; j++){
+			if(conf.BITFLIP_MUTATION){
+				for(int i=0; i<2; i++){
+					// Bitflip-mutation.
+					if(rng.nextFloat() < conf.MUTATION_CHANCE) {
 						int point = rng.nextInt(genomeLength);
-						childGenomes[i][point] = false;
+						childGenomes[i][point] = !childGenomes[i][point];
 					}
-					
+				}
+			} else{
+				for(int i=0; i<2; i++){
+					// "Turn off 10 random features"-mutation.
+					if(rng.nextFloat() < conf.MUTATION_CHANCE) {
+						for(int j=0; j<10; j++){
+							int point = rng.nextInt(genomeLength);
+							childGenomes[i][point] = false;
+						}
+
+					}
 				}
 			}
 			

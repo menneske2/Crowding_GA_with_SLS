@@ -10,8 +10,8 @@ import java.util.Arrays;
 import java.util.List;
 import problems.BenchmarkProblem;
 import problems.Problem;
-import smile.clustering.MEC;
 import smile.clustering.PartitionClustering;
+import smile.clustering.MEC;
 
 /**
  *

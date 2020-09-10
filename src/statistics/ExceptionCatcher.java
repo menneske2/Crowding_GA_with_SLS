@@ -11,10 +11,10 @@ package statistics;
  */
 public class ExceptionCatcher implements Runnable{
 	
-	private final Runnable runner;
-	private DataHarvester harvester;
+	private final AlgTester runner;
+	private final DataHarvester harvester;
 	
-	public ExceptionCatcher(Runnable runner, DataHarvester harvester){
+	public ExceptionCatcher(AlgTester runner, DataHarvester harvester){
 		this.runner = runner;
 		this.harvester = harvester;
 	}
@@ -26,7 +26,7 @@ public class ExceptionCatcher implements Runnable{
 		} catch(Exception e){
 //			e.printStackTrace();
 //			System.exit(4);
-			harvester.reportCrash();
+			harvester.reportCrash(runner.prob, runner.conf);
 		}
 	}
 	

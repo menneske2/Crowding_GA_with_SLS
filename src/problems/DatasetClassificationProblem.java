@@ -24,7 +24,7 @@ import jsat.linear.Vec;
 public class DatasetClassificationProblem extends Problem{
 	
 	public ClassificationDataSet datasetTrain, datasetValid;
-	
+//	private Classifier classifier;
 
 	// numFeatures is only used in benchmark functions.
 	public DatasetClassificationProblem(List<ClassificationDataSet> datasets){
@@ -33,6 +33,14 @@ public class DatasetClassificationProblem extends Problem{
 		this.datasetValid = datasets.get(1);
 		this.distanceMetric = new JaccardDistance2();
 		this.fitnessPunishRatio = 0.5;
+	}
+
+	@Override
+	public DatasetClassificationProblem clone(){
+		DatasetClassificationProblem sequel = (DatasetClassificationProblem) super.clone();
+//		sequel.classifier = new NaiveBayes();
+//		sequel.classifier.trainC(datasetTrain);
+		return sequel;
 	}
 	
 	public String getIndexName(int index){

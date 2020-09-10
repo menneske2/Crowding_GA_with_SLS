@@ -14,7 +14,7 @@ import java.util.List;
 public class PIDController {
 	
 	public void updateCrowdingScalingFactor(OptimizerConfig conf, int numNiches){ 
-		double error = conf.ACTIVE_NICHES - numNiches;
+		double error = conf.FC_WANTED_NICHES - numNiches;
 		double controlRate = 0.02;
 		double deltaCC = controlRate * error;
 		conf.CROWDING_SCALING_FACTOR += deltaCC;
